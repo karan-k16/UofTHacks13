@@ -1,14 +1,49 @@
 /**
  * Backboard.io integration for AI model routing
- * Handles communication with Gemini and fallback models through Backboard API
+ * Handles communication with Gemini and fallback models through Backboard SDK
+ * 
+ * Uses the official backboard-sdk package (SDK-first, no REST endpoints)
  */
 
 import type { BackboardResponse } from './types';
 
+// @ts-expect-error - backboard-sdk doesn't have TypeScript types
+import { BackboardClient } from 'backboard-sdk';
+
 const BACKBOARD_API_KEY = process.env.BACKBOARD_API_KEY;
-const BACKBOARD_API_URL = process.env.BACKBOARD_API_URL || 'https://api.backboard.io/v1/chat';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
+
+// TEMPORARY: Mock mode for testing (set to false when real API is available)
+const USE_MOCK = false;
+
+// Backboard client instance (singleton)
+let client: InstanceType<typeof BackboardClient> | null = null;
+
+// Cached assistant and thread IDs
+let cachedAssistantId: string | null = null;
+let cachedThreadId: string | null = null;
+
+// System prompt for DAW assistant (avoid curly braces to prevent template issues)
+const DAW_SYSTEM_PROMPT = `You are a DAW (Digital Audio Workstation) assistant. Convert natural language commands into structured JSON actions.
+              
+Available actions:
+- addPattern: Create a new pattern with name and lengthInSteps parameters
+- addNote: Add a note to a pattern with patternId, pitch, startTick, durationTick, velocity
+- setBpm: Set the tempo with bpm parameter
+- play, stop, pause: Control playback (no parameters)
+- addChannel: Add a synth or sampler channel with name and type parameters
+- addClip: Add a clip to the playlist with patternId, trackIndex, startTime parameters
+- setVolume, setPan: Adjust mixer settings with channelId and value parameters
+- toggleMute, toggleSolo: Mixer controls with channelId parameter
+
+Always respond with valid JSON only, no markdown, no explanation. Format:
+action: the action name
+parameters: object with action-specific parameters
+confidence: number between 0 and 1
+reasoning: brief explanation
+
+For unclear commands use action clarificationNeeded with parameters.message explaining what you need.`;
 
 /**
  * Sleep utility for retry delays
@@ -18,12 +53,155 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Mock Backboard response for testing
+ * Parses simple natural language commands into structured responses
+ */
+function mockBackboardResponse(text: string, model: string): BackboardResponse {
+  console.log(`[Mock Backboard] Processing: "${text}" with model: ${model}`);
+  
+  const lowerText = text.toLowerCase();
+  
+  // Pattern: "add a [instrument] pattern"
+  if (lowerText.includes('pattern') && (lowerText.includes('add') || lowerText.includes('create'))) {
+    const instruments = ['kick', 'snare', 'hihat', 'clap', 'tom', 'cymbal'];
+    const found = instruments.find(inst => lowerText.includes(inst));
+    
+    return {
+      action: 'addPattern',
+      parameters: {
+        name: found ? `${found.charAt(0).toUpperCase() + found.slice(1)} Pattern` : 'New Pattern',
+        lengthInSteps: 16,
+      },
+      confidence: 0.9,
+      reasoning: `Creating a new pattern${found ? ` for ${found}` : ''}`,
+    };
+  }
+  
+  // Pattern: "set bpm to [number]"
+  if (lowerText.includes('bpm') || lowerText.includes('tempo')) {
+    const match = text.match(/\d+/);
+    const bpm = match ? parseInt(match[0]) : 120;
+    
+    return {
+      action: 'setBpm',
+      parameters: { bpm },
+      confidence: 0.95,
+      reasoning: `Setting tempo to ${bpm} BPM`,
+    };
+  }
+  
+  // Pattern: "play"
+  if (lowerText.match(/^(play|start)/) || lowerText.includes('play it')) {
+    return {
+      action: 'play',
+      parameters: {},
+      confidence: 1.0,
+      reasoning: 'Starting playback',
+    };
+  }
+  
+  // Pattern: "stop"
+  if (lowerText.match(/^stop/)) {
+    return {
+      action: 'stop',
+      parameters: {},
+      confidence: 1.0,
+      reasoning: 'Stopping playback',
+    };
+  }
+  
+  // Pattern: "add note" or "add [note]"
+  if (lowerText.includes('note')) {
+    return {
+      action: 'addNote',
+      parameters: {
+        patternId: 'current',
+        pitch: 60, // C4
+        startTick: 0,
+        durationTick: 96,
+        velocity: 100,
+      },
+      confidence: 0.7,
+      reasoning: 'Adding a note to the current pattern',
+    };
+  }
+  
+  // Default: unknown command
+  return {
+    action: 'clarificationNeeded',
+    parameters: {
+      message: `I understand you want to "${text}", but I'm not sure how to help with that. Try commands like "add a kick pattern", "set BPM to 128", or "play".`,
+      suggestedOptions: ['Add a pattern', 'Set BPM', 'Play/Stop', 'Add a note'],
+    },
+    confidence: 0.1,
+    reasoning: 'Command not recognized',
+  };
+}
+
+/**
  * Initialize and validate Backboard configuration
  */
 export function initializeBackboard(): void {
   if (!BACKBOARD_API_KEY) {
     throw new Error('BACKBOARD_API_KEY environment variable is not set');
   }
+  
+  // Initialize the SDK client
+  if (!client) {
+    client = new BackboardClient({
+      apiKey: BACKBOARD_API_KEY,
+    });
+  }
+}
+
+/**
+ * Get or create the Backboard client
+ */
+function getClient(): InstanceType<typeof BackboardClient> {
+  if (!client) {
+    if (!BACKBOARD_API_KEY) {
+      throw new Error('Backboard API key not configured');
+    }
+    client = new BackboardClient({
+      apiKey: BACKBOARD_API_KEY,
+    });
+  }
+  return client;
+}
+
+/**
+ * Create or get cached assistant
+ */
+async function getAssistant(): Promise<string> {
+  if (cachedAssistantId) {
+    return cachedAssistantId;
+  }
+
+  const backboard = getClient();
+  const assistant = await backboard.createAssistant({
+    name: 'Music Copilot',
+    description: DAW_SYSTEM_PROMPT,
+  });
+
+  cachedAssistantId = assistant.assistantId;
+  console.log(`[Backboard] Created assistant: ${cachedAssistantId}`);
+  return cachedAssistantId!;
+}
+
+/**
+ * Create or get cached thread
+ */
+async function getThread(assistantId: string): Promise<string> {
+  if (cachedThreadId) {
+    return cachedThreadId;
+  }
+
+  const backboard = getClient();
+  const thread = await backboard.createThread(assistantId);
+  
+  cachedThreadId = thread.threadId;
+  console.log(`[Backboard] Created thread: ${cachedThreadId}`);
+  return cachedThreadId!;
 }
 
 /**
@@ -44,6 +222,14 @@ export async function sendToModel(
   model: 'gemini' | 'fallback',
   conversationHistory?: Array<{ role: string; content: string }>
 ): Promise<BackboardResponse> {
+  // MOCK MODE: Return mock responses for testing
+  if (USE_MOCK) {
+    console.log('[Backboard] Using MOCK mode');
+    await sleep(300); // Simulate network delay
+    return mockBackboardResponse(text, model);
+  }
+  
+  // REAL API MODE using Backboard SDK
   if (!BACKBOARD_API_KEY) {
     throw new Error('Backboard API key not configured');
   }
@@ -53,59 +239,30 @@ export async function sendToModel(
   // Retry loop
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(BACKBOARD_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${BACKBOARD_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: model === 'gemini' ? 'gemini-pro' : 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: `You are a DAW (Digital Audio Workstation) assistant. Convert natural language commands into structured JSON actions.
-              
-Available actions:
-- addPattern: Create a new pattern
-- addNote: Add a note to a pattern
-- setBpm: Set the tempo
-- play/stop/pause: Control playback
-- addChannel: Add a synth or sampler channel
-- addClip: Add a clip to the playlist
-- setVolume/setPan: Adjust mixer settings
-- toggleMute/toggleSolo: Mixer controls
+      // Get or create assistant and thread
+      const assistantId = await getAssistant();
+      const threadId = await getThread(assistantId);
 
-Always respond with JSON in this format:
-{
-  "action": "actionName",
-  "parameters": { /* action-specific parameters */ }
-}
+      // Use OpenAI models (Gemini not available on this Backboard instance)
+      const llmProvider = 'openai';
+      const modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
 
-For unclear commands, use:
-{
-  "action": "clarificationNeeded",
-  "parameters": { "message": "What did you mean?" }
-}`
-            },
-            ...(conversationHistory || []),
-            {
-              role: 'user',
-              content: text,
-            },
-          ],
-        }),
+      // Send message using SDK
+      const backboard = getClient();
+      const response = await backboard.addMessage(threadId, {
+        content: text,
+        llm_provider: llmProvider,
+        model_name: modelName,
+        stream: false,
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Backboard API error (${response.status}): ${errorText}`);
+      // Check if the response was successful
+      if (response.status === 'FAILED') {
+        throw new Error(`Backboard response failed: ${response.content}`);
       }
 
-      const data = await response.json();
-      
-      // Extract response content
-      let content = data.choices?.[0]?.message?.content || data.response || '';
+      // Extract response content from SDK response
+      let content = response.content || '';
       
       // Try to parse JSON from the response
       try {

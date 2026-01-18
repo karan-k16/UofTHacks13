@@ -187,11 +187,9 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         message: backboardResponse.reasoning || 'Command received',
-        action: backboardResponse.action,
-        parameters: backboardResponse.parameters,
-        confidence: backboardResponse.confidence,
+        commandResult: backboardResponse, // Pass the full response for client-side parsing
       },
-    } as ChatAPIResponse & { data: { action: string; parameters: Record<string, any>; confidence?: number } });
+    } as ChatAPIResponse);
 
   } catch (error) {
     console.error('[AI Chat API] Error:', error);
