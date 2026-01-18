@@ -339,7 +339,7 @@ export default function LandingPage() {
                 <span className="text-[16px] text-gray-400">{item.icon}</span>
                 <div>
                   <h4 className="text-[14px] font-medium mb-1">{item.title}</h4>
-                  <p className="text-[13px] text-[#777] leading-relaxed">{item.desc}</p>
+                  <p className="text-[13px] text-[#777] text-[#BAB8B8] leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -356,7 +356,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8 }}
-        className="px-8 lg:px-16 py-20 max-w-[1400px] mx-auto"
+        className="px-8 lg:px-16 py-20 max-w-[1400px] mx-auto mb-20"
       >
         <h2 className="text-[28px] mb-2">Autonomous QA on every commit</h2>
         <p className="whitespace-nowrap text-[#BAB8B8] text-[14px] mb-10 max-w-[600px]">
@@ -408,16 +408,126 @@ export default function LandingPage() {
                 <span className="text-[16px] text-gray-400">{item.icon}</span>
                 <div>
                   <h4 className="text-[14px] font-medium mb-1">{item.title}</h4>
-                  <p className="text-[13px] text-[#777] leading-relaxed">{item.desc}</p>
+                  <p className="text-[13px] text-[#BAB8B8] leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
-            <button className="text-[13px] text-white px-5 py-2.5 rounded-full border border-[#444] hover:border-[#666] transition-colors mt-4">
+            <button className="text-[14px] text-white px-5 py-2.5 rounded-xl border border-[#444] hover:border-[#666] transition-colors mt-4">
               See how it works
             </button>
           </div>
         </div>
       </motion.section>
+
+      {/* Safe and Secure Section */}
+      <div
+        className="w-full relative border-y border-[#1a1a1a] mb-20"
+        style={{
+          backgroundColor: '#111111ff',
+          backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+          backgroundSize: '32px 32px'
+        }}
+      >
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="px-8 lg:px-16 py-24 max-w-[1400px] mx-auto"
+        >
+          <h2 className="text-[28px] mb-2">Safe and secure</h2>
+          <p className="text-[#BAB8B8] text-[14px] mb-12 max-w-[500px]">
+            Enterprise-grade security with privacy and control by default.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            {/* Left: Security Demo/Illustration */}
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#0d0d0d] border border-[#222] group">
+              <div
+                className="absolute inset-0 opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000"
+                style={{
+                  backgroundImage: 'url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80")',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+
+              {/* Security Badge */}
+              <div className="absolute bottom-10 left-10 flex items-center gap-3 px-4 py-2.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
+                <div className="w-4 h-4 rounded-full border border-green-400/50 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+                </div>
+                <span className="text-[12px] text-white/90 font-medium tracking-tight">
+                  All systems nominal • <span className="text-white">SOC-2 Type II</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Right: Security Features */}
+            <div className="space-y-10 py-2">
+              {[
+                {
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ),
+                  title: 'Supervision',
+                  desc: 'Set approval workflows to ensure the right people approve as Pulse works.'
+                },
+                {
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                      <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                  ),
+                  title: 'Compliance',
+                  desc: 'SOC-2 Type II & HIPAA audited.'
+                },
+                {
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                      <path d="M2.5 12C2.5 12 5.5 5 12 5C18.5 5 21.5 12 21.5 12C21.5 12 18.5 19 12 19C5.5 19 2.5 12 2.5 12Z" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  ),
+                  title: 'Private by design',
+                  desc: 'We never train models on your data — you own all output.'
+                },
+                {
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                      <path d="M4 4H20V20H4V4Z" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M9 9H15V15H9V9Z" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M4 12H9" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M15 12H20" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                  ),
+                  title: 'Hybrid & enterprise',
+                  desc: 'BYOK/BYOC options for data residency in your VPC and control over inference providers/LLMs.'
+                }
+              ].map((item, i) => (
+                <div key={i} className="flex gap-5 group">
+                  <div className="mt-1 transition-transform group-hover:scale-110 duration-300">{item.icon}</div>
+                  <div>
+                    <h4 className="text-[14px] font-medium mb-1.5 text-white/90">{item.title}</h4>
+                    <p className="text-[13px] text-[#BAB8B8] leading-relaxed group-hover:text-[#BAB8B8] transition-colors">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="pt-4">
+                <button className="text-[14px] text-black bg-white px-6 py-2.5 rounded-xl font-medium hover:bg-[#ff7a7a] hover:text-white transition-all">
+                  Security overview
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+      </div>
 
       {/* Memory Quote Section */}
       <motion.section
