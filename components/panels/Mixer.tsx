@@ -369,9 +369,9 @@ function MixerSlider({
           {formatValue(value)}
         </span>
       </div>
-      <div className="relative h-2 group/slider">
+      <div className="relative h-4 group/slider flex items-center">
         {/* Track background */}
-        <div className="absolute inset-0 rounded-full bg-[#1a1a1a] overflow-hidden">
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-[#1a1a1a] overflow-hidden top-1/2 -translate-y-1/2">
           {/* Fill */}
           <div 
             className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#ff6b6b]/60 to-[#ff6b6b] transition-all duration-100"

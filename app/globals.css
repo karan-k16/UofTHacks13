@@ -320,7 +320,7 @@ select:focus {
   appearance: none;
   background: transparent;
   cursor: pointer;
-  height: 8px;
+  height: 14px;
 }
 
 .mixer-slider::-webkit-slider-runnable-track {
