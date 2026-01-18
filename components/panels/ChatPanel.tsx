@@ -2,14 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/state/store';
-<<<<<<< HEAD
-import type { ChatMessage } from '@/lib/ai/types';
-import { undoLastAIAction, canUndoAIAction } from '@/lib/ai/undoHandler';
-=======
 import type { ChatMessage, BackboardResponse } from '@/lib/ai/types';
+import { undoLastAIAction, canUndoAIAction } from '@/lib/ai/undoHandler';
 import { parseAIResponse } from '@/lib/ai/commandParser';
 import { executeCommand } from '@/lib/ai/dawController';
->>>>>>> 70d860209e6b2221f14d56b41b78ac71777a2030
 
 // Format timestamp as relative time
 function formatRelativeTime(timestamp: number): string {
@@ -37,10 +33,10 @@ function Message({ message }: { message: ChatMessage }) {
       <div className={`max-w-[80%] ${isUser ? 'order-2' : 'order-1'}`}>
         <div
           className={`rounded-lg px-4 py-2 ${isUser
-              ? 'bg-blue-600 text-white'
-              : isError
-                ? 'bg-red-900 text-red-100'
-                : 'bg-gray-800 text-gray-100'
+            ? 'bg-blue-600 text-white'
+            : isError
+              ? 'bg-red-900 text-red-100'
+              : 'bg-gray-800 text-gray-100'
             } ${isSending ? 'opacity-60' : ''}`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
@@ -111,7 +107,7 @@ export default function ChatPanel() {
     if (!inputText.trim() || isPending) return;
 
     const userMessage = inputText.trim();
-    
+
     // Clear input and reset textarea
     setInputText('');
     setTextareaRows(1);
@@ -152,18 +148,18 @@ export default function ChatPanel() {
       // Parse and execute the AI command
       if (apiResponse.data?.commandResult) {
         const backboardResponse = apiResponse.data.commandResult as BackboardResponse;
-        
+
         try {
           // Parse the AI response
           const command = parseAIResponse(backboardResponse);
-          
+
           // Execute the command
           const result = executeCommand(command);
-          
+
           // Add response message based on result
           if (result.success) {
             chat.addMessage('agent', result.message, 'sent');
-            
+
             // Track command for undo functionality
             if (result.data?.commandId) {
               chat.setLastCommand(result.data.commandId);
@@ -187,7 +183,7 @@ export default function ChatPanel() {
       }
     } catch (error) {
       console.error('API call error:', error);
-      
+
       // Show error message in chat
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       chat.addMessage(
@@ -195,7 +191,7 @@ export default function ChatPanel() {
         `Failed to process your request: ${errorMessage}`,
         'error'
       );
-      
+
       // Show toast notification for network errors
       if (error instanceof TypeError && error.message.includes('fetch')) {
         showErrorToast('Network error - please check your connection');
@@ -215,7 +211,7 @@ export default function ChatPanel() {
     toast.className = 'fixed bottom-4 right-4 bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
     toast.textContent = message;
     document.body.appendChild(toast);
-    
+
     // Remove after 4 seconds
     setTimeout(() => {
       toast.classList.add('opacity-0');
