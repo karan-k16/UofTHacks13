@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/state/store';
+import { apiClient } from '@/lib/api/client';
 import Transport from '@/components/transport/Transport';
 import Dropdown from '@/components/common/Dropdown';
 import KeyboardShortcutsModal from '@/components/common/KeyboardShortcutsModal';
@@ -30,6 +31,8 @@ export default function TopToolbar() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
   const router = useRouter();
 
   // Listen for global shortcuts
@@ -259,18 +262,59 @@ export default function TopToolbar() {
         {/* Project Name */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-ps-text-secondary">Project:</span>
-          <span
-            className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-1 py-0.5 rounded hover:bg-ps-bg-700"
-            onClick={() => {
-              const newName = prompt('Enter new project name:', project?.name || 'Untitled');
-              if (newName && newName.trim()) {
-                updateProjectName(newName.trim());
-              }
-            }}
-            title="Click to rename project"
-          >
-            {project?.name ?? 'Untitled'}
-          </span>
+          {isEditingName ? (
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onKeyDown={async (e) => {
+                  if (e.key === 'Enter') {
+                    const trimmed = editedName.trim();
+                    if (trimmed && trimmed !== project?.name && project?.id) {
+                      updateProjectName(trimmed);
+                      // Persist to database
+                      try {
+                        await apiClient.renameProject(project.id, trimmed);
+                      } catch (error) {
+                        console.error('Failed to save project name:', error);
+                      }
+                    }
+                    setIsEditingName(false);
+                  }
+                  if (e.key === 'Escape') {
+                    setIsEditingName(false);
+                  }
+                }}
+                onBlur={async () => {
+                  const trimmed = editedName.trim();
+                  if (trimmed && trimmed !== project?.name && project?.id) {
+                    updateProjectName(trimmed);
+                    // Persist to database
+                    try {
+                      await apiClient.renameProject(project.id, trimmed);
+                    } catch (error) {
+                      console.error('Failed to save project name:', error);
+                    }
+                  }
+                  setIsEditingName(false);
+                }}
+                className="text-xs font-medium bg-ps-bg-700 border border-ps-accent-primary rounded px-2 py-1 focus:outline-none w-40"
+                autoFocus
+              />
+            </div>
+          ) : (
+            <span
+              className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-2 py-1 rounded hover:bg-ps-bg-700 border border-transparent hover:border-ps-bg-600"
+              onClick={() => {
+                setEditedName(project?.name || 'Untitled');
+                setIsEditingName(true);
+              }}
+              title="Click to rename project"
+            >
+              {project?.name ?? 'Untitled'}
+            </span>
+          )}
           {hasUnsavedChanges && (
             <span className="text-xs text-ps-accent-tertiary">*</span>
           )}

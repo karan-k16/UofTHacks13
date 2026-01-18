@@ -242,7 +242,7 @@ export default function DashboardPage() {
                                     <span>Modified {new Date(project.updatedAt).toLocaleDateString()}</span>
                                     <Link
                                         href={`/project/${project.id}`}
-                                        className="text-ps-accent-tertiary text-xs hover:text-ps-accent-primary transition-colors"
+                                        className="text-sm font-medium px-3 py-1.5 bg-ps-accent-primary/10 text-ps-accent-primary rounded-md hover:bg-ps-accent-primary hover:text-white transition-all"
                                     >
                                         Open Studio →
                                     </Link>
