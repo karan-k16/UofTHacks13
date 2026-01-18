@@ -394,9 +394,25 @@ export default function Browser() {
                   </div>
                 )}
 
-                {/* Sample Grid */}
-                <div className="flex-1 overflow-auto p-2">
-                  <div className="grid grid-cols-2 gap-2">
+                {/* Sample List with Zoom Control */}
+                <div className="flex-1 overflow-auto">
+                  {/* Header with zoom control */}
+                  <div className="flex items-center justify-between px-2 py-1 sticky top-0 bg-ps-bg-800 z-10 border-b border-ps-bg-600">
+                    <div className="text-xs text-ps-text-secondary font-medium">
+                      {selectedSubcategory ? formatCategoryName(selectedSubcategory) : formatCategoryName(selectedCategory)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xs text-ps-text-muted">Waveform:</span>
+                      <WaveformZoomControl
+                        zoom={waveformZoom}
+                        onZoomChange={setWaveformZoom}
+                        min={0.5}
+                        max={4}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1 p-2">
                     {getSamplesByCategory(
                       sampleLibrary,
                       selectedCategory,
@@ -416,23 +432,37 @@ export default function Browser() {
                           if (suppressClickRef.current || dragActiveRef.current) return;
                           playPreview(sample.path);
                         }}
-                        className="group p-2 rounded bg-ps-bg-700 hover:bg-ps-bg-600 cursor-grab active:cursor-grabbing transition-colors"
-                        title={sample.name}
+                        className="group px-3 py-2 rounded hover:bg-ps-bg-700 cursor-grab active:cursor-grabbing"
                       >
-                        <div className="flex items-start gap-2 pointer-events-none">
+                        {/* Top row: icon, name */}
+                        <div className="flex items-center gap-2">
                           <svg
-                            className="w-8 h-8 text-ps-accent-secondary shrink-0"
+                            className="w-4 h-4 text-ps-accent-secondary shrink-0 pointer-events-none"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
                             <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
                           </svg>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-2xs font-medium truncate">{sample.name}</div>
+                          
+                          <div className="flex-1 min-w-0 pointer-events-none">
+                            <div className="text-xs truncate">{sample.name}</div>
                             <div className="text-2xs text-ps-text-muted">
                               {formatDuration(sample.duration)}
                             </div>
                           </div>
+                        </div>
+                        
+                        {/* Waveform display */}
+                        <div className="mt-2 ml-6 pointer-events-none">
+                          <WaveformCanvas
+                            assetId={sample.id}
+                            audioUrl={sample.path}
+                            width={Math.floor(180 * waveformZoom)}
+                            height={32}
+                            zoom={waveformZoom}
+                            compact
+                            className="w-full"
+                          />
                         </div>
                       </div>
                     ))}
@@ -516,12 +546,15 @@ export default function Browser() {
                       <div className="text-xs text-ps-text-secondary font-medium">
                         My Samples ({userSamples.length})
                       </div>
-                      <WaveformZoomControl
-                        zoom={waveformZoom}
-                        onZoomChange={setWaveformZoom}
-                        min={0.5}
-                        max={4}
-                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xs text-ps-text-muted">Waveform:</span>
+                        <WaveformZoomControl
+                          zoom={waveformZoom}
+                          onZoomChange={setWaveformZoom}
+                          min={0.5}
+                          max={4}
+                        />
+                      </div>
                     </div>
 
                     {userSamples.map((sample) => {

@@ -9,4 +9,3 @@
 9. Add the patterns into demo
 10. Delete the double start page. (it asks to start creating again after making demo)
 11. Doesn't stop the music for uploaded samples with the pause button
-12. The +- in my samples section doesn't do anything
