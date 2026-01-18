@@ -11,4 +11,3 @@
 11. Doesn't stop the music for uploaded samples with the pause button
 12. The +- in my samples section doesn't do anything
 13. Black bar under each sample, think it's supposed to show the waveform (delete or fix)
-14. Fix metronome
