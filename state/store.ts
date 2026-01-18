@@ -48,6 +48,8 @@ import {
   createDemoProject,
   getSampleColor,
 } from '@/domain/operations';
+import { createChatSlice, type ChatSlice } from './slices/chatSlice';
+import type { ChatMessage } from '@/lib/ai/types';
 
 // Enable Immer patches for undo/redo
 enablePatches();
@@ -162,6 +164,9 @@ interface StoreState {
   history: HistoryEntry[];
   historyIndex: number;
   maxHistorySize: number;
+
+  // Chat State (AI Agent)
+  chat: ChatSlice;
 
   // Actions
   // Project Actions
@@ -453,6 +458,57 @@ export const useStore = create<StoreState>()(
         history: [],
         historyIndex: -1,
         maxHistorySize: 100,
+
+        // Chat State (AI Agent)
+        chat: {
+          messages: [],
+          isPending: false,
+          selectedModel: 'gemini',
+          lastAICommandId: null,
+          addMessage: (from, text, status = 'sent') => {
+            set((state) => {
+              state.chat.messages.push({
+                id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                from,
+                text,
+                timestamp: Date.now(),
+                status,
+              });
+            });
+          },
+          updateMessageStatus: (messageId, status) => {
+            set((state) => {
+              const msg = state.chat.messages.find((m) => m.id === messageId);
+              if (msg) msg.status = status;
+            });
+          },
+          setModel: (model) => {
+            set((state) => {
+              state.chat.selectedModel = model;
+            });
+          },
+          setPending: (isPending) => {
+            set((state) => {
+              state.chat.isPending = isPending;
+            });
+          },
+          setLastCommand: (commandId) => {
+            set((state) => {
+              state.chat.lastAICommandId = commandId;
+            });
+          },
+          clearHistory: () => {
+            set((state) => {
+              state.chat.messages = [];
+              state.chat.lastAICommandId = null;
+            });
+          },
+          loadChatHistory: (messages: ChatMessage[]) => {
+            set((state) => {
+              state.chat.messages = messages;
+            });
+          },
+        },
 
         // ==========================================
         // Project Actions
