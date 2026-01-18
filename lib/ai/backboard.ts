@@ -168,19 +168,8 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
  */
 export function initializeBackboard(): void {
   if (!BACKBOARD_API_KEY) {
-<<<<<<< HEAD
-    throw new Error('BACKBOARD_API_KEY environment variable is not set');
-  }
-
-  // Initialize the SDK client
-  if (!client) {
-    client = new BackboardClient({
-      apiKey: BACKBOARD_API_KEY,
-    });
-=======
     console.warn('BACKBOARD_API_KEY not set - using mock mode');
     return;
->>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
   }
 
   // SDK not yet available - using mock mode
@@ -201,13 +190,9 @@ function getClient(): unknown | null {
 }
 
 /**
-<<<<<<< HEAD
  * Create or get cached assistant with dynamic system prompt
  * If the context has changed significantly, create a new assistant
-=======
- * Create or get cached assistant
  * Note: Currently returns placeholder as SDK is not available
->>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
  */
 async function getAssistant(systemPrompt: string): Promise<string> {
   const contextHash = hashContext(systemPrompt);
@@ -223,23 +208,11 @@ async function getAssistant(systemPrompt: string): Promise<string> {
     return cachedAssistantId;
   }
 
-<<<<<<< HEAD
-  const backboard = getClient();
-  const assistant = await backboard.createAssistant({
-    name: 'Pulse Studio Music Copilot',
-    description: systemPrompt,
-  });
-
-  cachedAssistantId = assistant.assistantId;
-  cachedContextHash = contextHash;
-  console.log(`[Backboard] Created assistant: ${cachedAssistantId}`);
-  return cachedAssistantId!;
-=======
   // SDK not available - return placeholder
   console.warn('[Backboard] SDK not available - using placeholder assistant ID');
   cachedAssistantId = 'mock-assistant-id';
+  cachedContextHash = contextHash;
   return cachedAssistantId;
->>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
 }
 
 /**
@@ -251,19 +224,10 @@ async function getThread(assistantId: string): Promise<string> {
     return cachedThreadId;
   }
 
-<<<<<<< HEAD
-  const backboard = getClient();
-  const thread = await backboard.createThread(assistantId);
-
-  cachedThreadId = thread.threadId;
-  console.log(`[Backboard] Created thread: ${cachedThreadId}`);
-  return cachedThreadId!;
-=======
   // SDK not available - return placeholder
   console.warn('[Backboard] SDK not available - using placeholder thread ID');
   cachedThreadId = 'mock-thread-id';
   return cachedThreadId;
->>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
 }
 
 /**
@@ -274,18 +238,11 @@ async function getThread(assistantId: string): Promise<string> {
  * @param conversationHistory - Optional previous messages for context
  * @param systemPrompt - Dynamic system prompt with project context (from contextBuilder)
  * @returns Parsed JSON response from the AI model
- * 
- * @example
- * const context = buildDAWContext(project, sampleLibrary);
- * const systemPrompt = generateSystemPrompt(context);
- * const response = await sendToModel("add a kick drum", "gemini", [], systemPrompt);
- * console.log(response.action); // "addAudioSample"
- * console.log(response.parameters); // { sampleId: "drums_kick_..." }
  */
 export async function sendToModel(
   text: string,
   model: 'gemini' | 'fallback',
-  conversationHistory?: Array<{ role: string; content: string }>,
+  _conversationHistory?: Array<{ role: string; content: string }>,
   systemPrompt?: string
 ): Promise<BackboardResponse> {
   // Use provided system prompt or fall back to default
@@ -310,59 +267,15 @@ export async function sendToModel(
     try {
       // Get or create assistant and thread with dynamic context
       const assistantId = await getAssistant(effectiveSystemPrompt);
-      const threadId = await getThread(assistantId);
+      const _threadId = await getThread(assistantId);
 
       // Use OpenAI models (Gemini not available on this Backboard instance)
-      const llmProvider = 'openai';
-      const modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
+      const _llmProvider = 'openai';
+      const _modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
 
-<<<<<<< HEAD
-      // Send message using SDK
-      const backboard = getClient();
-      const response = await backboard.addMessage(threadId, {
-        content: text,
-        llm_provider: llmProvider,
-        model_name: modelName,
-        stream: false,
-      });
-
-      // Check if the response was successful
-      if (response.status === 'FAILED') {
-        throw new Error(`Backboard response failed: ${response.content}`);
-      }
-
-      // Extract response content from SDK response
-      let content = response.content || '';
-
-      // Try to parse JSON from the response
-      try {
-        // Remove markdown code blocks if present
-        content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        const parsed = JSON.parse(content);
-
-        return {
-          action: parsed.action || 'unknown',
-          parameters: parsed.parameters || {},
-          confidence: parsed.confidence,
-          reasoning: parsed.reasoning,
-        };
-      } catch (parseError) {
-        // If JSON parsing fails, return unknown command
-        console.error('Failed to parse AI response:', content);
-        return {
-          action: 'unknown',
-          parameters: {
-            originalText: text,
-            reason: 'Failed to parse AI response',
-            rawResponse: content,
-          },
-        };
-      }
-=======
       // SDK not available - fall back to mock
       console.warn('[Backboard] SDK not available - falling back to mock mode');
       return mockBackboardResponse(text, model);
->>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
     } catch (error) {
       lastError = error as Error;
       console.error(`Backboard request attempt ${attempt + 1} failed:`, error);
