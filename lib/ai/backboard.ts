@@ -36,6 +36,11 @@ const DEFAULT_SYSTEM_PROMPT = `You are a DAW (Digital Audio Workstation) assista
 
 IMPORTANT: Always respond with ONLY valid JSON, no markdown, no explanation.
 
+TIMING REFERENCE (PPQ = 96 ticks per beat):
+- 1 bar = 384 ticks, 4 bars = 1536 ticks
+- Quarter note = 96 ticks, 8th = 48, 16th = 24
+- Beat 1 = 0, Beat 2 = 96, Beat 3 = 192, Beat 4 = 288
+
 Response format (always use actions array):
 {{
   "actions": [
@@ -55,6 +60,12 @@ Available actions:
 - setTrackEffect: Set mixer effect. Parameters: {{{{ trackId: string, effectKey: string, value: number }}}}
 - addAudioSample: Add sample. Parameters: {{{{ category: string, subcategory: string, trackIndex?: number, startTick?: number }}}}
 - clarificationNeeded: When unclear. Parameters: {{{{ message: string, suggestedOptions?: string[] }}}}
+
+BEAT CREATION: For "make a beat" requests, create full 4-bar patterns with 30-50+ sample placements.
+Example tick positions for a 4-bar boom-bap:
+- Kicks: 0, 144, 384, 528, 768, 912, 1152, 1296
+- Snares: 96, 288, 480, 672, 864, 1056, 1248, 1440  
+- Hi-hats: 0, 48, 96, 144... every 48 ticks for 8th notes
 
 For unclear commands use action "clarificationNeeded" with a message explaining what you need.`;
 
@@ -100,23 +111,33 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
 
   // Pattern: "make a beat" or "create a beat"
   if (lowerText.includes('beat') && (lowerText.includes('make') || lowerText.includes('create'))) {
+    // Full 4-bar boom-bap pattern with proper tick positions
+    const actions: { action: string; parameters: Record<string, any> }[] = [
+      { action: 'setBpm', parameters: { bpm: 90 } },
+    ];
+
+    // Kicks: 1, 2-and pattern across 4 bars (ticks 0, 144, 384, 528, 768, 912, 1152, 1296)
+    const kickTicks = [0, 144, 384, 528, 768, 912, 1152, 1296];
+    kickTicks.forEach(tick => {
+      actions.push({ action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'kick', trackIndex: 0, startTick: tick } });
+    });
+
+    // Snares: beats 2 and 4 pattern across 4 bars (ticks 96, 288, 480, 672, 864, 1056, 1248, 1440)
+    const snareTicks = [96, 288, 480, 672, 864, 1056, 1248, 1440];
+    snareTicks.forEach(tick => {
+      actions.push({ action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'snare', trackIndex: 1, startTick: tick } });
+    });
+
+    // Hi-hats: 8th notes throughout 4 bars (every 48 ticks from 0 to 1488)
+    for (let tick = 0; tick < 1536; tick += 48) {
+      actions.push({ action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'hihat', trackIndex: 2, startTick: tick } });
+    }
+
     return {
       action: '__batch__',
-      parameters: {
-        actions: [
-          { action: 'setBpm', parameters: { bpm: 90 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'kick', trackIndex: 0, startTick: 0 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'kick', trackIndex: 0, startTick: 384 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'snare', trackIndex: 1, startTick: 192 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'snare', trackIndex: 1, startTick: 576 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'hihat', trackIndex: 2, startTick: 0 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'hihat', trackIndex: 2, startTick: 96 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'hihat', trackIndex: 2, startTick: 192 } },
-          { action: 'addAudioSample', parameters: { category: 'drums', subcategory: 'hihat', trackIndex: 2, startTick: 288 } },
-        ],
-      },
-      confidence: 0.85,
-      reasoning: 'Creating a hip-hop style beat with kick, snare, and hi-hats',
+      parameters: { actions },
+      confidence: 0.9,
+      reasoning: 'Creating a 4-bar boom-bap beat: kicks on 1 and 2-and, snares on 2 and 4, 8th note hi-hats throughout',
     };
   }
 
@@ -312,7 +333,7 @@ export async function sendToModel(
 
       // Use OpenAI models (Gemini not available on this Backboard instance)
       const llmProvider = 'openai';
-      const modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
+      const modelName = model === 'gemini' ? 'gpt-4.1' : 'gpt-4.1-mini';
 
       // Send message using SDK
       const backboard = getClient();

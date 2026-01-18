@@ -7,10 +7,13 @@
  * - Current project state (patterns, channels, tracks, clips)
  * - Available actions with exact parameter schemas
  * - Constraints and validation rules
+ * - Beat patterns for various genres
  */
 
 import type { Project, Pattern, Channel, PlaylistTrack, Clip, TrackEffects, AudioClip, AudioAsset } from '@/domain/types';
 import type { SampleLibrary, SampleMetadata } from '@/lib/audio/SampleLibrary';
+import { getPatternSummaryForPrompt, allPatterns } from './beatPatterns';
+import { getMelodicPatternSummary, getChordProgressionSummary, getPitchReference } from './melodicPatterns';
 
 // ============================================
 // Types for Context Building
@@ -426,33 +429,209 @@ ${projectSection}
 
 ## ${samplesSection}
 
-## SAMPLE CATEGORIES
-When adding samples, use these category/subcategory combinations:
-- drums/kick, drums/snare, drums/hihat, drums/clap, drums/tom, drums/cymbal
-- fx/impact, fx/riser, fx/sweep
-- synth/bass, synth/lead, synth/pad
-- instruments/piano, instruments/guitar, instruments/strings
+## SAMPLE CATEGORIES (EXACT subcategory names from library)
+When adding samples, use these EXACT category/subcategory combinations:
 
-## COMMON DRUM PATTERNS (use as reference)
+**drums** (main drum sounds):
+- drums/kick - bass drum hits
+- drums/snare - snare drum hits
+- drums/hihat_closed - closed hi-hat (use "hihat" and system will match)
+- drums/hihat_open - open hi-hat
+- drums/clap - handclap sounds
+- drums/perc - additional percussion
 
-### Boom-Bap (85-95 BPM)
-- Kick: beat 1 and beat 3 (ticks 0, 192 per bar)
-- Snare: beat 2 and beat 4 (ticks 96, 288 per bar)
-- Hi-hat: every 8th note (ticks 0, 48, 96, 144, 192, 240, 288, 336)
+**fx** (sound effects):
+- fx/impact - impacts and hits
+- fx/riser - build-up risers
+- fx/sweep - sweep effects
 
-### Trap (130-160 BPM)
-- Kick: beat 1, sometimes syncopated
-- Snare/Clap: beat 3 (tick 192 per bar)
-- Hi-hat: 16th notes (every 24 ticks), with rolls (32nd = 12 ticks)
+**synth** (synthesizer sounds):
+- synth/bass - bass synth sounds
+- synth/lead - lead synth sounds
+- synth/pad - pad/atmosphere synths
 
-### Four-on-the-Floor / House (120-130 BPM)
-- Kick: every beat (ticks 0, 96, 192, 288)
-- Snare/Clap: beats 2 and 4 (ticks 96, 288)
-- Hi-hat: 8th notes or 16th notes
+**instruments** (acoustic/real instruments):
+- instruments/piano - piano sounds
+- instruments/guitar - guitar sounds
+- instruments/strings - string sounds
 
-### Lo-Fi Hip-Hop (70-90 BPM)
-- Similar to boom-bap, relaxed feel
-- Add reverb to drums for atmosphere
+**orchestral** (orchestral sounds):
+- orchestral/strings - orchestral strings
+
+NOTE: You can use shorthand like "hihat" and the system will find matching samples (hihat_closed, hihat_open).
+
+## TIMING REFERENCE (CRITICAL FOR BEAT MAKING)
+PPQ = 96 ticks per quarter note (beat)
+
+| Note Value | Ticks | Notes Per Bar |
+|------------|-------|---------------|
+| Whole note | 384 | 1 |
+| Half note | 192 | 2 |
+| Quarter note (beat) | 96 | 4 |
+| 8th note | 48 | 8 |
+| 16th note | 24 | 16 |
+| 32nd note | 12 | 32 |
+| Triplet 8th | 32 | 12 |
+
+### Beat Positions In One Bar (384 ticks):
+- Beat 1: tick 0
+- Beat 1.5 (8th): tick 48
+- Beat 2: tick 96
+- Beat 2.5 (8th): tick 144
+- Beat 3: tick 192
+- Beat 3.5 (8th): tick 240
+- Beat 4: tick 288
+- Beat 4.5 (8th): tick 336
+
+### Multi-Bar Positions:
+- Bar 1, Beat 1: tick 0
+- Bar 1, Beat 2: tick 96
+- Bar 1, Beat 3: tick 192
+- Bar 1, Beat 4: tick 288
+- Bar 2, Beat 1: tick 384
+- Bar 2, Beat 2: tick 480
+- Bar 2, Beat 3: tick 576
+- Bar 2, Beat 4: tick 672
+- Bar 3, Beat 1: tick 768
+- Bar 4, Beat 1: tick 1152
+
+## BEAT PATTERN LIBRARY - USE THESE FOR MAKING BEATS!
+
+When asked to create a beat, use the appropriate pattern style and BPM. Create 4-bar patterns (1536 ticks total).
+
+### Hip-Hop Patterns
+
+**boom-bap-classic (85-95 BPM)** - NYC 90s feel
+- Kick: 0, 144, 384, 528, 768, 912, 1152, 1296 (beat 1 + 2-and each bar)
+- Snare: 96, 288, 480, 672, 864, 1056, 1248, 1440 (beats 2 & 4)
+- Hi-hat: every 48 ticks (8th notes)
+
+**trap-atlanta (130-145 BPM)** - Modern Atlanta trap
+- Kick: 0, 288, 384, 576, 768, 1056, 1152, 1344 (syncopated)
+- Clap: 96, 288, 480, 672, 864, 1056, 1248, 1440 (beats 2 & 4)
+- Hi-hat: every 24 ticks (16th notes) with velocity rolls
+- Open hi-hat: 144, 528, 912, 1296
+
+**drill-uk (140-145 BPM)** - UK drill with sliding 808s
+- Kick: 0, 144, 288, 384, 528, 672, 768, 912, 1056, 1152, 1296, 1440
+- Snare: 96, 288, 480, 672, 864, 1056, 1248, 1440
+- Hi-hat: every 32 ticks (triplet feel)
+
+**lofi-hiphop (70-90 BPM)** - Chill study beats
+- Kick: 0, 192, 384, 576, 768, 960, 1152, 1344
+- Snare: 96, 288, 480, 672, 864, 1056, 1248, 1440
+- Hi-hat: swung 8ths with varied velocity (soft)
+
+**phonk (130-145 BPM)** - Memphis cowbell style
+- Kick: 0, 144, 288, 384, 528, 672, 768, 912, 1056, 1152, 1296, 1440
+- Clap: 96, 288, 480, 672, 864, 1056, 1248, 1440
+- Hi-hat: every 48 ticks (8th notes, loud)
+
+### EDM Patterns
+
+**house-classic (120-128 BPM)** - Four-on-the-floor
+- Kick: every 96 ticks (every beat): 0, 96, 192, 288, 384, 480... (16 hits for 4 bars)
+- Clap: 96, 288, 480, 672, 864, 1056, 1248, 1440
+- Hi-hat closed: every 48 ticks offset (off-beats): 48, 144, 240, 336...
+- Hi-hat open: 48, 432, 816, 1200
+
+**techno-minimal (125-135 BPM)** - Berlin minimal
+- Kick: every 96 ticks (four-on-the-floor)
+- Hi-hat: off-beat 48, 144, 240... (subtle)
+- Clap: only on beat 4 of each bar: 288, 672, 1056, 1440
+
+**drum-and-bass (170-180 BPM)** - Fast breakbeat
+- Kick: 0, 144, 288, 384, 528, 672... (two-step pattern)
+- Snare: 96, 288, 480, 672, 864, 1056...
+- Hi-hat: every 24 ticks (fast 16ths)
+
+**dubstep-halftime (140-150 BPM)** - Heavy halftime
+- Kick: 0, 384, 768, 1152 (beat 1 of each bar only)
+- Snare: 192, 576, 960, 1344 (beat 3 = the drop hit)
+- Hi-hat: every 48 ticks
+
+### Pop & Rock Patterns
+
+**pop-dance (118-128 BPM)** - Radio pop
+- Kick: every 96 ticks (four-on-the-floor)
+- Clap: 96, 288, 480, 672, 864, 1056, 1248, 1440
+- Hi-hat: every 48 ticks
+
+**rock-basic (110-140 BPM)** - Standard rock
+- Kick: 0, 192, 384, 576, 768, 960... (beats 1 & 3)
+- Snare: 96, 288, 480, 672... (beats 2 & 4)
+- Hi-hat: every 48 ticks
+- Cymbal crash: 0, 768 (bar 1 and bar 3)
+
+### Latin Patterns
+
+**reggaeton (85-100 BPM)** - Dembow rhythm
+- Kick: 0, 144, 192, 288, 384, 528, 576, 672...
+- Snare: 144, 288, 528, 672, 912, 1056...
+- Hi-hat: every 48 ticks
+
+**latin-trap (70-90 BPM)** - Reggaeton meets trap
+- Similar to reggaeton but with triplet hi-hats (every 32 ticks)
+
+### Funk & Jazz Patterns
+
+**funk-classic (95-115 BPM)** - James Brown style
+- Kick: 0 (THE ONE, strong!), 144, 288, 384, 528, 672...
+- Snare: 96, 288, 480, 672... with ghost notes at low velocity
+- Hi-hat: every 24 ticks (16ths)
+
+**jazz-swing (120-180 BPM)** - Swing feel
+- Kick: light, 0, 192, 384, 576...
+- Snare: comping pattern, varied
+- Hi-hat: swung triplet feel (0, 64, 96, 160, 192...)
+
+## WHEN MAKING A BEAT:
+
+1. **Set the BPM first** based on genre
+2. **Create 4 bars minimum** (ticks 0-1535)
+3. **Use separate tracks** for each drum element:
+   - Track 0: Kick
+   - Track 1: Snare/Clap
+   - Track 2: Hi-hat
+   - Track 3: Additional percussion (if needed)
+4. **Place samples at correct tick positions** from patterns above
+5. **Be generous with actions** - a good beat needs 20-50+ sample placements
+
+${getPitchReference()}
+
+${getChordProgressionSummary()}
+
+${getMelodicPatternSummary()}
+
+## ADDING MELODIES AND CHORDS
+
+When asked to add piano, melody, chords, bass line, or any melodic element:
+
+1. **Create a synth channel first** with appropriate preset (piano, bass, lead, pad, etc.)
+2. **Create a pattern** for the melodic content
+3. **Add notes using addNote or addNoteSequence** with correct pitches, timing, and velocities
+4. **Add a clip** to place the pattern on the playlist
+
+### Track Layout for Full Productions:
+- Tracks 0-2: Drums (kick, snare, hihat)
+- Track 3: Bass (synth bass or 808)
+- Track 4: Chords/Pads
+- Track 5: Lead melody
+- Track 6+: Additional elements
+
+### Example: Adding a Piano Chord Progression
+To add piano chords:
+1. addChannel with type: "synth", preset: "piano"
+2. addPattern with name: "Piano Chords"
+3. Use addNoteSequence to add chord notes (multiple pitches at same startTick)
+4. addClip to place on track 4
+
+### Example: Adding a Bass Line
+To add a bass line:
+1. addChannel with type: "synth", preset: "bass" or "subBass"
+2. addPattern with name: "Bass Line"
+3. Add notes in the bass register (pitches 33-48)
+4. addClip to place on track 3
 
 ## AVAILABLE SYNTH PRESETS
 ${capabilities.synthPresets.join(', ')}
@@ -536,42 +715,170 @@ Response:
   "reasoning": "Setting BPM to 120"
 }}}}
 
-### Creating a basic beat:
-User: "make a simple hip hop beat"
+### Creating a FULL hip-hop beat (4 bars):
+User: "make a rap beat" or "make a hip hop beat"
 Response:
 {{{{
   "actions": [
     {{{{ "action": "setBpm", "parameters": {{{{ "bpm": 90 }}}} }}}},
     {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 0 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 144 }}}} }}}},
     {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 384 }}}} }}}},
-    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 192 }}}} }}}},
-    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 576 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 528 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 768 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 912 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1152 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1296 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 96 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 288 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 480 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 672 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 864 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 1056 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 1248 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "snare", "trackIndex": 1, "startTick": 1440 }}}} }}}},
     {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 0 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 48 }}}} }}}},
     {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 96 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 144 }}}} }}}},
     {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 192 }}}} }}}},
-    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 288 }}}} }}}}
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 240 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 288 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 336 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 384 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 432 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 480 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 528 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 576 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 624 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 672 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 720 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 768 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 816 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 864 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 912 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 960 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1008 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1056 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1104 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1152 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1200 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1248 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1296 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1344 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1392 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1440 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1488 }}}} }}}}
   ],
-  "confidence": 0.85,
-  "reasoning": "Creating a boom-bap style beat with kick on 1 and 3, snare on 2 and 4, hi-hats on every beat"
+  "confidence": 0.9,
+  "reasoning": "Creating a 4-bar boom-bap beat: kicks on 1 and 2-and, snares on 2 and 4, 8th note hi-hats throughout"
 }}}}
 
-### Adding a pattern to a track:
-User: "drop a piano pattern on track 2"
+### Creating a house beat:
+User: "make a house beat" or "make an EDM beat"
 Response:
 {{{{
   "actions": [
-    {{{{ "action": "addPattern", "parameters": {{{{ "name": "Piano Pattern" }}}} }}}},
-    {{{{ "action": "addChannel", "parameters": {{{{ "name": "Piano", "type": "synth", "preset": "piano" }}}} }}}}
+    {{{{ "action": "setBpm", "parameters": {{{{ "bpm": 124 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 0 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 96 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 192 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 288 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 384 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 480 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 576 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 672 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 768 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 864 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 960 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1056 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1152 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1248 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1344 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "kick", "trackIndex": 0, "startTick": 1440 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 96 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 288 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 480 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 672 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 864 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 1056 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 1248 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "clap", "trackIndex": 1, "startTick": 1440 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 48 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 144 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 240 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 336 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 432 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 528 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 624 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 720 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 816 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 912 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1008 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1104 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1200 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1296 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1392 }}}} }}}},
+    {{{{ "action": "addAudioSample", "parameters": {{{{ "category": "drums", "subcategory": "hihat", "trackIndex": 2, "startTick": 1488 }}}} }}}}
   ],
   "confidence": 0.9,
-  "reasoning": "Creating a piano pattern and instrument channel"
+  "reasoning": "Creating a 4-bar house beat: four-on-the-floor kick, claps on 2 and 4, off-beat hi-hats"
+}}}}
+
+### Adding a piano melody:
+User: "add a piano melody" or "add some chords"
+Response:
+{{{{
+  "actions": [
+    {{{{ "action": "addChannel", "parameters": {{{{ "name": "Piano", "type": "synth", "preset": "piano" }}}} }}}},
+    {{{{ "action": "addPattern", "parameters": {{{{ "name": "Piano Chords", "lengthInSteps": 16 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 48, "startTick": 0, "durationTick": 336, "velocity": 70 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 52, "startTick": 0, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 55, "startTick": 0, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 43, "startTick": 384, "durationTick": 336, "velocity": 70 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 47, "startTick": 384, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 50, "startTick": 384, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 45, "startTick": 768, "durationTick": 336, "velocity": 70 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 48, "startTick": 768, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 52, "startTick": 768, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 41, "startTick": 1152, "durationTick": 336, "velocity": 70 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 45, "startTick": 1152, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 48, "startTick": 1152, "durationTick": 336, "velocity": 65 }}}} }}}},
+    {{{{ "action": "addClip", "parameters": {{{{ "patternId": "current", "trackIndex": 4, "startTick": 0 }}}} }}}}
+  ],
+  "confidence": 0.9,
+  "reasoning": "Creating piano with C-G-Am-F chord progression (I-V-vi-IV), common in pop music"
+}}}}
+
+### Adding a bass line:
+User: "add a bass" or "add a bass line"
+Response:
+{{{{
+  "actions": [
+    {{{{ "action": "addChannel", "parameters": {{{{ "name": "Bass", "type": "synth", "preset": "bass" }}}} }}}},
+    {{{{ "action": "addPattern", "parameters": {{{{ "name": "Bass Line", "lengthInSteps": 16 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 36, "startTick": 0, "durationTick": 192, "velocity": 100 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 36, "startTick": 192, "durationTick": 96, "velocity": 90 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 43, "startTick": 384, "durationTick": 192, "velocity": 100 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 43, "startTick": 576, "durationTick": 96, "velocity": 90 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 45, "startTick": 768, "durationTick": 192, "velocity": 100 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 45, "startTick": 960, "durationTick": 96, "velocity": 90 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 41, "startTick": 1152, "durationTick": 192, "velocity": 100 }}}} }}}},
+    {{{{ "action": "addNote", "parameters": {{{{ "patternId": "current", "pitch": 41, "startTick": 1344, "durationTick": 96, "velocity": 90 }}}} }}}},
+    {{{{ "action": "addClip", "parameters": {{{{ "patternId": "current", "trackIndex": 3, "startTick": 0 }}}} }}}}
+  ],
+  "confidence": 0.9,
+  "reasoning": "Creating bass line following C-G-Am-F progression with root notes"
 }}}}
 
 Remember: 
 - ALWAYS use the "actions" array format
 - Return ONLY valid JSON, no markdown code blocks
 - Use category/subcategory for samples, not specific IDs
-- Be generous with the number of actions for complex requests`;
+- BE GENEROUS with actions - a good beat needs 30-50+ sample placements for 4 bars
+- Follow the beat pattern library for proper tick positions
+- For melodies/chords: create channel first, then pattern, add notes, then clip
+- Use patternId: "current" to reference the most recently created pattern`;
 }
 
 // ============================================

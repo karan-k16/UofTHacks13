@@ -188,6 +188,7 @@ function scoreSampleMatch(
 
 /**
  * Get a random sample from a category
+ * Supports fuzzy subcategory matching (e.g., "hihat" matches "hihat_closed", "hihat_open")
  */
 export function getRandomFromCategory(
     library: SampleLibrary,
@@ -198,10 +199,45 @@ export function getRandomFromCategory(
     if (!categoryData) return null;
 
     let samples: SampleMetadata[] = [];
+    const normalizedSubcat = subcategory?.toLowerCase();
 
-    if (subcategory) {
-        samples = categoryData[subcategory.toLowerCase()] || [];
-    } else {
+    if (normalizedSubcat) {
+        // First try exact match
+        if (categoryData[normalizedSubcat]) {
+            samples = categoryData[normalizedSubcat];
+        } else {
+            // Fuzzy match: find subcategories that contain or start with the query
+            // e.g., "hihat" matches "hihat_closed", "hihat_open"
+            // Also handle common aliases
+            const aliases: Record<string, string[]> = {
+                hihat: ['hihat_closed', 'hihat_open', 'hh', 'hat'],
+                'hi-hat': ['hihat_closed', 'hihat_open'],
+                hh: ['hihat_closed', 'hihat_open'],
+                hat: ['hihat_closed', 'hihat_open'],
+                perc: ['perc', 'percussion'],
+                percussion: ['perc'],
+            };
+
+            const aliasMatches = aliases[normalizedSubcat] || [];
+
+            for (const [subcatName, subcatSamples] of Object.entries(categoryData)) {
+                const subcatLower = subcatName.toLowerCase();
+                // Match if: exact match, starts with query, contains query, or matches an alias
+                if (
+                    subcatLower === normalizedSubcat ||
+                    subcatLower.startsWith(normalizedSubcat) ||
+                    subcatLower.includes(normalizedSubcat) ||
+                    normalizedSubcat.startsWith(subcatLower) ||
+                    aliasMatches.includes(subcatLower)
+                ) {
+                    samples.push(...subcatSamples);
+                }
+            }
+        }
+    }
+
+    // If still no samples and we have a subcategory query, try without it
+    if (samples.length === 0) {
         // Get all samples from all subcategories
         for (const subcat of Object.values(categoryData)) {
             samples.push(...subcat);

@@ -25,12 +25,6 @@ interface ResolvedAction {
     originalIndex: number;
 }
 
-interface ConflictInfo {
-    trackIndex: number;
-    startTick: number;
-    durationTick: number;
-}
-
 // ============================================
 // Sample Consistency
 // ============================================
@@ -130,18 +124,19 @@ export function ensureTracksExist(
 // ============================================
 
 /**
- * Resolve conflicts by offsetting overlapping clips.
- * If two clips would occupy the same position on the same track,
- * offset the later one to start after the first one ends.
+ * Resolve conflicts for clips placed at the EXACT same position on the same track.
+ * 
+ * IMPORTANT: This does NOT prevent overlapping clip durations - that's intentional for beats!
+ * For example, a hi-hat at tick 0 (duration 96) and a hi-hat at tick 48 should BOTH be allowed.
+ * 
+ * This only prevents placing TWO clips at the exact same startTick on the same track,
+ * which would cause them to play simultaneously as duplicates.
  */
 export function resolveClipConflicts(
     actions: Array<{ action: string; parameters: Record<string, any> }>
 ): Array<{ action: string; parameters: Record<string, any> }> {
-    // Track occupied regions per track
-    const trackOccupancy: Map<number, ConflictInfo[]> = new Map();
-
-    // Default duration for samples (1 beat = 96 ticks)
-    const DEFAULT_DURATION = 96;
+    // Track used positions per track (trackIndex -> Set of startTicks)
+    const trackPositions: Map<number, Set<number>> = new Map();
 
     return actions.map(action => {
         // Only process actions that place something on the timeline
@@ -152,26 +147,21 @@ export function resolveClipConflicts(
         const params = { ...action.parameters };
         const trackIndex = typeof params.trackIndex === 'number' ? params.trackIndex : 0;
         let startTick = typeof params.startTick === 'number' ? params.startTick : 0;
-        const durationTick = typeof params.durationTick === 'number' ? params.durationTick : DEFAULT_DURATION;
 
-        // Get existing occupancy for this track
-        const occupied = trackOccupancy.get(trackIndex) || [];
+        // Get existing positions for this track
+        if (!trackPositions.has(trackIndex)) {
+            trackPositions.set(trackIndex, new Set());
+        }
+        const usedPositions = trackPositions.get(trackIndex)!;
 
-        // Check for conflicts and find next available slot
-        for (const region of occupied) {
-            const regionEnd = region.startTick + region.durationTick;
-            const newEnd = startTick + durationTick;
-
-            // Check if there's an overlap
-            if (startTick < regionEnd && newEnd > region.startTick) {
-                // Offset to after this region
-                startTick = regionEnd;
-            }
+        // Only resolve if there's already something at the EXACT same tick
+        // Offset by a small amount (12 ticks = 32nd note) to separate duplicates
+        while (usedPositions.has(startTick)) {
+            startTick += 12; // Offset by 32nd note
         }
 
-        // Update occupancy
-        occupied.push({ trackIndex, startTick, durationTick });
-        trackOccupancy.set(trackIndex, occupied);
+        // Mark this position as used
+        usedPositions.add(startTick);
 
         // Return updated action
         return {
@@ -216,6 +206,9 @@ export async function executeBatch(
     // Step 3: Resolve conflicts (offset overlapping clips)
     const conflictResolved = resolveClipConflicts(resolvedActions);
 
+    // Track created patterns for "current" patternId resolution
+    let lastCreatedPatternId: string | null = null;
+
     // Step 4: Parse and execute each action
     for (let i = 0; i < conflictResolved.length; i++) {
         const actionData = conflictResolved[i];
@@ -226,10 +219,16 @@ export async function executeBatch(
         }
 
         try {
+            // Resolve "current" patternId to actual pattern ID
+            const resolvedParams = { ...actionData.parameters };
+            if (resolvedParams.patternId === 'current' && lastCreatedPatternId) {
+                resolvedParams.patternId = lastCreatedPatternId;
+            }
+
             // Parse the action into a typed command
             const command = parseAIResponse({
                 action: actionData.action,
-                parameters: actionData.parameters,
+                parameters: resolvedParams,
             });
 
             // Execute the command
@@ -238,6 +237,11 @@ export async function executeBatch(
 
             if (result.success) {
                 successCount++;
+
+                // Track created pattern IDs for subsequent "current" references
+                if (actionData.action === 'addPattern' && result.data?.patternId) {
+                    lastCreatedPatternId = result.data.patternId;
+                }
             } else {
                 failCount++;
             }

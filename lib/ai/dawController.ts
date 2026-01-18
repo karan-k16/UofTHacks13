@@ -93,17 +93,19 @@ export function executePatternCommand(
     try {
       store.addPattern(cmd.name);
 
+      // Get the newly created pattern ID
+      const newPattern = store.project?.patterns[store.project.patterns.length - 1];
+      const newPatternId = newPattern?.id;
+
       // Set length if specified
-      if (cmd.lengthInSteps && store.project) {
-        const newPattern = store.project.patterns[store.project.patterns.length - 1];
-        if (newPattern) {
-          store.setPatternLength(newPattern.id, cmd.lengthInSteps);
-        }
+      if (cmd.lengthInSteps && store.project && newPattern) {
+        store.setPatternLength(newPattern.id, cmd.lengthInSteps);
       }
 
       return {
         success: true,
         message: `Created pattern "${cmd.name}"${cmd.lengthInSteps ? ` with ${cmd.lengthInSteps} steps` : ''}`,
+        data: { patternId: newPatternId },
       };
     } catch (error) {
       return {
