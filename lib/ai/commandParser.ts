@@ -198,6 +198,18 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
       };
     }
 
+    // Sample commands
+    if (action === 'addAudioSample') {
+      return {
+        action: 'addAudioSample',
+        sampleId: parameters.sampleId ? String(parameters.sampleId) : undefined,
+        category: parameters.category ? String(parameters.category) : undefined,
+        subcategory: parameters.subcategory ? String(parameters.subcategory) : undefined,
+        sampleName: parameters.sampleName ? String(parameters.sampleName) : undefined,
+        trackIndex: parameters.trackIndex !== undefined ? Number(parameters.trackIndex) : undefined,
+      };
+    }
+
     // Effect commands
     if (action === 'addEffect') {
       return {

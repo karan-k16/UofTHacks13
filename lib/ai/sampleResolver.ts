@@ -25,7 +25,8 @@ export function findSample(
     query: string
 ): SampleMetadata | null {
     const matches = searchSamples(library, query, 1);
-    return matches.length > 0 ? matches[0].sample : null;
+    const firstMatch = matches[0];
+    return firstMatch ? firstMatch.sample : null;
 }
 
 /**
@@ -210,7 +211,7 @@ export function getRandomFromCategory(
     if (samples.length === 0) return null;
 
     const randomIndex = Math.floor(Math.random() * samples.length);
-    return samples[randomIndex];
+    return samples[randomIndex] ?? null;
 }
 
 /**

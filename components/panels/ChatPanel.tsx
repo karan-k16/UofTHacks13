@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/state/store';
-import type { ChatMessage, BackboardResponse } from '@/lib/ai/types';
+import type { ChatMessage, BackboardResponse, BackboardBatchResponse } from '@/lib/ai/types';
 import { undoLastAIAction, canUndoAIAction } from '@/lib/ai/undoHandler';
 import { parseAIResponse } from '@/lib/ai/commandParser';
 import { executeCommand } from '@/lib/ai/dawController';
+import { executeBatch } from '@/lib/ai/batchExecutor';
 import { buildDAWContext, generateSystemPrompt } from '@/lib/ai/contextBuilder';
 import { loadSampleLibrary } from '@/lib/audio/SampleLibrary';
 
@@ -154,27 +155,49 @@ export default function ChatPanel() {
         throw new Error(apiResponse.error || 'Unknown API error');
       }
 
-      // Parse and execute the AI command
+      // Parse and execute the AI command(s)
       if (apiResponse.data?.commandResult) {
         const backboardResponse = apiResponse.data.commandResult as BackboardResponse;
 
         try {
-          // Parse the AI response
-          const command = parseAIResponse(backboardResponse);
+          // Check if this is a batch response
+          if (backboardResponse.action === '__batch__' && backboardResponse.parameters?.actions) {
+            // Extract batch data
+            const batchData: BackboardBatchResponse = {
+              actions: backboardResponse.parameters.actions,
+              sampleChoices: backboardResponse.parameters.sampleChoices,
+              confidence: backboardResponse.confidence,
+              reasoning: backboardResponse.reasoning,
+            };
 
-          // Execute the command (async for sample operations)
-          const result = await executeCommand(command);
+            // Execute the batch using the batch executor
+            const batchResult = await executeBatch(batchData, sampleLibrary);
 
-          // Add response message based on result
-          if (result.success) {
-            chat.addMessage('agent', result.message, 'sent');
+            // Add response message based on result
+            if (batchResult.success) {
+              chat.addMessage('agent', batchResult.message, 'sent');
 
-            // Track command for undo functionality
-            if (result.data?.commandId) {
-              chat.setLastCommand(result.data.commandId);
+              // Track command for undo functionality
+              if (batchResult.undoGroupId) {
+                chat.setLastCommand(batchResult.undoGroupId);
+              }
+            } else {
+              // Partial success - show what worked and what failed
+              chat.addMessage('agent', batchResult.message, batchResult.successCount > 0 ? 'sent' : 'error');
             }
           } else {
-            chat.addMessage('agent', `Error: ${result.message}`, 'error');
+            // Legacy single command response
+            const command = parseAIResponse(backboardResponse);
+            const result = await executeCommand(command);
+
+            if (result.success) {
+              chat.addMessage('agent', result.message, 'sent');
+              if (result.data?.commandId) {
+                chat.setLastCommand(result.data.commandId);
+              }
+            } else {
+              chat.addMessage('agent', `Error: ${result.message}`, 'error');
+            }
           }
         } catch (parseError) {
           console.error('Command parsing/execution error:', parseError);

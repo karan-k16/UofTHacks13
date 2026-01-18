@@ -360,12 +360,25 @@ export interface UnknownCommand extends BaseCommand {
   reason?: string;
 }
 
-// Response from Backboard
+// Response from Backboard (single action - legacy)
 export interface BackboardResponse {
   action: string;
   parameters: Record<string, any>;
   confidence?: number;
   reasoning?: string;
+}
+
+// Response from Backboard (batch actions - new)
+export interface BackboardBatchResponse {
+  actions: Array<{
+    action: string;
+    parameters: Record<string, any>;
+  }>;
+  // Sample choices for consistency within a batch (e.g., { "kick": "drums_kick_01" })
+  sampleChoices?: Record<string, string>;
+  confidence?: number;
+  reasoning?: string;
+  genre?: string; // For context: "trap", "boom-bap", "house", etc.
 }
 
 // Result of command execution
@@ -374,6 +387,18 @@ export interface CommandResult {
   message: string;
   data?: any;
   error?: string;
+}
+
+// Result of batch command execution
+export interface BatchCommandResult {
+  success: boolean;
+  message: string;
+  totalActions: number;
+  successCount: number;
+  failCount: number;
+  results: CommandResult[];
+  // For grouped undo
+  undoGroupId?: string;
 }
 
 // Chat message types
@@ -404,6 +429,7 @@ export interface ChatAPIResponse {
   data?: {
     message: string;
     commandResult?: BackboardResponse;
+    batchResult?: BatchCommandResult;
   };
   error?: string;
 }

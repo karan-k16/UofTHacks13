@@ -1,10 +1,13 @@
 /**
  * API endpoint for AI chat agent
  * POST /api/chat - Process natural language commands and execute DAW actions
+ * 
+ * Now supports batch actions - AI can return multiple actions for complex requests
+ * like "make a beat" which results in multiple samples being placed.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import type { ChatAPIRequest, ChatAPIResponse, BackboardResponse } from '@/lib/ai/types';
+import type { ChatAPIRequest, ChatAPIResponse, BackboardResponse, BackboardBatchResponse } from '@/lib/ai/types';
 import { sendToModel } from '@/lib/ai/backboard';
 
 // Rate limiting (simple in-memory implementation)
@@ -111,10 +114,14 @@ export async function POST(request: NextRequest) {
       );
 
       // Log successful response
+      const isBatch = backboardResponse.action === '__batch__';
+      const actionCount = isBatch ? (backboardResponse.parameters?.actions?.length || 0) : 1;
+
       console.log('[AI Chat API] Backboard response:', {
-        action: backboardResponse.action,
-        hasParameters: !!Object.keys(backboardResponse.parameters || {}).length,
+        isBatch,
+        actionCount,
         confidence: backboardResponse.confidence,
+        reasoning: backboardResponse.reasoning,
         timestamp: new Date().toISOString(),
       });
 
@@ -184,12 +191,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return raw structured action + metadata (no store mutation on server)
+    // Check if this is a batch response
+    const isBatch = backboardResponse.action === '__batch__';
+
+    if (isBatch) {
+      // Extract batch data for client-side execution
+      const batchData: BackboardBatchResponse = {
+        actions: backboardResponse.parameters?.actions || [],
+        sampleChoices: backboardResponse.parameters?.sampleChoices,
+        confidence: backboardResponse.confidence,
+        reasoning: backboardResponse.reasoning,
+      };
+
+      const actionCount = batchData.actions.length;
+      const message = backboardResponse.reasoning ||
+        (actionCount > 1
+          ? `Preparing ${actionCount} actions...`
+          : 'Processing command...');
+
+      // Return batch response for client-side execution
+      return NextResponse.json({
+        success: true,
+        data: {
+          message,
+          commandResult: {
+            action: '__batch__',
+            parameters: batchData,
+            confidence: backboardResponse.confidence,
+            reasoning: backboardResponse.reasoning,
+          },
+        },
+      } as ChatAPIResponse);
+    }
+
+    // Legacy single action response (shouldn't happen with new system)
     return NextResponse.json({
       success: true,
       data: {
         message: backboardResponse.reasoning || 'Command received',
-        commandResult: backboardResponse, // Pass the full response for client-side parsing
+        commandResult: backboardResponse,
       },
     } as ChatAPIResponse);
 

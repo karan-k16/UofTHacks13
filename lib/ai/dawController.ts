@@ -450,7 +450,8 @@ export async function executeSampleCommand(cmd: AddAudioSampleCommand): Promise<
   // The sample library is loaded on the client via SampleLibrary.ts
   // Import dynamically to avoid server-side issues
   try {
-    const { loadSampleLibrary, getSampleById } = await import('@/lib/audio/SampleLibrary');
+    const { loadSampleLibrary, getSampleById, getSamplesByCategory } = await import('@/lib/audio/SampleLibrary');
+    const { getRandomFromCategory } = await import('./sampleResolver');
     const library = await loadSampleLibrary();
 
     if (!library) {
@@ -464,10 +465,15 @@ export async function executeSampleCommand(cmd: AddAudioSampleCommand): Promise<
       sample = getSampleById(library, cmd.sampleId);
     }
 
+    // If no sample found by ID, try by category/subcategory
+    if (!sample && cmd.category) {
+      sample = getRandomFromCategory(library, cmd.category, cmd.subcategory);
+    }
+
     if (!sample) {
       return {
         success: false,
-        message: `Sample not found: ${cmd.sampleId || cmd.sampleName || 'unknown'}. Check sample ID is correct.`
+        message: `Sample not found: ${cmd.sampleId || cmd.category + '/' + cmd.subcategory || cmd.sampleName || 'unknown'}. Check sample ID or category.`
       };
     }
 
@@ -481,24 +487,32 @@ export async function executeSampleCommand(cmd: AddAudioSampleCommand): Promise<
     });
 
     // Calculate duration in ticks (using project BPM and PPQ)
-    const durationSeconds = sample.duration || 1;
+    // Use a default of 1 beat (96 ticks) if sample duration is very short
+    const durationSeconds = sample.duration || 0.5;
     const beatsPerSecond = project.bpm / 60;
     const durationBeats = durationSeconds * beatsPerSecond;
-    const durationTicks = Math.round(durationBeats * project.ppq);
+    let durationTicks = Math.round(durationBeats * project.ppq);
 
-    // Add to a new track (or existing if trackIndex provided)
-    const startTick = 0;
+    // Minimum duration of 1 beat
+    durationTicks = Math.max(durationTicks, 96);
+
+    // Get startTick from command or default to 0
+    const startTick = (cmd as any).startTick ?? 0;
 
     if (cmd.trackIndex !== undefined) {
-      // Validate track index
-      if (cmd.trackIndex < 0 || cmd.trackIndex >= project.playlist.tracks.length) {
-        return { success: false, message: `Invalid track index: ${cmd.trackIndex}` };
+      // Ensure track exists (auto-create if needed)
+      const currentTrackCount = project.playlist.tracks.length;
+      if (cmd.trackIndex >= currentTrackCount) {
+        // Create tracks up to the needed index
+        for (let i = currentTrackCount; i <= cmd.trackIndex; i++) {
+          store.addPlaylistTrack(`Track ${i + 1}`);
+        }
       }
 
-      // Add clip to existing track
+      // Add clip to track
       store.addClip({
         type: 'audio',
-        audioAssetId: assetId,
+        assetId: assetId,
         trackIndex: cmd.trackIndex,
         startTick,
         durationTick: durationTicks,
@@ -507,8 +521,8 @@ export async function executeSampleCommand(cmd: AddAudioSampleCommand): Promise<
 
       return {
         success: true,
-        message: `Added sample "${sample.name}" to track ${cmd.trackIndex}`,
-        data: { assetId, samplePath: sample.path },
+        message: `Added sample "${sample.name}" to track ${cmd.trackIndex + 1} at tick ${startTick}`,
+        data: { assetId, samplePath: sample.path, trackIndex: cmd.trackIndex, startTick },
       };
     } else {
       // Create new track with the sample
