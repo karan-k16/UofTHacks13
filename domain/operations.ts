@@ -175,7 +175,7 @@ function getSynthPresetSettings(preset: string): Partial<SynthSettings> {
     atmosphericPad: { oscillatorType: 'sine', attack: 1.0, decay: 0.5, sustain: 0.9, release: 2.0, filterCutoff: 1000, filterResonance: 0.3 },
     metallic: { oscillatorType: 'square', attack: 0.001, decay: 0.6, sustain: 0.2, release: 0.8, filterCutoff: 5000, filterResonance: 5 },
   };
-  
+
   return PRESETS[preset] ?? PRESETS.default;
 }
 

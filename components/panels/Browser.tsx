@@ -13,7 +13,7 @@ import {
 } from '@/lib/audio/SampleLibrary';
 import { WaveformCanvas, WaveformZoomControl } from '@/components/common/WaveformCanvas';
 
-type BrowserTab = 'patterns' | 'samples' | 'presets';
+type BrowserTab = 'patterns' | 'samples';
 type SampleView = 'library' | 'user';
 
 export default function Browser() {
@@ -217,15 +217,6 @@ export default function Browser() {
           onClick={() => setActiveTab('samples')}
         >
           Samples
-        </button>
-        <button
-          className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${activeTab === 'presets'
-            ? 'bg-ps-bg-700 text-ps-accent-primary border-b-2 border-ps-accent-primary'
-            : 'text-ps-text-secondary hover:text-ps-text-primary'
-            }`}
-          onClick={() => setActiveTab('presets')}
-        >
-          Presets
         </button>
       </div>
 
@@ -616,22 +607,6 @@ export default function Browser() {
                 )}
               </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'presets' && (
-          <div className="space-y-2">
-            <div className="text-xs text-ps-text-secondary px-2 py-1 font-medium">
-              Synth Presets
-            </div>
-            {['Default', 'Pad', 'Lead', 'Bass', 'Pluck'].map((preset) => (
-              <div
-                key={preset}
-                className="px-3 py-2 rounded hover:bg-ps-bg-700 cursor-pointer text-xs"
-              >
-                {preset}
-              </div>
-            ))}
           </div>
         )}
       </div>
