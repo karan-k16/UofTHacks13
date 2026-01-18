@@ -302,7 +302,7 @@ export interface RenderResult {
 // UI State Types
 // ============================================
 
-export type PanelId = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer';
+export type PanelId = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer' | 'chat';
 
 export interface PanelState {
   isOpen: boolean;

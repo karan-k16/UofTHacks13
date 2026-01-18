@@ -10,12 +10,28 @@ export interface BaseCommand {
 // Pattern commands
 export interface AddPatternCommand extends BaseCommand {
   action: 'addPattern';
-  name: string;
+  name?: string;
   lengthInSteps?: number;
+}
+
+export interface SetPatternLengthCommand extends BaseCommand {
+  action: 'setPatternLength';
+  patternId: string;
+  lengthInSteps: number;
 }
 
 export interface DeletePatternCommand extends BaseCommand {
   action: 'deletePattern';
+  patternId: string;
+}
+
+export interface SelectPatternCommand extends BaseCommand {
+  action: 'selectPattern';
+  patternId: string;
+}
+
+export interface OpenPianoRollCommand extends BaseCommand {
+  action: 'openPianoRoll';
   patternId: string;
 }
 
@@ -73,9 +89,9 @@ export interface ToggleMetronomeCommand extends BaseCommand {
 // Channel commands
 export interface AddChannelCommand extends BaseCommand {
   action: 'addChannel';
+  name?: string;
   type: 'synth' | 'sampler';
   preset?: string;
-  name?: string;
 }
 
 export interface UpdateChannelCommand extends BaseCommand {
@@ -90,10 +106,52 @@ export interface DeleteChannelCommand extends BaseCommand {
   channelId: string;
 }
 
+export interface SelectChannelCommand extends BaseCommand {
+  action: 'selectChannel';
+  channelId: string;
+}
+
+export interface SetChannelVolumeCommand extends BaseCommand {
+  action: 'setChannelVolume';
+  channelId: string;
+  volume: number;
+}
+
+export interface SetChannelPanCommand extends BaseCommand {
+  action: 'setChannelPan';
+  channelId: string;
+  pan: number;
+}
+
+export interface ToggleChannelMuteCommand extends BaseCommand {
+  action: 'toggleChannelMute';
+  channelId: string;
+}
+
+export interface ToggleChannelSoloCommand extends BaseCommand {
+  action: 'toggleChannelSolo';
+  channelId: string;
+}
+
 // Mixer commands
 export interface SetVolumeCommand extends BaseCommand {
   action: 'setVolume';
-  trackIndex: number;
+ 
+
+export interface AddPlaylistTrackCommand extends BaseCommand {
+  action: 'addPlaylistTrack';
+  name?: string;
+}
+
+export interface TogglePlaylistTrackMuteCommand extends BaseCommand {
+  action: 'togglePlaylistTrackMute';
+  trackId: string;
+}
+
+export interface TogglePlaylistTrackSoloCommand extends BaseCommand {
+  action: 'togglePlaylistTrackSolo';
+  trackId: string;
+} trackIndex: number;
   volume: number;
 }
 
@@ -131,24 +189,82 @@ export interface MoveClipCommand extends BaseCommand {
 
 export interface ResizeClipCommand extends BaseCommand {
   action: 'resizeClip';
-  clipId: string;
-  durationTick: number;
+  clipId: string; (TrackEffects - simple inline mixer)
+export interface SetTrackEffectCommand extends BaseCommand {
+  action: 'setTrackEffect';
+  trackId: string;
+  key: string; // e.g., 'volume', 'pan', 'reverb', etc.
+  value: number;
 }
 
-export interface DeleteClipCommand extends BaseCommand {
-  action: 'deleteClip';
-  clipId: string;
+export interface ResetTrackEffectsCommand extends BaseCommand {
+  action: 'resetTrackEffects';
+  trackId: string;
 }
 
-export interface SetLoopRegionCommand extends BaseCommand {
-  action: 'setLoopRegion';
-  startTick: number;
-  endTick: number;
+export interface ApplyTrackEffectsCommand extends BaseCommand {
+  action: 'applyTrackEffects';
+  trackId: string;
 }
 
-// Effect commands
+export interface SetMasterVolumeCommand extends BaseCommand {
+  action: 'setMasterVolume';
+  volume: number;
+}
+
+// Legacy effect commands (kept for compatibility)
 export interface AddEffectCommand extends BaseCommand {
   action: 'addEffect';
+  trackIndex: number;
+  effectType: 'reverb' | 'delay' | 'eq' | 'compressor' | 'distortion';
+}
+
+export interface UpdateEffectCommand extends BaseCommand {
+  action: 'updateEffect';
+  effectId: string;
+  parameters: Record<string, number>;
+}SetPatternLengthCommand
+  | DeletePatternCommand
+  | SelectPatternCommand
+  | OpenPianoRollCommand
+  | AddNoteCommand
+  | UpdateNoteCommand
+  | DeleteNoteCommand
+  | PlayCommand
+  | StopCommand
+  | PauseCommand
+  | SetBPMCommand
+  | SetPositionCommand
+  | ToggleMetronomeCommand
+  | AddChannelCommand
+  | UpdateChannelCommand
+  | DeleteChannelCommand
+  | SelectChannelCommand
+  | SetChannelVolumeCommand
+  | SetChannelPanCommand
+  | ToggleChannelMuteCommand
+  | ToggleChannelSoloCommand
+  | SetVolumeCommand
+  | SetPanCommand
+  | ToggleMuteCommand
+  | ToggleSoloCommand
+  | AddClipCommand
+  | AddPlaylistTrackCommand
+  | TogglePlaylistTrackMuteCommand
+  | TogglePlaylistTrackSoloCommand
+  | MoveClipCommand
+  | ResizeClipCommand
+  | DeleteClipCommand
+  | SetLoopRegionCommand
+  | SetTrackEffectCommand
+  | ResetTrackEffectsCommand
+  | ApplyTrackEffectsCommand
+  | SetMasterVolumeCommand
+  | AddEffectCommand
+  | UpdateEffectCommand
+  | DeleteEffectCommand
+  | AddAudioSampleCommand
+  | AddAudioSampleToNewTrackfect';
   trackIndex: number;
   effectType: 'reverb' | 'delay' | 'eq' | 'compressor' | 'distortion';
 }
