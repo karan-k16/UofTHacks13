@@ -206,7 +206,7 @@ export default function TopToolbar() {
 
   return (
     <>
-      <div className="h-14 bg-ps-bg-800 border-b border-ps-bg-600 flex items-center px-5 gap-4 shrink-0 shadow-md">
+      <div className="h-14 bg-gradient-to-r from-[#0d0d0d] to-[#111] border-b border-[#1a1a1a] flex items-center px-5 gap-4 shrink-0 shadow-md">
         {/* Logo - Click to go to Dashboard */}
         <button
           onClick={() => {
@@ -221,54 +221,43 @@ export default function TopToolbar() {
           className="flex items-center gap-2.5 hover:opacity-80 transition-opacity cursor-pointer group"
           title="Go to Dashboard"
         >
-          <div className="relative">
-            <svg
-              className="w-8 h-8 transition-transform group-hover:scale-105"
-              viewBox="0 0 100 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="50" cy="50" r="40" stroke="#ff7a4a" strokeWidth="4" className="opacity-60" />
-              <circle cx="50" cy="50" r="25" fill="#ff7a4a" className="opacity-80" />
-              <circle cx="50" cy="50" r="12" fill="#ff7a4a" />
-            </svg>
-            <div className="absolute inset-0 rounded-full bg-ps-accent-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-base text-ps-accent-primary tracking-wide leading-none">PULSE</span>
-            <span className="text-2xs text-ps-text-dim uppercase tracking-widest">Studio</span>
-          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transition-transform group-hover:scale-105">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 17L12 22L22 17" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 12L12 17L22 12" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="font-semibold text-base text-white tracking-tight">PULSE</span>
         </button>
 
         {/* Divider */}
-        <div className="w-px h-7 bg-ps-bg-600" />
+        <div className="w-px h-7 bg-[#222]" />
 
         {/* File Menu */}
         <div className="flex items-center gap-1">
           <Dropdown
-            trigger={<button className="btn btn-ghost text-xs px-3 py-2">File</button>}
+            trigger={<button className="text-xs px-3 py-2 text-[#888] hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-colors">File</button>}
             items={fileMenuItems}
           />
           <Dropdown
-            trigger={<button className="btn btn-ghost text-xs px-3 py-2">Edit</button>}
+            trigger={<button className="text-xs px-3 py-2 text-[#888] hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-colors">Edit</button>}
             items={editMenuItems}
           />
           <Dropdown
-            trigger={<button className="btn btn-ghost text-xs px-3 py-2">View</button>}
+            trigger={<button className="text-xs px-3 py-2 text-[#888] hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-colors">View</button>}
             items={viewMenuItems}
           />
           <Dropdown
-            trigger={<button className="btn btn-ghost text-xs px-3 py-2">Help</button>}
+            trigger={<button className="text-xs px-3 py-2 text-[#888] hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-colors">Help</button>}
             items={helpMenuItems}
           />
         </div>
 
         {/* Divider */}
-        <div className="w-px h-7 bg-ps-bg-600" />
+        <div className="w-px h-7 bg-[#222]" />
 
         {/* Project Name */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-ps-text-muted uppercase tracking-wide">Project:</span>
+          <span className="text-xs text-[#666] uppercase tracking-wide">Project:</span>
           {isEditingName ? (
             <div className="flex items-center gap-1">
               <input
@@ -306,13 +295,13 @@ export default function TopToolbar() {
                   }
                   setIsEditingName(false);
                 }}
-                className="text-xs font-medium bg-ps-bg-700 border border-ps-accent-primary rounded px-2 py-1 focus:outline-none w-40"
+                className="text-xs font-medium bg-[#0a0a0a] border border-[#ff6b6b] rounded-lg px-2 py-1 focus:outline-none w-40 text-white"
                 autoFocus
               />
             </div>
           ) : (
             <span
-              className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-2 py-1 rounded hover:bg-ps-bg-700 border border-transparent hover:border-ps-bg-600"
+              className="text-xs font-medium text-white cursor-pointer hover:text-[#ff6b6b] transition-colors px-2 py-1 rounded-lg hover:bg-[#1a1a1a] border border-transparent hover:border-[#222]"
               onClick={() => {
                 setEditedName(project?.name || 'Untitled');
                 setIsEditingName(true);
@@ -323,7 +312,7 @@ export default function TopToolbar() {
             </span>
           )}
           {hasUnsavedChanges && (
-            <span className="text-xs text-ps-accent-tertiary">*</span>
+            <span className="text-xs text-[#ffe66d]">*</span>
           )}
         </div>
 
@@ -337,25 +326,25 @@ export default function TopToolbar() {
         <div className="flex-1" />
 
         {/* BPM */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-ps-text-secondary">BPM</span>
+        <div className="flex items-center gap-2 bg-[#111] rounded-lg px-3 py-1.5 border border-[#1a1a1a]">
+          <span className="text-xs text-[#666] uppercase tracking-wide">BPM</span>
           <input
             type="number"
             value={project?.bpm ?? 120}
             onChange={(e) => setBpm(parseInt(e.target.value, 10) || 120)}
-            className="w-14 text-center font-mono"
+            className="w-14 text-center font-mono bg-transparent border-none text-white text-sm focus:outline-none"
             min={20}
             max={999}
           />
         </div>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-ps-bg-600" />
+        <div className="w-px h-6 bg-[#222]" />
 
         {/* Tools */}
         <div className="flex items-center gap-1">
           <button
-            className={`btn btn-icon ${canUndo() ? 'btn-ghost' : 'btn-ghost opacity-50 cursor-not-allowed'}`}
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${canUndo() ? 'text-[#888] hover:text-white hover:bg-[#1a1a1a]' : 'text-[#333] cursor-not-allowed'}`}
             onClick={() => canUndo() && undo()}
             title="Undo (Ctrl+Z)"
           >
@@ -368,7 +357,7 @@ export default function TopToolbar() {
             </svg>
           </button>
           <button
-            className={`btn btn-icon ${canRedo() ? 'btn-ghost' : 'btn-ghost opacity-50 cursor-not-allowed'}`}
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${canRedo() ? 'text-[#888] hover:text-white hover:bg-[#1a1a1a]' : 'text-[#333] cursor-not-allowed'}`}
             onClick={() => canRedo() && redo()}
             title="Redo (Ctrl+Shift+Z)"
           >
@@ -381,10 +370,10 @@ export default function TopToolbar() {
             </svg>
           </button>
 
-          <div className="w-px h-4 bg-ps-bg-600 mx-1" />
+          <div className="w-px h-4 bg-[#222] mx-1" />
 
           <button
-            className={`btn btn-icon ${metronomeEnabled ? 'btn-primary' : 'btn-ghost'}`}
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${metronomeEnabled ? 'bg-[#ff6b6b] text-white' : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'}`}
             onClick={toggleMetronome}
             title="Metronome (M)"
           >
@@ -404,42 +393,38 @@ export default function TopToolbar() {
       {/* About Modal */}
       {showAbout && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={() => setShowAbout(false)}
         >
           <div
-            className="bg-ps-bg-800 border border-ps-bg-600 rounded-lg p-6 max-w-md mx-4"
+            className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#222] rounded-2xl p-8 max-w-md mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center mb-4">
-              <svg
-                className="w-16 h-16"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="50" cy="50" r="40" stroke="#ff6b35" strokeWidth="4" />
-                <circle cx="50" cy="50" r="20" fill="#ff6b35" />
+            <div className="flex items-center justify-center mb-5">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 17L12 22L22 17" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-ps-text-primary text-center mb-2">
+            <h2 className="text-xl font-semibold text-white text-center mb-2">
               Pulse Studio
             </h2>
-            <p className="text-sm text-ps-text-secondary text-center mb-4">
+            <p className="text-sm text-[#888] text-center mb-4">
               Version 0.1.0 Alpha
             </p>
-            <p className="text-sm text-ps-text-secondary text-center mb-6">
+            <p className="text-sm text-[#666] text-center mb-6 leading-relaxed">
               A modern, browser-based digital audio workstation (DAW) built with Next.js, Tone.js, and TypeScript.
             </p>
-            <div className="text-xs text-ps-text-muted text-center space-y-1">
+            <div className="text-xs text-[#555] text-center space-y-1">
               <p>Created for UofTHacks</p>
-              <p className="mt-4 pt-4 border-t border-ps-bg-600">
+              <p className="mt-4 pt-4 border-t border-[#222]">
                 This is an alpha version. Many features are still in development.
               </p>
             </div>
             <button
               onClick={() => setShowAbout(false)}
-              className="btn btn-primary w-full mt-6"
+              className="w-full mt-6 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-[#ff6b6b] to-[#ff8585] text-white hover:shadow-lg hover:shadow-[#ff6b6b]/25 transition-all"
             >
               Close
             </button>

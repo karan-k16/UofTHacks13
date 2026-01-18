@@ -229,7 +229,7 @@ export default function Transport() {
   return (
     <div className="flex items-center gap-3 relative">
       {/* Position Display */}
-      <div className="transport-display min-w-[100px] text-center">
+      <div className="font-mono text-sm text-white bg-[#111] px-3 py-1.5 rounded-lg border border-[#1a1a1a] min-w-[100px] text-center tabular-nums">
         {formatTicksAsBBT(position, ppq, timeSignature)}
       </div>
 
@@ -237,7 +237,7 @@ export default function Transport() {
       <div className="flex items-center gap-1">
         {/* Stop */}
         <button
-          className={`btn btn-icon ${isStopped ? 'btn-primary' : 'btn-ghost'}`}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isStopped ? 'bg-[#ff6b6b] text-white' : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'}`}
           onClick={handleStop}
           title="Stop (Enter)"
         >
@@ -248,7 +248,7 @@ export default function Transport() {
 
         {/* Play/Pause */}
         <button
-          className={`btn btn-icon ${isPlaying ? 'btn-primary' : 'btn-ghost'}`}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isPlaying ? 'bg-[#ff6b6b] text-white' : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'}`}
           onClick={handlePlayStop}
           title="Play/Pause (Space)"
         >
@@ -273,10 +273,10 @@ export default function Transport() {
 
         {/* Record */}
         <button
-          className={`btn btn-icon transition-all ${
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
             isRecording 
               ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' 
-              : 'btn-ghost hover:bg-red-600/20 hover:text-red-400'
+              : 'text-[#888] hover:bg-red-600/20 hover:text-red-400'
           }`}
           onClick={handleRecord}
           title={isRecording ? 'Stop Recording' : `Record (${recording.countInBars} bar count-in)`}
@@ -289,7 +289,7 @@ export default function Transport() {
         {/* Recording Settings */}
         <div className="relative" ref={settingsRef}>
           <button
-            className={`btn btn-icon ${showRecordingSettings ? 'btn-secondary' : 'btn-ghost'}`}
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${showRecordingSettings ? 'bg-[#1a1a1a] text-white' : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'}`}
             onClick={() => setShowRecordingSettings(!showRecordingSettings)}
             title="Recording Settings"
           >
@@ -300,29 +300,29 @@ export default function Transport() {
 
           {/* Recording Settings Panel */}
           {showRecordingSettings && (
-            <div className="absolute top-full right-0 mt-2 bg-ps-bg-800 border border-ps-bg-600 rounded-lg p-4 shadow-xl z-50 min-w-[300px]">
-              <h3 className="text-sm font-semibold mb-3 text-ps-text-primary">Recording Settings</h3>
+            <div className="absolute top-full right-0 mt-2 bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-4 shadow-xl z-50 min-w-[300px]">
+              <h3 className="text-sm font-semibold mb-3 text-white">Recording Settings</h3>
 
               {/* Permission Request */}
               {permissionState !== 'granted' && (
-                <div className="mb-4 p-3 bg-ps-bg-900 rounded-lg border border-ps-bg-700">
+                <div className="mb-4 p-3 bg-[#0a0a0a] rounded-lg border border-[#1a1a1a]">
                   {permissionState === 'denied' ? (
                     <div className="text-center">
                       <div className="text-red-400 text-sm mb-2">🚫 Microphone Access Denied</div>
-                      <p className="text-xs text-ps-text-muted">
+                      <p className="text-xs text-[#666]">
                         Please enable microphone access in your browser settings to use recording features.
                       </p>
                     </div>
                   ) : (
                     <div className="text-center">
-                      <div className="text-ps-text-secondary text-sm mb-2">🎤 Microphone Permission Required</div>
-                      <p className="text-xs text-ps-text-muted mb-3">
+                      <div className="text-[#888] text-sm mb-2">🎤 Microphone Permission Required</div>
+                      <p className="text-xs text-[#666] mb-3">
                         Grant microphone access to record audio and see available input devices.
                       </p>
                       <button
                         onClick={requestMicrophonePermission}
                         disabled={isRequestingPermission}
-                        className="px-4 py-2 bg-ps-accent-primary text-white rounded-lg text-sm font-medium hover:bg-ps-accent-primary/80 transition-colors disabled:opacity-50"
+                        className="px-4 py-2 bg-[#ff6b6b] text-white rounded-lg text-sm font-medium hover:bg-[#ff8585] transition-colors disabled:opacity-50"
                       >
                         {isRequestingPermission ? 'Requesting...' : 'Allow Microphone Access'}
                       </button>
@@ -333,9 +333,9 @@ export default function Transport() {
 
               {/* Input Device Selection */}
               <div className="mb-3">
-                <label className="text-xs text-ps-text-muted block mb-1">Input Device</label>
+                <label className="text-xs text-[#666] block mb-1.5">Input Device</label>
                 <select
-                  className="w-full bg-ps-bg-900 border border-ps-bg-700 rounded px-2 py-1.5 text-sm text-ps-text-primary disabled:opacity-50 focus:border-ps-accent-primary focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-sm text-white disabled:opacity-50 focus:border-[#ff6b6b] focus:outline-none"
                   value={recording.inputDeviceId || ''}
                   onChange={(e) => handleInputDeviceChange(e.target.value)}
                   disabled={permissionState !== 'granted'}
@@ -357,9 +357,9 @@ export default function Transport() {
 
               {/* Count-in Bars */}
               <div className="mb-3">
-                <label className="text-xs text-ps-text-muted block mb-1">Count-in (bars)</label>
+                <label className="text-xs text-[#666] block mb-1.5">Count-in (bars)</label>
                 <select
-                  className="w-full bg-ps-bg-900 border border-ps-bg-700 rounded px-2 py-1.5 text-sm text-ps-text-primary focus:border-ps-accent-primary focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-sm text-white focus:border-[#ff6b6b] focus:outline-none"
                   value={recording.countInBars}
                   onChange={(e) => setCountInBars(parseInt(e.target.value))}
                 >
@@ -373,7 +373,7 @@ export default function Transport() {
               {/* Input Level Preview */}
               {permissionState === 'granted' && (
                 <div className="mb-3">
-                  <label className="text-xs text-ps-text-muted block mb-1">Input Level</label>
+                  <label className="text-xs text-[#666] block mb-1.5">Input Level</label>
                   <LevelMeter
                     level={levelToDb(recording.inputLevel)}
                     width={268}
@@ -381,7 +381,7 @@ export default function Transport() {
                     orientation="horizontal"
                     showPeak={true}
                   />
-                  <p className="text-xs text-ps-text-muted mt-1">
+                  <p className="text-xs text-[#666] mt-1.5">
                     {recording.inputLevel > 0 ? 'Microphone is active' : 'No input detected'}
                   </p>
                 </div>
@@ -389,13 +389,13 @@ export default function Transport() {
 
               {/* Error Display */}
               {recordingError && (
-                <div className="text-xs text-red-400 mt-2 p-2 bg-red-900/20 rounded border border-red-900/50">
+                <div className="text-xs text-red-400 mt-2 p-2 bg-red-900/20 rounded-lg border border-red-900/50">
                   ⚠️ {recordingError}
                 </div>
               )}
 
               {/* Help Text */}
-              <div className="text-xs text-ps-text-muted mt-3 pt-3 border-t border-ps-bg-700">
+              <div className="text-xs text-[#555] mt-3 pt-3 border-t border-[#222]">
                 💡 Click the red record button to start. The metronome will play during count-in.
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function Transport() {
 
         {/* Loop */}
         <button
-          className={`btn btn-icon ${loopEnabled ? 'btn-secondary' : 'btn-ghost'}`}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${loopEnabled ? 'bg-[#1a1a1a] text-[#ff6b6b]' : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'}`}
           onClick={toggleLoop}
           title="Loop"
         >
@@ -416,14 +416,14 @@ export default function Transport() {
         {/* Loop Count */}
         {loopEnabled && (
           <div className="flex items-center gap-1 ml-1">
-            <span className="text-xs text-ps-text-muted">x</span>
+            <span className="text-xs text-[#666]">x</span>
             <input
               type="number"
               min="0"
               max="999"
               value={loopCount}
               onChange={(e) => setLoopCount(parseInt(e.target.value) || 0)}
-              className="w-12 px-1 text-xs text-center bg-ps-bg-800 border border-ps-bg-600 rounded focus:border-ps-accent-primary focus:outline-none"
+              className="w-12 px-1 text-xs text-center bg-[#111] border border-[#222] rounded-lg focus:border-[#ff6b6b] focus:outline-none text-white"
               title="Loop count (0 = infinite)"
             />
           </div>
@@ -432,9 +432,9 @@ export default function Transport() {
 
       {/* Recording Status */}
       {isRecording && (
-        <div className="flex items-center gap-2 px-2 py-1 bg-red-600/20 rounded-lg border border-red-600/50">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 rounded-lg border border-red-600/50">
           <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-          <span className="text-xs text-red-400 font-mono">
+          <span className="text-xs text-red-400 font-mono tabular-nums">
             REC {formatDuration(recordingDuration)}
           </span>
         </div>
@@ -442,7 +442,7 @@ export default function Transport() {
 
       {/* Count-in Display */}
       {recording.isPreparing && recording.countInRemaining > 0 && (
-        <div className="flex items-center gap-2 px-3 py-1 bg-orange-600/20 rounded-lg border border-orange-600/50">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-600/20 rounded-lg border border-orange-600/50">
           <span className="text-sm text-orange-400 font-bold animate-pulse">
             Count-in: {recording.countInRemaining}
           </span>
@@ -450,7 +450,7 @@ export default function Transport() {
       )}
 
       {/* Time Display */}
-      <div className="transport-display min-w-[80px] text-center text-xs">
+      <div className="font-mono text-xs text-[#888] bg-[#111] px-3 py-1.5 rounded-lg border border-[#1a1a1a] min-w-[80px] text-center tabular-nums">
         {formatTicksAsTime(position, bpm, ppq)}
       </div>
     </div>
