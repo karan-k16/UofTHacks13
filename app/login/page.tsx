@@ -4,6 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+
+const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+};
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -33,51 +40,73 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="h-screen w-screen flex items-center justify-center bg-ps-bg-900 text-ps-text-primary">
-            <div className="w-full max-w-md p-8 bg-ps-bg-800 rounded-xl shadow-2xl border border-ps-bg-700">
-                <div className="text-center mb-8">
-                    <Link href="/" className="inline-block mb-4">
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ps-accent-primary to-ps-accent-secondary hover:opacity-80 transition-opacity">
-                            Pulse Studio
-                        </h1>
-                    </Link>
-                    <h2 className="text-2xl font-semibold text-ps-text-primary mb-2">
+        <div className="min-h-screen w-screen flex flex-col items-center justify-center text-white relative px-6">
+            {/* Minimal Logo / Link back to home */}
+            <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="absolute top-12 left-12"
+            >
+                <Link href="/" className="flex items-center gap-2 group">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ff7a7a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="#ff7a7a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="#ff7a7a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="text-[13px] text-[#666] group-hover:text-white transition-colors tracking-wide">PULSE</span>
+                </Link>
+            </motion.div>
+
+            <motion.div
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+                className="w-full max-w-[400px] space-y-8"
+            >
+                <div className="text-center space-y-4">
+                    <h1
+                        className="text-[48px] leading-tight text-white mb-2"
+                        style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontStyle: 'italic' }}
+                    >
                         Welcome Back
-                    </h2>
-                    <p className="text-ps-text-secondary">
-                        Sign in to access your projects
+                    </h1>
+                    <p className="text-[#BAB8B8] text-[15px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Sign in to access your autonomous systems.
                     </p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-ps-text-secondary mb-1">
-                            Email
+                <form onSubmit={handleLogin} className="space-y-5">
+                    <div className="space-y-2">
+                        <label className="text-[13px] text-[#666] ml-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                            Email address
                         </label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 bg-ps-bg-900 border border-ps-bg-600 rounded-lg focus:ring-2 focus:ring-ps-accent-primary focus:border-transparent outline-none text-ps-text-primary"
+                            className="w-full px-5 py-3 bg-[#1a1a1a] border border-[#333] rounded-full focus:border-[#ff7a7a] focus:ring-1 focus:ring-[#ff7a7a] outline-none text-[14px] text-white transition-all"
+                            placeholder="name@company.com"
                             required
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-ps-text-secondary mb-1">
+                    <div className="space-y-2">
+                        <label className="text-[13px] text-[#666] ml-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                             Password
                         </label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 bg-ps-bg-900 border border-ps-bg-600 rounded-lg focus:ring-2 focus:ring-ps-accent-primary focus:border-transparent outline-none text-ps-text-primary"
+                            className="w-full px-5 py-3 bg-[#1a1a1a] border border-[#333] rounded-full focus:border-[#ff7a7a] focus:ring-1 focus:ring-[#ff7a7a] outline-none text-[14px] text-white transition-all"
+                            placeholder="••••••••"
                             required
                         />
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                        <div className="text-[13px] text-[#ff7a7a] text-center bg-[#ff7a7a]/5 py-2 rounded-lg border border-[#ff7a7a]/20">
                             {error}
                         </div>
                     )}
@@ -85,24 +114,25 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 bg-ps-accent-primary text-white font-semibold rounded-lg hover:shadow-glow-orange transition-all disabled:opacity-50"
+                        className="w-full py-3 bg-white text-black font-medium rounded-full hover:bg-[#ff7a7a] hover:text-white transition-all disabled:opacity-50 text-[14px]"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
                     >
-                        {loading ? 'Processing...' : 'Sign In'}
+                        {loading ? 'Authenticating...' : 'Sign In'}
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-ps-bg-700 text-center text-sm text-ps-text-secondary">
-                    <p>
+                <div className="text-center">
+                    <p className="text-[13px] text-[#666]">
                         Don&apos;t have an account?{' '}
-                        <button
-                            onClick={() => router.push('/signup')}
-                            className="text-ps-accent-primary hover:text-ps-accent-secondary font-semibold hover:underline transition-colors ml-1"
+                        <Link
+                            href="/signup"
+                            className="text-[#ff7a7a] hover:underline transition-colors ml-1 font-medium"
                         >
-                            Sign Up Now
-                        </button>
+                            Create one now
+                        </Link>
                     </p>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

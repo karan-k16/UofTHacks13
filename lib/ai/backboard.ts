@@ -283,7 +283,7 @@ async function getThread(assistantId: string): Promise<string> {
 export async function sendToModel(
   text: string,
   model: 'gemini' | 'fallback',
-  conversationHistory?: Array<{ role: string; content: string }>,
+  _conversationHistory?: Array<{ role: string; content: string }>,
   systemPrompt?: string
 ): Promise<BackboardResponse> {
   // Use provided system prompt or fall back to default
@@ -308,11 +308,11 @@ export async function sendToModel(
     try {
       // Get or create assistant and thread with dynamic context
       const assistantId = await getAssistant(effectiveSystemPrompt);
-      const threadId = await getThread(assistantId);
+      const _threadId = await getThread(assistantId);
 
       // Use OpenAI models (Gemini not available on this Backboard instance)
-      const llmProvider = 'openai';
-      const modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
+      const _llmProvider = 'openai';
+      const _modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
 
       // Send message using SDK
       const backboard = getClient();

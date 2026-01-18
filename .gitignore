@@ -1,7 +1,12 @@
 # dependencies
 node_modules
 .next
-.next
+
+# virtual environments
+backend/.venv
+.venv/
+venv/
+env/
 
 # environment variables
 .env.local
