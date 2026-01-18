@@ -22,9 +22,7 @@ export default function TopToolbar() {
     loadDemoProject,
     markSaved,
     playlistZoom,
-    pianoRollZoom,
     setPlaylistZoom,
-    setPianoRollZoom,
     updateProjectName,
   } = useStore();
 
@@ -179,19 +177,6 @@ export default function TopToolbar() {
       onClick: () => setPlaylistZoom(1),
       shortcut: 'Ctrl+0',
     },
-    { label: '', onClick: () => { }, divider: true },
-    {
-      label: 'Zoom In Piano Roll',
-      onClick: () => setPianoRollZoom(Math.min(4, pianoRollZoom * 1.2)),
-    },
-    {
-      label: 'Zoom Out Piano Roll',
-      onClick: () => setPianoRollZoom(Math.max(0.1, pianoRollZoom / 1.2)),
-    },
-    {
-      label: 'Reset Piano Roll Zoom',
-      onClick: () => setPianoRollZoom(1),
-    },
   ];
 
   // Help Menu Items
@@ -260,7 +245,7 @@ export default function TopToolbar() {
         {/* Project Name */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-ps-text-secondary">Project:</span>
-          <span 
+          <span
             className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-1 py-0.5 rounded hover:bg-ps-bg-700"
             onClick={() => {
               const newName = prompt('Enter new project name:', project?.name || 'Untitled');
