@@ -95,7 +95,6 @@ export interface Channel {
   pan: number; // -1 to 1
   mute: boolean;
   solo: boolean;
-  mixerTrackId: UUID;
   preset?: string; // Synth preset name (e.g., 'piano', 'bass', 'strings')
   samplerSettings?: SamplerSettings;
   synthSettings?: SynthSettings;
@@ -144,6 +143,7 @@ export interface PlaylistTrack {
   mute: boolean;
   solo: boolean;
   locked: boolean;
+  effects: TrackEffects;  // Simple inline effects
 }
 
 export interface Playlist {
@@ -156,71 +156,40 @@ export interface Playlist {
 }
 
 // ============================================
-// Mixer
+// Track Effects (Simple Mixer)
 // ============================================
 
-export type EffectType = 'eq' | 'compressor' | 'reverb' | 'delay';
-
-export interface EQParams {
-  lowGain: number;
-  midGain: number;
-  highGain: number;
-  lowFreq: number;
-  highFreq: number;
+/**
+ * Simple effect settings applied to playlist tracks.
+ * All values have sensible defaults (0 = neutral for EQ, etc.)
+ */
+export interface TrackEffects {
+  volume: number;         // 0-2 (1 = unity gain)
+  pan: number;            // -1 to 1
+  // 3-Band EQ (in dB, -12 to +12)
+  eqLow: number;
+  eqMid: number;
+  eqHigh: number;
+  // Compression
+  compThreshold: number;  // -60 to 0 dB
+  compRatio: number;      // 1 to 20
+  // Reverb
+  reverbWet: number;      // 0 to 1
 }
 
-export interface CompressorParams {
-  threshold: number;
-  ratio: number;
-  attack: number;
-  release: number;
-  makeupGain: number;
-}
+export const DEFAULT_TRACK_EFFECTS: TrackEffects = {
+  volume: 1,
+  pan: 0,
+  eqLow: 0,
+  eqMid: 0,
+  eqHigh: 0,
+  compThreshold: -24,
+  compRatio: 4,
+  reverbWet: 0,
+};
 
-export interface ReverbParams {
-  decay: number;
-  preDelay: number;
-  wet: number;
-}
-
-export interface DelayParams {
-  time: number;
-  feedback: number;
-  wet: number;
-}
-
-export type EffectParams = EQParams | CompressorParams | ReverbParams | DelayParams;
-
-export interface InsertEffect {
-  id: UUID;
-  type: EffectType;
-  enabled: boolean;
-  params: EffectParams;
-}
-
-export interface Send {
-  id: UUID;
-  fromTrackId: UUID;
-  toTrackId: UUID;
-  gain: number;
-  preFader: boolean;
-}
-
-export interface MixerTrack {
-  id: UUID;
-  name: string;
-  index: number;
-  volume: number; // 0-1.5 (allow boost)
-  pan: number;
-  mute: boolean;
-  solo: boolean;
-  inserts: InsertEffect[];
-  color: string;
-}
-
-export interface Mixer {
-  tracks: MixerTrack[];
-  sends: Send[];
+// Master volume is stored separately
+export interface MixerState {
   masterVolume: number;
 }
 
@@ -239,6 +208,9 @@ export interface AudioAsset {
   format: string;
   size: number; // bytes
   createdAt: string;
+  originalUrl?: string; // Reference to original, unprocessed file
+  isProcessed?: boolean; // True if this is a processed version
+  processedFrom?: UUID; // ID of the original asset this was processed from
 }
 
 // ============================================
@@ -255,7 +227,7 @@ export interface Project {
   patterns: Pattern[];
   channels: Channel[];
   playlist: Playlist;
-  mixer: Mixer;
+  mixer: MixerState;  // Simplified mixer (just master volume)
   assets: AudioAsset[];
   selectedPatternId: UUID | null;
   createdAt: string;
@@ -281,7 +253,7 @@ export interface Transport {
 // ============================================
 
 export interface Selection {
-  type: 'notes' | 'clips' | 'channels' | 'mixerTracks';
+  type: 'notes' | 'clips' | 'channels' | 'tracks';
   ids: UUID[];
 }
 
@@ -297,7 +269,7 @@ export interface AutomationPoint {
 
 export interface AutomationLane {
   id: UUID;
-  targetType: 'channel' | 'mixerTrack' | 'effect';
+  targetType: 'channel' | 'track';
   targetId: UUID;
   parameter: string;
   points: AutomationPoint[];
@@ -330,7 +302,7 @@ export interface RenderResult {
 // UI State Types
 // ============================================
 
-export type PanelId = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer';
+export type PanelId = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer' | 'chat';
 
 export interface PanelState {
   isOpen: boolean;

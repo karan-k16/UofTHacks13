@@ -1,117 +1,133 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { AudioRecorder } from './AudioRecorder';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/state/store';
 
+/**
+ * Hook for managing audio input devices and recording permission
+ * Note: Actual recording is handled by the AudioEngine via store actions
+ */
 export function useAudioRecorder() {
-    const recorderRef = useRef<AudioRecorder | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const [availableDevices, setAvailableDevices] = useState<MediaDeviceInfo[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'unknown'>('unknown');
 
-    const {
-        recording,
-        setRecordingInputLevel,
-        finalizeRecording,
-        cancelRecording,
-    } = useStore();
+    const { setRecordingInputLevel } = useStore();
 
-    // Initialize recorder
+    // Initialize and enumerate devices
     useEffect(() => {
-        let recorder: AudioRecorder | null = null;
+        let levelCheckInterval: ReturnType<typeof setInterval> | null = null;
+        let audioContext: AudioContext | null = null;
+        let analyser: AnalyserNode | null = null;
+        let mediaStream: MediaStream | null = null;
 
         const init = async () => {
             try {
-                recorder = new AudioRecorder();
-                await recorder.initialize();
-
-                // Set up level callback
-                recorder.setOnLevelChange((level) => {
-                    setRecordingInputLevel(level);
-                });
-
-                recorderRef.current = recorder;
-                setIsInitialized(true);
-                setError(null);
-
-                // Get available audio input devices
+                // Try to enumerate devices
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const audioInputs = devices.filter(d => d.kind === 'audioinput');
-                setAvailableDevices(audioInputs);
+                
+                // Check if we have labels (meaning permission was granted)
+                if (audioInputs.length > 0 && audioInputs[0].label) {
+                    setPermissionState('granted');
+                    setAvailableDevices(audioInputs);
+                    setIsInitialized(true);
+                    
+                    // Set up level monitoring
+                    try {
+                        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        audioContext = new AudioContext();
+                        const source = audioContext.createMediaStreamSource(mediaStream);
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 256;
+                        source.connect(analyser);
+                        
+                        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        
+                        levelCheckInterval = setInterval(() => {
+                            if (!analyser) return;
+                            analyser.getByteFrequencyData(dataArray);
+                            
+                            // Calculate RMS level
+                            let sum = 0;
+                            for (let i = 0; i < dataArray.length; i++) {
+                                const value = (dataArray[i] ?? 0) / 255;
+                                sum += value * value;
+                            }
+                            const rms = Math.sqrt(sum / dataArray.length);
+                            setRecordingInputLevel(rms);
+                        }, 50);
+                    } catch (levelError) {
+                        console.warn('[useAudioRecorder] Could not set up level monitoring:', levelError);
+                    }
+                } else {
+                    setPermissionState('prompt');
+                    setAvailableDevices(audioInputs);
+                }
+                
+                setError(null);
             } catch (err) {
-                console.error('Failed to initialize recorder:', err);
-                setError(err instanceof Error ? err.message : 'Failed to initialize recorder');
+                console.error('[useAudioRecorder] Failed to initialize:', err);
+                setError(err instanceof Error ? err.message : 'Failed to initialize');
                 setIsInitialized(false);
             }
         };
 
         init();
 
+        // Listen for device changes
+        const handleDeviceChange = async () => {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputs = devices.filter(d => d.kind === 'audioinput');
+            setAvailableDevices(audioInputs);
+        };
+        
+        navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
+
         return () => {
-            if (recorder) {
-                recorder.dispose();
+            navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+            if (levelCheckInterval) {
+                clearInterval(levelCheckInterval);
+            }
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
             }
         };
     }, [setRecordingInputLevel]);
 
-    // Handle recording state changes
-    useEffect(() => {
-        const recorder = recorderRef.current;
-        if (!recorder) return;
-
-        const handleRecording = async () => {
-            if (recording.isRecording && !recording.isPreparing) {
-                try {
-                    await recorder.start();
-                } catch (err) {
-                    console.error('Failed to start recording:', err);
-                    setError(err instanceof Error ? err.message : 'Failed to start recording');
-                    cancelRecording();
-                }
-            } else if (!recording.isRecording && recorder.getState() === 'recording') {
-                try {
-                    const result = await recorder.stop();
-                    await finalizeRecording(result.blob, result.duration);
-                } catch (err) {
-                    console.error('Failed to stop recording:', err);
-                    setError(err instanceof Error ? err.message : 'Failed to stop recording');
-                    cancelRecording();
-                }
-            }
-        };
-
-        handleRecording();
-    }, [recording.isRecording, recording.isPreparing, finalizeRecording, cancelRecording]);
-
     const selectInputDevice = async (deviceId: string) => {
-        const recorder = recorderRef.current;
-        if (!recorder) return;
-
         try {
-            // Reinitialize with specific device
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    deviceId: { exact: deviceId },
-                    echoCancellation: false,
-                    noiseSuppression: false,
-                    autoGainControl: false,
-                },
-            });
-
-            // Update recorder with new stream
-            recorder.dispose();
-            const newRecorder = new AudioRecorder();
-            await newRecorder.initialize();
-            newRecorder.setOnLevelChange((level) => {
-                setRecordingInputLevel(level);
-            });
-
-            recorderRef.current = newRecorder;
+            // Store the selected device ID in the store
+            useStore.getState().setRecordingInputDevice(deviceId);
             setError(null);
         } catch (err) {
-            console.error('Failed to select input device:', err);
+            console.error('[useAudioRecorder] Failed to select input device:', err);
             setError(err instanceof Error ? err.message : 'Failed to select input device');
+        }
+    };
+
+    const requestPermission = async (): Promise<boolean> => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop());
+            setPermissionState('granted');
+            
+            // Re-enumerate devices
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputs = devices.filter(d => d.kind === 'audioinput');
+            setAvailableDevices(audioInputs);
+            setIsInitialized(true);
+            
+            return true;
+        } catch (err) {
+            console.error('[useAudioRecorder] Permission denied:', err);
+            setPermissionState('denied');
+            setError('Microphone permission denied');
+            return false;
         }
     };
 
@@ -119,6 +135,8 @@ export function useAudioRecorder() {
         isInitialized,
         availableDevices,
         error,
+        permissionState,
         selectInputDevice,
+        requestPermission,
     };
 }

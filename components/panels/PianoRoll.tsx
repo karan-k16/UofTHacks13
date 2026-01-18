@@ -6,23 +6,21 @@ import { ticksToPixels, pixelsToTicks } from '@/lib/utils/time';
 import { midiToNoteName, isBlackKey, getNoteColor } from '@/lib/utils/music';
 import type { Note, Pattern } from '@/domain/types';
 
-const KEY_WIDTH = 48;
-const KEY_HEIGHT = 14;
+const KEY_WIDTH = 70;
+const KEY_HEIGHT = 32;
 const TOTAL_KEYS = 88; // Piano range
 const LOWEST_NOTE = 21; // A0
 const PPQ = 96;
 
 export default function PianoRoll() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const gridContentRef = useRef<HTMLDivElement>(null);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [scrollTop, setScrollTop] = useState((60 - LOWEST_NOTE) * KEY_HEIGHT); // Start at C4
+  const [scrollTop, setScrollTop] = useState(0);
+  const [isScrollInitialized, setIsScrollInitialized] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<number, OscillatorNode>>(new Map());
 
-  // State for note creation (click-drag to create)
-  const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const creatingNoteStart = useRef<{ x: number; tick: number; pitch: number } | null>(null);
-  const creatingNoteId = useRef<string | null>(null);
 
   const {
     project,
@@ -39,6 +37,7 @@ export default function PianoRoll() {
     selectedChannelId,
     snapToGrid,
     setPosition,
+    clearPatternNotes,
   } = useStore();
 
   // ... (audio context effect kept as is)
@@ -66,6 +65,16 @@ export default function PianoRoll() {
     };
   }, []);
 
+  // Initialize scroll position to center around C4 (MIDI note 60)
+  useEffect(() => {
+    if (containerRef.current && !isScrollInitialized) {
+      const initialScrollTop = (60 - LOWEST_NOTE) * KEY_HEIGHT;
+      containerRef.current.scrollTop = initialScrollTop;
+      setScrollTop(initialScrollTop);
+      setIsScrollInitialized(true);
+    }
+  }, [isScrollInitialized]);
+
   const patterns = project?.patterns ?? [];
   const selectedPattern = patterns.find((p) => p.id === selectedPatternId);
   const notes = selectedPattern?.notes ?? [];
@@ -88,14 +97,28 @@ export default function PianoRoll() {
   const gridSize = PPQ / 4; // 16th notes
 
   // Calculate note position from mouse event
-  const getGridPosition = useCallback((e: React.MouseEvent | MouseEvent) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return null;
+  const getGridPosition = useCallback((e: React.MouseEvent) => {
+    const gridContent = gridContentRef.current;
+    if (!gridContent) return null;
+    
+    const gridRect = gridContent.getBoundingClientRect();
+    const x = e.clientX - gridRect.left;
+    
+    // Try to get the pitch directly from the clicked grid row's data attribute
+    // This is more reliable than coordinate calculations
+    const target = e.target as HTMLElement | SVGElement;
+    const gridRow = target.closest('.grid-row') as SVGRectElement | null;
+    
+    let pitch: number;
+    if (gridRow && gridRow.dataset.note) {
+      // Use the data attribute directly - most reliable
+      pitch = parseInt(gridRow.dataset.note, 10);
+    } else {
+      // Fallback to coordinate calculation
+      const y = e.clientY - gridRect.top;
+      pitch = LOWEST_NOTE + TOTAL_KEYS - 1 - Math.floor(y / KEY_HEIGHT);
+    }
 
-    const x = (e as React.MouseEvent).clientX - rect.left + scrollLeft;
-    const y = (e as React.MouseEvent).clientY - rect.top + scrollTop;
-
-    const pitch = LOWEST_NOTE + TOTAL_KEYS - 1 - Math.floor(y / KEY_HEIGHT);
     const tick = pixelsToTicks(x, pianoRollZoom, PPQ);
 
     // Snap to grid
@@ -106,7 +129,7 @@ export default function PianoRoll() {
       tick: Math.max(0, snappedTick),
       x,
     };
-  }, [scrollLeft, scrollTop, pianoRollZoom, snapToGrid, gridSize]);
+  }, [pianoRollZoom, snapToGrid, gridSize]);
 
   // Play preview sound (used when clicking grid or piano keys)
   const playPreviewNote = useCallback((midiNote: number) => {
@@ -146,92 +169,105 @@ export default function PianoRoll() {
     oscillator.onended = () => oscillatorsRef.current.delete(midiNote);
   }, []);
 
-  // Handle mouse down on grid - start creating note
-  const handleGridMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      // Only handle left click
-      if (e.button !== 0) return;
+  // State for drag-and-drop from piano keyboard
+  const [isDraggingKey, setIsDraggingKey] = useState(false);
+  const [draggedNote, setDraggedNote] = useState<number | null>(null);
+  const [dragPreview, setDragPreview] = useState<{ pitch: number; tick: number } | null>(null);
 
-      // Don't create note if clicking on an existing note
-      const target = e.target as HTMLElement;
-      if (target.closest('.note')) return;
+  // Handle drag over grid - allow drop and show preview
+  const handleGridDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    
+    // Calculate preview position for visual feedback
+    const gridContent = gridContentRef.current;
+    if (!gridContent) return;
+    
+    const gridRect = gridContent.getBoundingClientRect();
+    const x = e.clientX - gridRect.left;
+    const y = e.clientY - gridRect.top;
+    
+    // Calculate tick from X position
+    const tick = pixelsToTicks(x, pianoRollZoom, PPQ);
+    const snappedTick = snapToGrid ? Math.floor(tick / gridSize) * gridSize : tick;
+    
+    // Calculate pitch from Y position
+    const rowIndex = Math.floor(y / KEY_HEIGHT);
+    const pitch = LOWEST_NOTE + TOTAL_KEYS - 1 - rowIndex;
+    const clampedPitch = Math.max(LOWEST_NOTE, Math.min(LOWEST_NOTE + TOTAL_KEYS - 1, pitch));
+    
+    setDragPreview({ pitch: clampedPitch, tick: Math.max(0, snappedTick) });
+  }, [pianoRollZoom, snapToGrid, gridSize]);
 
+  // Handle drop on grid - create note at drop position
+  const handleGridDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       if (!selectedPattern) return;
-
-      const pos = getGridPosition(e);
-      if (!pos) return;
-
+      
+      // Check if this is a piano key drag
+      const noteData = e.dataTransfer.getData('text/plain');
+      console.log('[PianoRoll] Drop received, data:', noteData);
+      
+      if (!noteData || !noteData.startsWith('piano-note:')) return;
+      
+      // Calculate position from drop location on the grid
+      const gridContent = gridContentRef.current;
+      if (!gridContent) return;
+      
+      const gridRect = gridContent.getBoundingClientRect();
+      const x = e.clientX - gridRect.left;
+      const y = e.clientY - gridRect.top;
+      
+      // Calculate tick from X position
+      const tick = pixelsToTicks(x, pianoRollZoom, PPQ);
+      
+      // Calculate pitch from Y position - this is where the note should be placed
+      // Y=0 is the top (highest note), Y=gridHeight is the bottom (lowest note)
+      const rowIndex = Math.floor(y / KEY_HEIGHT);
+      const pitch = LOWEST_NOTE + TOTAL_KEYS - 1 - rowIndex;
+      const clampedPitch = Math.max(LOWEST_NOTE, Math.min(LOWEST_NOTE + TOTAL_KEYS - 1, pitch));
+      
+      // Snap tick to grid
+      const snappedTick = snapToGrid ? Math.floor(tick / gridSize) * gridSize : tick;
+      
       // Play preview sound
-      playPreviewNote(pos.pitch);
-
-      // Create the note
-      console.log('Adding note at', pos);
-      const newNoteId = addNote(selectedPattern.id, {
-        pitch: pos.pitch,
-        startTick: pos.tick,
+      playPreviewNote(clampedPitch);
+      
+      // Create the note at the drop position
+      console.log('[PianoRoll] Dropping note at pitch:', clampedPitch, 'tick:', snappedTick, 'rowIndex:', rowIndex);
+      addNote(selectedPattern.id, {
+        pitch: clampedPitch,
+        startTick: Math.max(0, snappedTick),
         durationTick: gridSize,
         velocity: 100,
       });
-
-      console.log('Added note ID:', newNoteId);
-
-      // Track that we're creating this note by its ID
-      setIsCreatingNote(true);
-      creatingNoteStart.current = { x: pos.x, tick: pos.tick, pitch: pos.pitch };
-      creatingNoteId.current = newNoteId || null;
-
-      e.preventDefault();
+      
+      setIsDraggingKey(false);
+      setDraggedNote(null);
+      setDragPreview(null);
     },
-    [selectedPattern, getGridPosition, addNote, gridSize, playPreviewNote]
+    [selectedPattern, pianoRollZoom, snapToGrid, gridSize, playPreviewNote, addNote]
   );
 
-  // Handle mouse move while creating note - extend duration
-  const handleGridMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isCreatingNote || !creatingNoteStart.current || !selectedPattern || !creatingNoteId.current) return;
+  // Callback for when piano key drag starts
+  const handlePianoKeyDragStart = useCallback((midiNote: number, _e: React.DragEvent) => {
+    // Data is set in PianoKeyboard component directly
+    setIsDraggingKey(true);
+    setDraggedNote(midiNote);
+    setDragPreview(null);
+    playPreviewNote(midiNote);
+  }, [playPreviewNote]);
 
-      const pos = getGridPosition(e);
-      if (!pos) return;
-
-      // Calculate new duration based on drag distance
-      const deltaTick = pos.tick - creatingNoteStart.current.tick;
-      const newDuration = Math.max(gridSize, deltaTick + gridSize); // Wait, logic check below
-
-      // Resize the note
-      // Logic fix: deltaTick is (current - start). If I drag 1 grid unit right, delta is gridSize.
-      // Assuming start duration was gridSize?
-
-      // Standard behavior: duration = max(gridSize, currentTick - startTick)
-      // Actually, if we start at X and drag to X+d, duration should cover from X to X+d.
-      const exactDuration = Math.max(gridSize, pos.tick - creatingNoteStart.current.tick);
-
-      resizeNotes(selectedPattern.id, [creatingNoteId.current], exactDuration);
-    },
-    [isCreatingNote, selectedPattern, getGridPosition, gridSize, resizeNotes]
-  );
-
-  // Handle mouse up - finish creating note
-  const handleGridMouseUp = useCallback(() => {
-    if (isCreatingNote) {
-      console.log('Finished creating note');
-      setIsCreatingNote(false);
-      creatingNoteStart.current = null;
-      creatingNoteId.current = null;
-    }
-  }, [isCreatingNote]);
-
-  // Global mouse up handler (in case mouse leaves the grid)
-  useEffect(() => {
-    if (isCreatingNote) {
-      const handleGlobalMouseUp = () => {
-        setIsCreatingNote(false);
-        creatingNoteStart.current = null;
-      };
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-    }
-    return undefined;
-  }, [isCreatingNote]);
+  // Callback for when piano key drag ends
+  const handlePianoKeyDragEnd = useCallback(() => {
+    setIsDraggingKey(false);
+    setDraggedNote(null);
+    setDragPreview(null);
+  }, []);
 
   // Handle note click
   const handleNoteClick = useCallback(
@@ -267,13 +303,23 @@ export default function PianoRoll() {
     [selectedPattern, selection, deleteNote, setSelection]
   );
 
-  // Handle piano key click - only play preview sound (notes are created by clicking grid)
+  // Handle piano key click - only play preview sound (drag to grid to add notes)
   const handlePianoKeyClick = useCallback(
     (midiNote: number) => {
       playPreviewNote(midiNote);
     },
     [playPreviewNote]
   );
+
+  // Handle clear all notes
+  const handleClearAllNotes = useCallback(() => {
+    if (selectedPattern && notes.length > 0) {
+      if (confirm(`Clear all ${notes.length} notes from this pattern?`)) {
+        clearPatternNotes(selectedPattern.id);
+        setSelection(null);
+      }
+    }
+  }, [selectedPattern, notes.length, clearPatternNotes, setSelection]);
 
   if (!selectedPattern) {
     return (
@@ -296,7 +342,31 @@ export default function PianoRoll() {
 
   return (
     <div className="h-full flex flex-col" data-panel="pianoRoll">
-      {/* Top info bar */}
+      {/* Toolbar */}
+      <div className="h-8 bg-ps-bg-700 border-b border-ps-bg-600 flex items-center px-3 gap-3 shrink-0">
+        <span className="text-xs text-ps-text-secondary">
+          Pattern: <span className="text-ps-text-primary font-medium">{selectedPattern.name}</span>
+        </span>
+        <span className="text-xs text-ps-text-muted">|</span>
+        <span className="text-xs text-ps-text-muted">
+          {notes.length} note{notes.length !== 1 ? 's' : ''}
+        </span>
+        <span className="text-xs text-ps-text-muted">|</span>
+        <span className="text-xs text-ps-accent-primary/70">
+          🎹 Drag keys from keyboard → drop on grid
+        </span>
+        <div className="flex-1" />
+        <button
+          onClick={handleClearAllNotes}
+          disabled={notes.length === 0}
+          className="px-2 py-1 text-xs bg-ps-bg-600 hover:bg-red-600/30 hover:text-red-400 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          title="Clear all notes from this pattern"
+        >
+          Clear All Notes
+        </button>
+      </div>
+
+      {/* Warning bar if pattern not in playlist */}
       {!patternHasClips && (
         <div className="h-7 bg-yellow-500/10 border-b border-yellow-500/30 flex items-center px-3 text-xs text-yellow-400 shrink-0">
           <span className="mr-2">⚠</span>
@@ -328,26 +398,33 @@ export default function PianoRoll() {
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Piano keyboard */}
+        {/* Piano keyboard - drag keys from here */}
         <div
           className="shrink-0 overflow-hidden border-r border-ps-bg-600"
           style={{ width: KEY_WIDTH, marginTop: -scrollTop }}
         >
-          <PianoKeyboard height={gridHeight} onKeyClick={handlePianoKeyClick} />
+          <PianoKeyboard 
+            height={gridHeight} 
+            onKeyClick={handlePianoKeyClick}
+            onKeyDragStart={handlePianoKeyDragStart}
+            onKeyDragEnd={handlePianoKeyDragEnd}
+          />
         </div>
 
-        {/* Note grid */}
+        {/* Note grid - drop notes here */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-auto relative"
+          className={`flex-1 overflow-auto relative ${isDraggingKey ? 'bg-ps-accent-primary/5' : ''}`}
           onScroll={handleScroll}
-          onMouseDown={handleGridMouseDown}
-          onMouseMove={handleGridMouseMove}
-          onMouseUp={handleGridMouseUp}
+          onDragOver={handleGridDragOver}
+          onDrop={handleGridDrop}
         >
           <div
+            ref={gridContentRef}
             className="relative"
             style={{ width: gridWidth, height: gridHeight }}
+            onDragOver={handleGridDragOver}
+            onDrop={handleGridDrop}
           >
             {/* Grid */}
             <PianoRollGrid
@@ -377,6 +454,25 @@ export default function PianoRoll() {
                 snapToGrid={snapToGrid}
               />
             ))}
+
+            {/* Ghost preview note while dragging from keyboard - snaps to discrete grid positions */}
+            {isDraggingKey && dragPreview && (
+              <div
+                className="absolute note pointer-events-none z-20 border-2 border-white/50"
+                style={{
+                  left: ticksToPixels(dragPreview.tick, pianoRollZoom, PPQ),
+                  top: (LOWEST_NOTE + TOTAL_KEYS - 1 - dragPreview.pitch) * KEY_HEIGHT + 2,
+                  width: Math.max(12, ticksToPixels(gridSize, pianoRollZoom, PPQ) - 2),
+                  height: KEY_HEIGHT - 4,
+                  backgroundColor: getNoteColor(dragPreview.pitch),
+                  opacity: 0.8,
+                }}
+              >
+                <span className="text-xs text-white px-1 truncate pointer-events-none font-medium leading-tight">
+                  {midiToNoteName(dragPreview.pitch)}
+                </span>
+              </div>
+            )}
 
             {/* Playhead cursor */}
             <div
@@ -430,15 +526,20 @@ function PianoRollRuler({
   );
 }
 
-// Piano keyboard
+// Piano keyboard - supports drag-to-grid
 function PianoKeyboard({
   height,
   onKeyClick,
+  onKeyDragStart,
+  onKeyDragEnd,
 }: {
   height: number;
   onKeyClick: (note: number) => void;
+  onKeyDragStart?: (note: number, e: React.DragEvent) => void;
+  onKeyDragEnd?: () => void;
 }) {
   const [activeKeys, setActiveKeys] = useState<Set<number>>(new Set());
+  const [draggingKey, setDraggingKey] = useState<number | null>(null);
 
   const handleKeyDown = useCallback((note: number) => {
     setActiveKeys(prev => new Set(prev).add(note));
@@ -453,6 +554,30 @@ function PianoKeyboard({
     });
   }, []);
 
+  const handleDragStart = useCallback((note: number, e: React.DragEvent) => {
+    // Set data FIRST before anything else - this must happen synchronously in dragstart
+    e.dataTransfer.setData('text/plain', `piano-note:${note}`);
+    e.dataTransfer.effectAllowed = 'copyMove';
+    
+    setDraggingKey(note);
+    onKeyDragStart?.(note, e);
+    
+    // Create a custom drag image
+    const dragImage = document.createElement('div');
+    dragImage.textContent = midiToNoteName(note);
+    dragImage.style.cssText = 'position:absolute;left:-1000px;padding:4px 8px;background:#ff6b35;color:white;border-radius:4px;font-size:12px;font-weight:bold;';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 20, 10);
+    setTimeout(() => document.body.removeChild(dragImage), 0);
+    
+    console.log('[PianoKeyboard] Drag started for note:', note);
+  }, [onKeyDragStart]);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingKey(null);
+    onKeyDragEnd?.();
+  }, [onKeyDragEnd]);
+
   return (
     <div className="relative" style={{ height }}>
       {Array.from({ length: TOTAL_KEYS }).map((_, i) => {
@@ -460,12 +585,14 @@ function PianoKeyboard({
         const black = isBlackKey(note);
         const isC = note % 12 === 0;
         const isActive = activeKeys.has(note);
+        const isDragging = draggingKey === note;
 
         return (
           <div
             key={note}
+            draggable
             className={`piano-key ${black ? 'piano-key-black' : 'piano-key-white'
-              } ${isActive ? 'piano-key-active' : ''} flex items-center justify-end pr-1`}
+              } ${isActive ? 'piano-key-active' : ''} ${isDragging ? 'opacity-50' : ''} flex items-center justify-end pr-1 cursor-grab active:cursor-grabbing`}
             style={{
               height: KEY_HEIGHT,
               width: black ? KEY_WIDTH * 0.7 : KEY_WIDTH,
@@ -473,12 +600,20 @@ function PianoKeyboard({
             onMouseDown={() => handleKeyDown(note)}
             onMouseUp={() => handleKeyUp(note)}
             onMouseLeave={() => handleKeyUp(note)}
+            onDragStart={(e) => handleDragStart(note, e)}
+            onDragEnd={handleDragEnd}
           >
-            {isC && (
-              <span className="text-2xs text-ps-text-muted pointer-events-none">
-                {midiToNoteName(note)}
-              </span>
-            )}
+            <span 
+              className={`text-xs pointer-events-none font-medium ${
+                black 
+                  ? 'text-white/80' 
+                  : isC 
+                    ? 'text-ps-accent-primary font-bold' 
+                    : 'text-ps-text-muted'
+              }`}
+            >
+              {midiToNoteName(note)}
+            </span>
           </div>
         );
       })}
@@ -505,7 +640,7 @@ function PianoRollGrid({
   patternLength: number;
 }) {
   return (
-    <svg className="absolute inset-0" width={width} height={height}>
+    <svg className="absolute inset-0 pointer-events-none" width={width} height={height}>
       {/* Horizontal key lines */}
       {Array.from({ length: totalKeys }).map((_, i) => {
         const note = LOWEST_NOTE + totalKeys - 1 - i;
@@ -514,6 +649,9 @@ function PianoRollGrid({
         return (
           <rect
             key={`key-${i}`}
+            data-note={note}
+            data-row={i}
+            className="grid-row"
             x={0}
             y={i * keyHeight}
             width={width}
@@ -598,9 +736,9 @@ function NoteBlock({
   const { moveNotes, resizeNotes } = useStore();
 
   const x = ticksToPixels(note.startTick, zoom, ppq);
-  const width = Math.max(4, ticksToPixels(note.durationTick, zoom, ppq) - 1);
-  const y = (lowestNote + totalKeys - 1 - note.pitch) * keyHeight + 1;
-  const height = keyHeight - 2;
+  const width = Math.max(12, ticksToPixels(note.durationTick, zoom, ppq) - 2);
+  const y = (lowestNote + totalKeys - 1 - note.pitch) * keyHeight + 2;
+  const height = keyHeight - 4;
 
   const handleResizeMouseDown = useCallback(
     (e: React.MouseEvent, edge: 'left' | 'right') => {
@@ -737,9 +875,9 @@ function NoteBlock({
   );
 
   const displayWidth = isResizing === 'right'
-    ? Math.max(4, width + ticksToPixels(resizeOffset, zoom, ppq))
+    ? Math.max(12, width + ticksToPixels(resizeOffset, zoom, ppq))
     : isResizing === 'left'
-      ? Math.max(4, width - ticksToPixels(resizeOffset, zoom, ppq))
+      ? Math.max(12, width - ticksToPixels(resizeOffset, zoom, ppq))
       : width;
 
   const displayX = isResizing === 'left' ? x + ticksToPixels(resizeOffset, zoom, ppq) : x;
@@ -772,21 +910,21 @@ function NoteBlock({
     >
       {/* Left resize handle */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity"
         onMouseDown={(e) => handleResizeMouseDown(e, 'left')}
         onClick={(e) => e.stopPropagation()}
       />
 
       {/* Right resize handle */}
       <div
-        className="absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity"
         onMouseDown={(e) => handleResizeMouseDown(e, 'right')}
         onClick={(e) => e.stopPropagation()}
       />
 
       {/* Note name if wide enough */}
-      {width > 30 && (
-        <span className="text-2xs text-white px-1 truncate pointer-events-none">
+      {width > 24 && (
+        <span className="text-xs text-white px-1 truncate pointer-events-none font-medium leading-tight">
           {midiToNoteName(note.pitch)}
         </span>
       )}

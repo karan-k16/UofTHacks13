@@ -7,10 +7,8 @@ import type {
   Pattern,
   Channel,
   Clip,
-  MixerTrack,
-  Send,
   Note,
-  InsertEffect,
+  TrackEffects,
   UUID,
 } from './types';
 
@@ -112,85 +110,45 @@ export function validateChannel(channel: Channel): ValidationResult {
 }
 
 // ============================================
-// Mixer Routing Validation
+// Track Effects Validation
 // ============================================
 
-export function validateMixerRouting(
-  sends: Send[],
-  tracks: MixerTrack[]
-): ValidationResult {
+export function validateTrackEffects(effects: TrackEffects): ValidationResult {
   const errors: string[] = [];
-  const trackIds = new Set(tracks.map((t) => t.id));
 
-  // Check all send references are valid
-  for (const send of sends) {
-    if (!trackIds.has(send.fromTrackId)) {
-      errors.push(`Send references non-existent source track: ${send.fromTrackId}`);
-    }
-    if (!trackIds.has(send.toTrackId)) {
-      errors.push(`Send references non-existent destination track: ${send.toTrackId}`);
-    }
-    if (send.fromTrackId === send.toTrackId) {
-      errors.push(`Send cannot route track to itself: ${send.fromTrackId}`);
-    }
+  if (effects.volume < 0 || effects.volume > 2) {
+    errors.push(`Volume must be 0-2, got ${effects.volume}`);
   }
 
-  // Check for feedback loops using DFS
-  const feedbackLoops = detectFeedbackLoops(sends, trackIds);
-  if (feedbackLoops.length > 0) {
-    errors.push(`Feedback loop detected: ${feedbackLoops.join(' -> ')}`);
+  if (effects.pan < -1 || effects.pan > 1) {
+    errors.push(`Pan must be -1 to 1, got ${effects.pan}`);
+  }
+
+  if (effects.eqLow < -12 || effects.eqLow > 12) {
+    errors.push(`EQ Low must be -12 to 12 dB, got ${effects.eqLow}`);
+  }
+
+  if (effects.eqMid < -12 || effects.eqMid > 12) {
+    errors.push(`EQ Mid must be -12 to 12 dB, got ${effects.eqMid}`);
+  }
+
+  if (effects.eqHigh < -12 || effects.eqHigh > 12) {
+    errors.push(`EQ High must be -12 to 12 dB, got ${effects.eqHigh}`);
+  }
+
+  if (effects.compThreshold < -60 || effects.compThreshold > 0) {
+    errors.push(`Compressor threshold must be -60 to 0 dB, got ${effects.compThreshold}`);
+  }
+
+  if (effects.compRatio < 1 || effects.compRatio > 20) {
+    errors.push(`Compressor ratio must be 1 to 20, got ${effects.compRatio}`);
+  }
+
+  if (effects.reverbWet < 0 || effects.reverbWet > 1) {
+    errors.push(`Reverb wet must be 0 to 1, got ${effects.reverbWet}`);
   }
 
   return { valid: errors.length === 0, errors };
-}
-
-function detectFeedbackLoops(sends: Send[], trackIds: Set<UUID>): UUID[] {
-  // Build adjacency list
-  const graph = new Map<UUID, UUID[]>();
-  for (const trackId of Array.from(trackIds)) {
-    graph.set(trackId, []);
-  }
-  for (const send of sends) {
-    const existing = graph.get(send.fromTrackId) || [];
-    existing.push(send.toTrackId);
-    graph.set(send.fromTrackId, existing);
-  }
-
-  // DFS for cycle detection
-  const visited = new Set<UUID>();
-  const recursionStack = new Set<UUID>();
-  const path: UUID[] = [];
-
-  function dfs(node: UUID): boolean {
-    visited.add(node);
-    recursionStack.add(node);
-    path.push(node);
-
-    const neighbors = graph.get(node) || [];
-    for (const neighbor of neighbors) {
-      if (!visited.has(neighbor)) {
-        if (dfs(neighbor)) return true;
-      } else if (recursionStack.has(neighbor)) {
-        // Found a cycle
-        path.push(neighbor);
-        return true;
-      }
-    }
-
-    path.pop();
-    recursionStack.delete(node);
-    return false;
-  }
-
-  for (const trackId of Array.from(trackIds)) {
-    if (!visited.has(trackId)) {
-      if (dfs(trackId)) {
-        return path;
-      }
-    }
-  }
-
-  return [];
 }
 
 // ============================================
@@ -220,53 +178,6 @@ export function validateClip(
     const pattern = patterns.find((p) => p.id === clip.patternId);
     if (!pattern) {
       errors.push(`Clip references non-existent pattern: ${clip.patternId}`);
-    }
-  }
-
-  return { valid: errors.length === 0, errors };
-}
-
-// ============================================
-// Insert Effect Validation
-// ============================================
-
-export function validateInsertEffect(effect: InsertEffect): ValidationResult {
-  const errors: string[] = [];
-
-  const validTypes = ['eq', 'compressor', 'reverb', 'delay'];
-  if (!validTypes.includes(effect.type)) {
-    errors.push(`Invalid effect type: ${effect.type}`);
-  }
-
-  // Type-specific parameter validation
-  switch (effect.type) {
-    case 'eq': {
-      const params = effect.params as { lowGain?: number; midGain?: number; highGain?: number };
-      if (params.lowGain !== undefined && (params.lowGain < -24 || params.lowGain > 24)) {
-        errors.push('EQ gain must be between -24 and 24 dB');
-      }
-      break;
-    }
-    case 'compressor': {
-      const params = effect.params as { ratio?: number };
-      if (params.ratio !== undefined && (params.ratio < 1 || params.ratio > 20)) {
-        errors.push('Compressor ratio must be between 1 and 20');
-      }
-      break;
-    }
-    case 'reverb': {
-      const params = effect.params as { wet?: number };
-      if (params.wet !== undefined && (params.wet < 0 || params.wet > 1)) {
-        errors.push('Reverb wet must be between 0 and 1');
-      }
-      break;
-    }
-    case 'delay': {
-      const params = effect.params as { feedback?: number };
-      if (params.feedback !== undefined && (params.feedback < 0 || params.feedback > 0.95)) {
-        errors.push('Delay feedback must be between 0 and 0.95');
-      }
-      break;
     }
   }
 
@@ -308,11 +219,13 @@ export function validateProject(project: Project): ValidationResult {
     }
   });
 
-  // Validate mixer routing
-  const routingResult = validateMixerRouting(project.mixer.sends, project.mixer.tracks);
-  if (!routingResult.valid) {
-    errors.push(...routingResult.errors);
-  }
+  // Validate playlist track effects
+  project.playlist.tracks.forEach((track, index) => {
+    const result = validateTrackEffects(track.effects);
+    if (!result.valid) {
+      errors.push(`Track ${index} (${track.name}): ${result.errors.join(', ')}`);
+    }
+  });
 
   // Validate clips
   project.playlist.clips.forEach((clip, index) => {

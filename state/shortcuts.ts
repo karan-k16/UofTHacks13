@@ -34,7 +34,6 @@ export function useKeyboardShortcuts() {
     canUndo,
     canRedo,
     transportState,
-    toggleSnapToGrid,
     toggleMetronome,
     deleteClip,
     deleteNote,
@@ -56,7 +55,7 @@ export function useKeyboardShortcuts() {
     (e: KeyboardEvent) => {
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       const target = e.target as HTMLElement;
-      
+
       // Don't trigger shortcuts when typing in inputs
       if (
         target.tagName === 'INPUT' ||
@@ -158,12 +157,12 @@ export function useKeyboardShortcuts() {
       // Ctrl/Cmd + A: Select All
       if (isCtrlOrCmd && e.code === 'KeyA') {
         e.preventDefault();
-        
+
         // Determine context based on focused element
         const target = e.target as HTMLElement;
         const playlistElement = target.closest('[data-panel="playlist"]');
         const pianoRollElement = target.closest('[data-panel="pianoRoll"]');
-        
+
         if (pianoRollElement && selectedPatternId && project) {
           // Select all notes in current pattern
           const pattern = project.patterns.find((p) => p.id === selectedPatternId);
@@ -176,13 +175,6 @@ export function useKeyboardShortcuts() {
             setSelection({ type: 'clips', ids: project.playlist.clips.map((c) => c.id) });
           }
         }
-        return;
-      }
-
-      // G: Toggle snap to grid
-      if (e.code === 'KeyG' && !isCtrlOrCmd) {
-        e.preventDefault();
-        toggleSnapToGrid();
         return;
       }
 
@@ -238,7 +230,6 @@ export function useKeyboardShortcuts() {
       redo,
       canUndo,
       canRedo,
-      toggleSnapToGrid,
       toggleMetronome,
       selection,
       selectedPatternId,
@@ -388,11 +379,6 @@ export const DEFAULT_SHORTCUTS: Array<Omit<Shortcut, 'action'>> = [
     key: 'Escape',
     description: 'Clear selection',
     category: 'selection',
-  },
-  {
-    key: 'G',
-    description: 'Toggle snap to grid',
-    category: 'view',
   },
   {
     key: 'M',

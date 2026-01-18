@@ -76,14 +76,13 @@ export class OfflineRenderer {
       });
 
       // Create offline context
-      const buffer = await Tone.Offline((context) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const buffer = await Tone.Offline((context: any) => {
         const { transport } = context;
         transport.bpm.value = project.bpm;
 
         // Set up master volume
-        if (!options.onlyTrackId) {
-          Tone.getDestination().volume.value = Tone.gainToDb(project.mixer.masterVolume);
-        }
+        Tone.getDestination().volume.value = Tone.gainToDb(project.mixer.masterVolume);
 
         // Set up instruments for offline rendering
         const instruments = this.setupOfflineInstruments(project, options);
@@ -153,67 +152,17 @@ export class OfflineRenderer {
   ): Map<string, any> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const instruments = new Map<string, any>();
-    const { channels, mixer } = project;
+    const { channels } = project;
 
     const Tone = getTone();
     if (!Tone) return instruments;
 
-    // First, set up mixer tracks
-    const trackNodes = new Map<string, any>();
-    for (const track of mixer.tracks) {
-      // If we are rendering only one track, skip others
-      if (options.onlyTrackId && track.id !== options.onlyTrackId && track.index !== 0) {
-        continue;
-      }
+    // Set up master volume
+    const masterVolume = new Tone.Volume(Tone.gainToDb(project.mixer.masterVolume));
+    masterVolume.toDestination();
 
-      const volumeNode = new Tone.Volume(Tone.gainToDb(track.volume));
-      const panNode = new Tone.Panner(track.pan);
-      
-      // Chain: Volume -> Pan
-      volumeNode.connect(panNode);
-
-      // Add effects (Inserts)
-      let lastNode = panNode;
-      for (const effect of track.inserts) {
-        if (!effect.enabled) continue;
-        
-        const effectNode = this.createEffectNode(effect);
-        if (effectNode) {
-          lastNode.connect(effectNode);
-          lastNode = effectNode;
-        }
-      }
-
-      // Final connection
-      if (options.onlyTrackId) {
-        // If this is the track we want, connect to destination
-        if (track.id === options.onlyTrackId) {
-          lastNode.toDestination();
-        }
-      } else {
-        // Master or multiple tracks render
-        if (track.index === 0) {
-          // Master track connects to destination
-          lastNode.toDestination();
-        } else {
-          // Other tracks connect to master track (index 0) or destination if master not found
-          const masterTrack = mixer.tracks.find(t => t.index === 0);
-          if (masterTrack && trackNodes.has(masterTrack.id)) {
-            lastNode.connect(trackNodes.get(masterTrack.id));
-          } else {
-            lastNode.toDestination();
-          }
-        }
-      }
-
-      trackNodes.set(track.id, volumeNode); // We store the start of the chain (volumeNode)
-    }
-
-    // Now set up instruments and connect to mixer tracks
+    // Now set up instruments and connect directly to master
     for (const channel of channels) {
-      const trackNode = trackNodes.get(channel.mixerTrackId);
-      if (!trackNode) continue;
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let instrument: any;
 
@@ -233,52 +182,14 @@ export class OfflineRenderer {
       }
 
       instrument.volume.value = Tone.gainToDb(channel.volume);
-      
-      // Connect instrument to the mixer track's volume node
-      instrument.connect(trackNode);
+
+      // Connect instrument directly to master volume
+      instrument.connect(masterVolume);
 
       instruments.set(channel.id, instrument);
     }
 
     return instruments;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private createEffectNode(effect: any): any {
-    if (!Tone) return null;
-    
-    switch (effect.type) {
-      case 'eq':
-        // Simplified EQ for offline render
-        return new Tone.EQ3({
-          low: effect.params.lowGain,
-          mid: effect.params.midGain,
-          high: effect.params.highGain,
-          lowFrequency: effect.params.lowFreq,
-          highFrequency: effect.params.highFreq,
-        });
-      case 'compressor':
-        return new Tone.Compressor({
-          threshold: effect.params.threshold,
-          ratio: effect.params.ratio,
-          attack: effect.params.attack,
-          release: effect.params.release,
-        });
-      case 'reverb':
-        return new Tone.Reverb({
-          decay: effect.params.decay,
-          preDelay: effect.params.preDelay,
-          wet: effect.params.wet,
-        });
-      case 'delay':
-        return new Tone.FeedbackDelay({
-          delayTime: effect.params.time,
-          feedback: effect.params.feedback,
-          wet: effect.params.wet,
-        });
-      default:
-        return null;
-    }
   }
 
   private scheduleOfflineContent(
@@ -342,11 +253,6 @@ export class OfflineRenderer {
       const channel = channels.find((c) => c.id === stepEvent.channelId);
       if (!channel) continue;
 
-      // If we are rendering only one track, and this channel isn't on that track, skip
-      if (options.onlyTrackId && channel.mixerTrackId !== options.onlyTrackId) {
-        continue;
-      }
-
       const instrument = instruments.get(channel.id);
       if (!instrument) continue;
 
@@ -378,11 +284,6 @@ export class OfflineRenderer {
     for (const note of pattern.notes) {
       const channel = channels[0]; // TODO: Piano roll should specify channel
       if (!channel) continue;
-
-      // If we are rendering only one track, and this channel isn't on that track, skip
-      if (options.onlyTrackId && channel.mixerTrackId !== options.onlyTrackId) {
-        continue;
-      }
 
       const instrument = instruments.get(channel.id);
       if (!instrument) continue;

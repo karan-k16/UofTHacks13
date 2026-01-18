@@ -12,27 +12,21 @@ import type {
   AudioClip,
   Note,
   StepEvent,
-  MixerTrack,
-  InsertEffect,
-  Send,
   PlaylistTrack,
   UUID,
   DEFAULT_PPQ,
   DEFAULT_BPM,
   ChannelType,
-  EffectType,
   SynthSettings,
   SamplerSettings,
 } from './types';
+import { DEFAULT_TRACK_EFFECTS } from './types';
 
 // ============================================
 // Factory Functions
 // ============================================
 
 export function createProject(name: string, ownerId: UUID): Project {
-  const masterTrackId = uuidv4();
-  const defaultMixerTrackId = uuidv4();
-  const synthMixerTrackId = uuidv4();
   const defaultChannelId = uuidv4();
   const synthChannelId = uuidv4();
   const defaultPatternId = uuidv4();
@@ -58,8 +52,8 @@ export function createProject(name: string, ownerId: UUID): Project {
     timeSignature: { numerator: 4, denominator: 4 },
     patterns: [testPattern],
     channels: [
-      createChannel('Kick', 'sampler', defaultChannelId, defaultMixerTrackId),
-      createChannel('Synth', 'synth', synthChannelId, synthMixerTrackId),
+      createChannel('Kick', 'sampler', defaultChannelId),
+      createChannel('Synth', 'synth', synthChannelId),
     ],
     playlist: {
       tracks: [
@@ -72,12 +66,6 @@ export function createProject(name: string, ownerId: UUID): Project {
       loopCount: 0, // 0 = infinite loops
     },
     mixer: {
-      tracks: [
-        createMixerTrack('Master', 0, masterTrackId),
-        createMixerTrack('Track 1', 1, defaultMixerTrackId),
-        createMixerTrack('Synth', 2, synthMixerTrackId),
-      ],
-      sends: [],
       masterVolume: 1,
     },
     assets: [],
@@ -103,7 +91,6 @@ export function createChannel(
   name: string,
   type: ChannelType,
   id?: UUID,
-  mixerTrackId?: UUID,
   preset?: string
 ): Channel {
   const channel: Channel = {
@@ -115,7 +102,6 @@ export function createChannel(
     pan: 0,
     mute: false,
     solo: false,
-    mixerTrackId: mixerTrackId || uuidv4(),
     preset: preset || (type === 'synth' ? 'default' : undefined),
   };
 
@@ -147,6 +133,7 @@ export function createDefaultSynthSettings(preset?: string): SynthSettings {
 function getSynthPresetSettings(preset: string): Partial<SynthSettings> {
   // Define presets inline to avoid circular dependencies
   const PRESETS: Record<string, Partial<SynthSettings>> = {
+    default: { oscillatorType: 'sawtooth', attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.3, filterCutoff: 2000, filterResonance: 1 },
     piano: { oscillatorType: 'sine', attack: 0.005, decay: 0.1, sustain: 0.3, release: 1.0, filterCutoff: 3000, filterResonance: 1 },
     electricPiano: { oscillatorType: 'triangle', attack: 0.002, decay: 0.3, sustain: 0.2, release: 0.5, filterCutoff: 2500, filterResonance: 1.5 },
     organ: { oscillatorType: 'sine', attack: 0.001, decay: 0.01, sustain: 0.9, release: 0.05, filterCutoff: 4000, filterResonance: 0.5 },
@@ -174,8 +161,8 @@ function getSynthPresetSettings(preset: string): Partial<SynthSettings> {
     atmosphericPad: { oscillatorType: 'sine', attack: 1.0, decay: 0.5, sustain: 0.9, release: 2.0, filterCutoff: 1000, filterResonance: 0.3 },
     metallic: { oscillatorType: 'square', attack: 0.001, decay: 0.6, sustain: 0.2, release: 0.8, filterCutoff: 5000, filterResonance: 5 },
   };
-  
-  return PRESETS[preset] ?? PRESETS.default!;
+
+  return PRESETS[preset] ?? PRESETS.default;
 }
 
 export function createDefaultSamplerSettings(): SamplerSettings {
@@ -270,81 +257,7 @@ export function createPlaylistTrack(name: string, index: number): PlaylistTrack 
     mute: false,
     solo: false,
     locked: false,
-  };
-}
-
-export function createMixerTrack(name: string, index: number, id?: UUID): MixerTrack {
-  return {
-    id: id || uuidv4(),
-    name,
-    index,
-    volume: index === 0 ? 1 : 0.8, // Master at 100%
-    pan: 0,
-    mute: false,
-    solo: false,
-    inserts: [],
-    color: index === 0 ? '#ff6b35' : '#4a4a4a',
-  };
-}
-
-export function createInsertEffect(type: EffectType): InsertEffect {
-  const baseEffect = {
-    id: uuidv4(),
-    type,
-    enabled: true,
-  };
-
-  switch (type) {
-    case 'eq':
-      return {
-        ...baseEffect,
-        params: {
-          lowGain: 0,
-          midGain: 0,
-          highGain: 0,
-          lowFreq: 200,
-          highFreq: 3000,
-        },
-      };
-    case 'compressor':
-      return {
-        ...baseEffect,
-        params: {
-          threshold: -24,
-          ratio: 4,
-          attack: 0.003,
-          release: 0.25,
-          makeupGain: 0,
-        },
-      };
-    case 'reverb':
-      return {
-        ...baseEffect,
-        params: {
-          decay: 2,
-          preDelay: 0.01,
-          wet: 0.3,
-        },
-      };
-    case 'delay':
-      return {
-        ...baseEffect,
-        params: {
-          time: 0.25,
-          feedback: 0.4,
-          wet: 0.3,
-        },
-      };
-  }
-}
-
-export function createSend(fromTrackId: UUID, toTrackId: UUID, gain: number = 0.5): Send {
-  return {
-    id: uuidv4(),
-    fromTrackId,
-    toTrackId,
-    gain,
-    preFader: false,
+    effects: { ...DEFAULT_TRACK_EFFECTS },
   };
 }
 
@@ -700,14 +613,8 @@ export function createDemoProject(ownerId: UUID): Project {
   project.patterns.push(pattern2);
 
   // Add a bass synth channel
-  const bassChannel = createChannel('Bass', 'synth', undefined, undefined, 'bass');
+  const bassChannel = createChannel('Bass', 'synth', undefined, 'bass');
   bassChannel.color = '#9b59b6';
-
-  // Add bass synth to mixer
-  const bassMixerTrack = createMixerTrack('Bass', project.mixer.tracks.length);
-  project.mixer.tracks.push(bassMixerTrack);
-  bassChannel.mixerTrackId = bassMixerTrack.id;
-
   project.channels.push(bassChannel);
 
   // Add some step events to pattern 1 (kick pattern)
@@ -744,21 +651,6 @@ export function createDemoProject(ownerId: UUID): Project {
     createPlaylistTrack('Track 2', 1),
     createPlaylistTrack('Track 3', 2)
   );
-
-  // Add more mixer tracks
-  project.mixer.tracks.push(
-    createMixerTrack('Track 2', 2),
-    createMixerTrack('Track 3', 3)
-  );
-
-  // Add some effects to mixer track 1
-  const mixerTrack1 = project.mixer.tracks[1];
-  if (mixerTrack1) {
-    mixerTrack1.inserts = [
-      createInsertEffect('eq'),
-      createInsertEffect('compressor'),
-    ];
-  }
 
   return project;
 }

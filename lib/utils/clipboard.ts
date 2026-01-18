@@ -118,7 +118,6 @@ export function pasteChannel(): Channel | null {
     ...content.data,
     id: crypto.randomUUID(),
     name: `${content.data.name} (copy)`,
-    mixerTrackId: crypto.randomUUID(), // Will need to create new mixer track
   };
 }
 

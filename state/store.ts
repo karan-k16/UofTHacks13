@@ -14,17 +14,15 @@ import type {
   AudioClip,
   Note,
   StepEvent,
-  MixerTrack,
-  InsertEffect,
-  Send,
   PlaylistTrack,
   TransportState,
   Selection,
   PanelId,
   UUID,
-  EffectType,
   ChannelType,
+  TrackEffects,
 } from '@/domain/types';
+import { DEFAULT_TRACK_EFFECTS } from '@/domain/types';
 import {
   createProject,
   createPattern,
@@ -33,9 +31,6 @@ import {
   createStepEvent,
   createPatternClip,
   createPlaylistTrack,
-  createMixerTrack,
-  createInsertEffect,
-  createSend,
   duplicatePattern,
   duplicateClip,
   duplicateNote,
@@ -48,6 +43,8 @@ import {
   createDemoProject,
   getSampleColor,
 } from '@/domain/operations';
+import { createChatSlice, type ChatSlice } from './slices/chatSlice';
+import type { ChatMessage } from '@/lib/ai/types';
 
 // Enable Immer patches for undo/redo
 enablePatches();
@@ -86,7 +83,7 @@ function getSynthPresetSettingsFromStore(preset: string): Partial<import('@/doma
     atmosphericPad: { oscillatorType: 'sine', attack: 1.0, decay: 0.5, sustain: 0.9, release: 2.0, filterCutoff: 1000, filterResonance: 0.3 },
     metallic: { oscillatorType: 'square', attack: 0.001, decay: 0.6, sustain: 0.2, release: 0.8, filterCutoff: 5000, filterResonance: 5 },
   };
-  
+
   const selectedPreset = PRESETS[preset];
   return selectedPreset !== undefined ? selectedPreset : PRESETS.default!;
 }
@@ -163,6 +160,9 @@ interface StoreState {
   historyIndex: number;
   maxHistorySize: number;
 
+  // Chat State (AI Agent)
+  chat: ChatSlice;
+
   // Actions
   // Project Actions
   loadProject: (project: Project) => void;
@@ -191,6 +191,7 @@ interface StoreState {
   moveNotes: (patternId: UUID, noteIds: UUID[], deltaPitch: number, deltaTick: number) => void;
   resizeNotes: (patternId: UUID, noteIds: UUID[], newDuration: number) => void;
   quantizeSelectedNotes: (patternId: UUID, noteIds: UUID[], gridSize: number) => void;
+  clearPatternNotes: (patternId: UUID) => void;
 
   // Channel Actions
   addChannel: (name: string, type: ChannelType, preset?: string) => void;
@@ -223,21 +224,10 @@ interface StoreState {
   // Atomic action to prevent race conditions when dropping samples
   addAudioSampleToNewTrack: (assetId: UUID, name: string, startTick: number, durationTick: number) => Promise<void>;
 
-  // Mixer Actions
-  addMixerTrack: (name?: string) => void;
-  deleteMixerTrack: (id: UUID) => void;
-  updateMixerTrack: (id: UUID, updates: Partial<MixerTrack>) => void;
-  setMixerTrackVolume: (id: UUID, volume: number) => void;
-  setMixerTrackPan: (id: UUID, pan: number) => void;
-  toggleMixerTrackMute: (id: UUID) => void;
-  toggleMixerTrackSolo: (id: UUID) => void;
-  addInsertEffect: (trackId: UUID, effectType: EffectType) => void;
-  removeInsertEffect: (trackId: UUID, effectId: UUID) => void;
-  updateInsertEffect: (trackId: UUID, effectId: UUID, updates: Partial<InsertEffect>) => void;
-  reorderInsertEffect: (trackId: UUID, effectId: UUID, direction: 'up' | 'down') => void;
-  addSend: (fromTrackId: UUID, toTrackId: UUID, gain?: number) => void;
-  removeSend: (sendId: UUID) => void;
-  updateSend: (sendId: UUID, updates: Partial<Send>) => void;
+  // Mixer Actions (Simplified)
+  setTrackEffect: (trackId: UUID, key: keyof TrackEffects, value: number) => void;
+  resetTrackEffects: (trackId: UUID) => void;
+  applyTrackEffects: (trackId: UUID) => Promise<void>;
   setMasterVolume: (volume: number) => void;
 
   // Transport Actions
@@ -432,9 +422,9 @@ export const useStore = create<StoreState>()(
 
         focusedPanel: null,
         playlistZoom: 1,
-        pianoRollZoom: 1,
+        pianoRollZoom: 1.5,
         snapToGrid: true,
-        gridSize: 24, // Quarter of a beat
+        gridSize: 24, // Quarter of a beat (16th note)
         selectedPatternId: null,
         selectedChannelId: null,
 
@@ -453,6 +443,57 @@ export const useStore = create<StoreState>()(
         history: [],
         historyIndex: -1,
         maxHistorySize: 100,
+
+        // Chat State (AI Agent)
+        chat: {
+          messages: [],
+          isPending: false,
+          selectedModel: 'gemini',
+          lastAICommandId: null,
+          addMessage: (from, text, status = 'sent') => {
+            set((state) => {
+              state.chat.messages.push({
+                id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                from,
+                text,
+                timestamp: Date.now(),
+                status,
+              });
+            });
+          },
+          updateMessageStatus: (messageId, status) => {
+            set((state) => {
+              const msg = state.chat.messages.find((m) => m.id === messageId);
+              if (msg) msg.status = status;
+            });
+          },
+          setModel: (model) => {
+            set((state) => {
+              state.chat.selectedModel = model;
+            });
+          },
+          setPending: (isPending) => {
+            set((state) => {
+              state.chat.isPending = isPending;
+            });
+          },
+          setLastCommand: (commandId) => {
+            set((state) => {
+              state.chat.lastAICommandId = commandId;
+            });
+          },
+          clearHistory: () => {
+            set((state) => {
+              state.chat.messages = [];
+              state.chat.lastAICommandId = null;
+            });
+          },
+          loadChatHistory: (messages: ChatMessage[]) => {
+            set((state) => {
+              state.chat.messages = messages;
+            });
+          },
+        },
 
         // ==========================================
         // Project Actions
@@ -633,6 +674,18 @@ export const useStore = create<StoreState>()(
         // Note Actions (Piano Roll)
         // ==========================================
 
+        clearPatternNotes: (patternId) => {
+          recordHistory('Clear pattern notes', (draft) => {
+            if (draft.project) {
+              const pattern = draft.project.patterns.find((p) => p.id === patternId);
+              if (pattern) {
+                pattern.notes = [];
+                draft.project.updatedAt = new Date().toISOString();
+              }
+            }
+          });
+        },
+
         addNote: (patternId, note) => {
           let newNoteId: string | undefined;
           recordHistory('Add note', (draft) => {
@@ -731,14 +784,7 @@ export const useStore = create<StoreState>()(
         addChannel: (name, type, preset) => {
           recordHistory('Add channel', (draft) => {
             if (draft.project) {
-              // Create a new mixer track for this channel
-              const mixerTrack = createMixerTrack(
-                name,
-                draft.project.mixer.tracks.length
-              );
-              draft.project.mixer.tracks.push(mixerTrack);
-
-              const channel = createChannel(name, type, undefined, mixerTrack.id, preset);
+              const channel = createChannel(name, type, undefined, preset);
               draft.project.channels.push(channel);
               draft.selectedChannelId = channel.id;
               draft.project.updatedAt = new Date().toISOString();
@@ -1213,247 +1259,232 @@ export const useStore = create<StoreState>()(
         },
 
         // ==========================================
-        // Mixer Actions
+        // Mixer Actions (Simplified)
         // ==========================================
 
-        addMixerTrack: (name) => {
-          recordHistory('Add mixer track', (draft) => {
-            if (draft.project) {
-              const track = createMixerTrack(
-                name || `Track ${draft.project.mixer.tracks.length}`,
-                draft.project.mixer.tracks.length
-              );
-              draft.project.mixer.tracks.push(track);
-              draft.project.updatedAt = new Date().toISOString();
+        setTrackEffect: (trackId, key, value) => {
+          set((state) => {
+            if (state.project) {
+              const track = state.project.playlist.tracks.find((t) => t.id === trackId);
+              if (track) {
+                track.effects[key] = value;
+                state.project.updatedAt = new Date().toISOString();
+              }
             }
           });
         },
 
-        deleteMixerTrack: (id) => {
-          recordHistory('Delete mixer track', (draft) => {
+        resetTrackEffects: (trackId) => {
+          recordHistory('Reset track effects', (draft) => {
             if (draft.project) {
-              // Don't delete master track (index 0)
-              const track = draft.project.mixer.tracks.find((t) => t.id === id);
-              if (track && track.index !== 0) {
-                const index = draft.project.mixer.tracks.findIndex((t) => t.id === id);
-                draft.project.mixer.tracks.splice(index, 1);
-                // Remove related sends
-                draft.project.mixer.sends = draft.project.mixer.sends.filter(
-                  (s) => s.fromTrackId !== id && s.toTrackId !== id
+              const track = draft.project.playlist.tracks.find((t) => t.id === trackId);
+              if (track) {
+                track.effects = { ...DEFAULT_TRACK_EFFECTS };
+                draft.project.updatedAt = new Date().toISOString();
+              }
+            }
+          });
+        },
+
+        applyTrackEffects: async (trackId) => {
+          const state = get();
+          if (!state.project) return;
+
+          // Find the playlist track
+          const playlistTrack = state.project.playlist.tracks.find((t) => t.id === trackId);
+          if (!playlistTrack) {
+            console.error('[Store] Track not found:', trackId);
+            return;
+          }
+
+          // Find all clips on this track
+          const trackClips = state.project.playlist.clips.filter(
+            (clip) => clip.trackIndex === playlistTrack.index
+          );
+
+          // Separate audio clips and pattern clips
+          const audioClips = trackClips.filter((clip) => clip.type === 'audio');
+          const patternClips = trackClips.filter((clip) => clip.type === 'pattern');
+
+          console.log(`[Store] Track ${playlistTrack.name}: ${audioClips.length} audio clips, ${patternClips.length} pattern clips`);
+
+          // Process pattern clips first - render them to audio
+          if (patternClips.length > 0) {
+            console.log('[Store] Rendering pattern clips to audio...');
+
+            try {
+              const { PatternRenderer } = await import('@/lib/audio/PatternRenderer');
+
+              for (const clip of patternClips) {
+                if (clip.type !== 'pattern') continue;
+
+                const pattern = state.project?.patterns.find((p) => p.id === clip.patternId);
+                if (!pattern) continue;
+
+                console.log(`[Store] Rendering pattern: ${pattern.name}`);
+
+                // Render pattern to audio buffer with effects applied
+                const renderedBuffer = await PatternRenderer.renderPattern(
+                  state.project!,
+                  pattern,
+                  clip,
+                  playlistTrack.effects
                 );
-                // Re-index tracks
-                draft.project.mixer.tracks.forEach((t, i) => {
-                  t.index = i;
+
+                // Convert to WAV blob
+                const { SimpleEffectProcessor } = await import('@/lib/audio/SimpleEffectProcessor');
+                const wavBlob = SimpleEffectProcessor.audioBufferToWav(renderedBuffer);
+                const processedUrl = URL.createObjectURL(wavBlob);
+
+                // Create new audio asset from rendered pattern
+                const renderedAsset = {
+                  id: `pattern-${pattern.id}-rendered-${Date.now()}` as UUID,
+                  name: `${pattern.name} (Rendered)`,
+                  fileName: `${pattern.name}-rendered.wav`,
+                  storageUrl: processedUrl,
+                  duration: renderedBuffer.duration,
+                  sampleRate: renderedBuffer.sampleRate,
+                  channels: renderedBuffer.numberOfChannels,
+                  format: 'wav',
+                  size: wavBlob.size,
+                  createdAt: new Date().toISOString(),
+                  originalUrl: processedUrl,
+                  isProcessed: true,
+                  processedFrom: pattern.id,
+                };
+
+                // Convert pattern clip to audio clip
+                set((draft) => {
+                  if (draft.project) {
+                    // Add the rendered asset
+                    draft.project.assets.push(renderedAsset);
+
+                    // Find and convert the clip to audio type
+                    const clipIndex = draft.project.playlist.clips.findIndex((c) => c.id === clip.id);
+                    if (clipIndex !== -1) {
+                      const originalClip = draft.project.playlist.clips[clipIndex];
+                      // Replace with audio clip, preserving color
+                      draft.project.playlist.clips[clipIndex] = {
+                        id: originalClip.id,
+                        type: 'audio',
+                        trackIndex: originalClip.trackIndex,
+                        startTick: originalClip.startTick,
+                        durationTick: originalClip.durationTick,
+                        mute: originalClip.mute,
+                        assetId: renderedAsset.id as UUID,
+                        offset: 0,
+                        color: originalClip.type === 'pattern' ? originalClip.color : '#4a9eff',
+                        gain: 1,
+                        pitch: 0,
+                      };
+                    }
+
+                    draft.project.updatedAt = new Date().toISOString();
+                  }
                 });
-                draft.project.updatedAt = new Date().toISOString();
+
+                console.log(`[Store] Rendered pattern ${pattern.name} to audio`);
+              }
+            } catch (err) {
+              console.error('[Store] Error rendering patterns:', err);
+            }
+          }
+
+          // Now process audio clips (including newly rendered ones)
+          // Re-fetch the clips after pattern conversion
+          const updatedState = get();
+          if (!updatedState.project) return;
+
+          const updatedAudioClips = updatedState.project.playlist.clips.filter(
+            (clip) => clip.type === 'audio' && clip.trackIndex === playlistTrack.index
+          );
+
+          if (updatedAudioClips.length === 0) {
+            console.log('[Store] No audio clips on this track to process');
+            return;
+          }
+
+          console.log(`[Store] Processing ${updatedAudioClips.length} audio clips on ${playlistTrack.name}`);
+
+          // Process each audio clip
+          for (const clip of updatedAudioClips) {
+            if (clip.type !== 'audio') continue;
+
+            let assetToProcess = updatedState.project.assets.find((a) => a.id === clip.assetId);
+            if (!assetToProcess) continue;
+
+            // If this is a processed asset, find the TRUE original
+            let trueOriginalAsset = assetToProcess;
+            while (trueOriginalAsset.isProcessed && trueOriginalAsset.processedFrom) {
+              const originalId = trueOriginalAsset.processedFrom;
+              const foundOriginal = state.project.assets.find((a) => a.id === originalId);
+              if (foundOriginal) {
+                trueOriginalAsset = foundOriginal;
+              } else {
+                break;
               }
             }
-          });
-        },
 
-        updateMixerTrack: (id, updates) => {
-          recordHistory('Update mixer track', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === id);
-              if (track) {
-                Object.assign(track, updates);
-                draft.project.updatedAt = new Date().toISOString();
-              }
-            }
-          });
-        },
+            console.log(`[Store] Processing from original: ${trueOriginalAsset.name}`);
 
-        setMixerTrackVolume: (id, volume) => {
-          set((state) => {
-            if (state.project) {
-              const track = state.project.mixer.tracks.find((t) => t.id === id);
-              if (track) {
-                track.volume = Math.max(0, Math.min(1.5, volume));
-                state.project.updatedAt = new Date().toISOString();
+            try {
+              const { SimpleEffectProcessor } = await import('@/lib/audio/SimpleEffectProcessor');
 
-                // Update audio engine
-                if (typeof window !== 'undefined') {
-                  const newVolume = track.volume; // Capture value before async operation
-                  import('@/lib/audio/AudioEngine').then(({ getAudioEngine }) => {
-                    const engine = getAudioEngine();
-                    engine.setMixerTrackVolume(id, newVolume);
-                  });
+              // Process the audio with the track's effects
+              const processedBuffer = await SimpleEffectProcessor.processAudio(
+                trueOriginalAsset.originalUrl || trueOriginalAsset.storageUrl,
+                playlistTrack.effects
+              );
+
+              // Convert to WAV blob
+              const wavBlob = SimpleEffectProcessor.audioBufferToWav(processedBuffer);
+
+              // Create object URL for the processed audio
+              const processedUrl = URL.createObjectURL(wavBlob);
+
+              // Create new processed asset
+              const processedAsset = {
+                id: `${trueOriginalAsset.id}-processed-${Date.now()}` as UUID,
+                name: `${trueOriginalAsset.name} (Processed)`,
+                fileName: `${trueOriginalAsset.fileName}-processed.wav`,
+                storageUrl: processedUrl,
+                duration: trueOriginalAsset.duration,
+                sampleRate: trueOriginalAsset.sampleRate,
+                channels: trueOriginalAsset.channels,
+                format: 'wav',
+                size: wavBlob.size,
+                createdAt: new Date().toISOString(),
+                originalUrl: trueOriginalAsset.originalUrl || trueOriginalAsset.storageUrl,
+                isProcessed: true,
+                processedFrom: trueOriginalAsset.id,
+              };
+
+              // Add processed asset and update clip reference
+              set((state) => {
+                if (state.project) {
+                  state.project.assets.push(processedAsset);
+
+                  const clipToUpdate = state.project.playlist.clips.find((c) => c.id === clip.id);
+                  if (clipToUpdate && clipToUpdate.type === 'audio') {
+                    clipToUpdate.assetId = processedAsset.id as UUID;
+                  }
+
+                  state.project.updatedAt = new Date().toISOString();
                 }
-              }
+              });
+
+              console.log(`[Store] Processed ${trueOriginalAsset.name} successfully`);
+            } catch (err) {
+              console.error('[Store] Error processing audio:', err);
             }
-          });
-        },
-
-        setMixerTrackPan: (id, pan) => {
-          set((state) => {
-            if (state.project) {
-              const track = state.project.mixer.tracks.find((t) => t.id === id);
-              if (track) {
-                track.pan = Math.max(-1, Math.min(1, pan));
-                state.project.updatedAt = new Date().toISOString();
-
-                // Update audio engine
-                if (typeof window !== 'undefined') {
-                  const newPan = track.pan; // Capture value before async operation
-                  import('@/lib/audio/AudioEngine').then(({ getAudioEngine }) => {
-                    const engine = getAudioEngine();
-                    engine.setMixerTrackPan(id, newPan);
-                  });
-                }
-              }
-            }
-          });
-        },
-
-        toggleMixerTrackMute: (id) => {
-          recordHistory('Toggle mixer track mute', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === id);
-              if (track) {
-                track.mute = !track.mute;
-
-                // Update audio engine
-                if (typeof window !== 'undefined') {
-                  const newMuteState = track.mute; // Capture value before async operation
-                  import('@/lib/audio/AudioEngine').then(({ getAudioEngine }) => {
-                    const engine = getAudioEngine();
-                    engine.setMixerTrackMute(id, newMuteState);
-                  });
-                }
-              }
-            }
-          });
-        },
-
-        toggleMixerTrackSolo: (id) => {
-          recordHistory('Toggle mixer track solo', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === id);
-              if (track) {
-                track.solo = !track.solo;
-              }
-            }
-          });
-        },
-
-        addInsertEffect: (trackId, effectType) => {
-          recordHistory('Add insert effect', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === trackId);
-              if (track) {
-                const effect = createInsertEffect(effectType);
-                track.inserts.push(effect);
-                draft.project.updatedAt = new Date().toISOString();
-              }
-            }
-          });
-        },
-
-        removeInsertEffect: (trackId, effectId) => {
-          recordHistory('Remove insert effect', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === trackId);
-              if (track) {
-                const index = track.inserts.findIndex((e) => e.id === effectId);
-                if (index !== -1) {
-                  track.inserts.splice(index, 1);
-                  draft.project.updatedAt = new Date().toISOString();
-                }
-              }
-            }
-          });
-        },
-
-        updateInsertEffect: (trackId, effectId, updates) => {
-          recordHistory('Update insert effect', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === trackId);
-              if (track) {
-                const effect = track.inserts.find((e) => e.id === effectId);
-                if (effect) {
-                  Object.assign(effect, updates);
-                  draft.project.updatedAt = new Date().toISOString();
-                }
-              }
-            }
-          });
-        },
-
-        reorderInsertEffect: (trackId, effectId, direction) => {
-          recordHistory('Reorder insert effect', (draft) => {
-            if (draft.project) {
-              const track = draft.project.mixer.tracks.find((t) => t.id === trackId);
-              if (track) {
-                const currentIndex = track.inserts.findIndex((e) => e.id === effectId);
-                if (currentIndex === -1) return;
-
-                const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-
-                // Check bounds
-                if (newIndex < 0 || newIndex >= track.inserts.length) return;
-
-                // Swap the effects
-                const currentEffect = track.inserts[currentIndex];
-                const swapEffect = track.inserts[newIndex];
-                if (currentEffect && swapEffect) {
-                  track.inserts[currentIndex] = swapEffect;
-                  track.inserts[newIndex] = currentEffect;
-                }
-
-                draft.project.updatedAt = new Date().toISOString();
-              }
-            }
-          });
-        },
-
-        addSend: (fromTrackId, toTrackId, gain = 0.5) => {
-          recordHistory('Add send', (draft) => {
-            if (draft.project) {
-              const send = createSend(fromTrackId, toTrackId, gain);
-              draft.project.mixer.sends.push(send);
-              draft.project.updatedAt = new Date().toISOString();
-            }
-          });
-        },
-
-        removeSend: (sendId) => {
-          recordHistory('Remove send', (draft) => {
-            if (draft.project) {
-              const index = draft.project.mixer.sends.findIndex((s) => s.id === sendId);
-              if (index !== -1) {
-                draft.project.mixer.sends.splice(index, 1);
-                draft.project.updatedAt = new Date().toISOString();
-              }
-            }
-          });
-        },
-
-        updateSend: (sendId, updates) => {
-          recordHistory('Update send', (draft) => {
-            if (draft.project) {
-              const send = draft.project.mixer.sends.find((s) => s.id === sendId);
-              if (send) {
-                Object.assign(send, updates);
-                draft.project.updatedAt = new Date().toISOString();
-              }
-            }
-          });
+          }
         },
 
         setMasterVolume: (volume) => {
           set((state) => {
             if (state.project) {
-              const newMasterVolume = Math.max(0, Math.min(1.5, volume));
-              state.project.mixer.masterVolume = newMasterVolume;
+              state.project.mixer.masterVolume = Math.max(0, Math.min(1.5, volume));
               state.project.updatedAt = new Date().toISOString();
-
-              // Sync with audio engine
-              if (typeof window !== 'undefined') {
-                import('@/lib/audio/AudioEngine').then(({ getAudioEngine }) => {
-                  const engine = getAudioEngine();
-                  engine.setMasterVolume?.(newMasterVolume);
-                });
-              }
             }
           });
         },
@@ -1644,6 +1675,16 @@ export const useStore = create<StoreState>()(
         },
 
         cancelRecording: async () => {
+          console.log('[Store] Cancelling recording...');
+          try {
+            // Try to cancel in the audio engine
+            const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
+            const engine = getAudioEngine();
+            engine.cancelRecording();
+          } catch (error) {
+            console.error('[Store] Error cancelling recording:', error);
+          }
+          
           set((state) => {
             state.recording.isRecording = false;
             state.recording.isPreparing = false;
@@ -2011,19 +2052,46 @@ export const useStore = create<StoreState>()(
           }
 
           try {
+            console.log('[Store] recordAudio called with countInBars:', countInBars, 'deviceId:', deviceId);
+            
+            // Update state to show we're preparing to record
+            set((draft) => {
+              draft.recording.isPreparing = true;
+              draft.recording.countInRemaining = countInBars;
+              draft.recording.recordingStartPosition = draft.position;
+            });
+
             // Import audio engine dynamically
             const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
             const engine = getAudioEngine();
 
+            // Ensure engine is initialized
+            if (!engine.isInitialized) {
+              console.log('[Store] Initializing audio engine...');
+              await engine.initialize();
+            }
+
             // Start recording (includes count-in)
+            console.log('[Store] Starting engine recording...');
             await engine.startRecording(countInBars, deviceId);
 
-            // Update state
-            state.startRecording();
+            // Update state to show we're now recording
+            set((draft) => {
+              draft.recording.isPreparing = false;
+              draft.recording.isRecording = true;
+              draft.isRecording = true;
+              draft.transportState = 'recording';
+            });
 
-            console.log('[Store] Recording started');
+            console.log('[Store] Recording started successfully');
           } catch (error) {
             console.error('[Store] Failed to start recording:', error);
+            // Reset state on error
+            set((draft) => {
+              draft.recording.isPreparing = false;
+              draft.recording.isRecording = false;
+              draft.isRecording = false;
+            });
             throw error;
           }
         },
@@ -2033,20 +2101,34 @@ export const useStore = create<StoreState>()(
          */
         finishRecording: async () => {
           const state = get();
-          if (!state.project || !state.isRecording) {
+          if (!state.project) {
+            console.log('[Store] finishRecording: No project');
+            return;
+          }
+          
+          if (!state.isRecording && !state.recording.isRecording) {
+            console.log('[Store] finishRecording: Not recording');
             return;
           }
 
           try {
+            console.log('[Store] Finishing recording...');
+            
             // Import audio engine dynamically
             const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
             const engine = getAudioEngine();
 
             // Stop recording and get result
             const result = await engine.stopRecording();
+            console.log('[Store] Recording stopped, duration:', result.duration);
 
-            // Update state
-            state.stopRecording();
+            // Update state immediately
+            set((draft) => {
+              draft.recording.isRecording = false;
+              draft.recording.isPreparing = false;
+              draft.isRecording = false;
+              draft.transportState = 'stopped';
+            });
 
             // Convert blob to base64 for storage
             const reader = new FileReader();

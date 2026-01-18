@@ -15,6 +15,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
+    "backboard-sdk": "^1.4.7",
     "classnames": "^2.5.1",
     "framer-motion": "^12.26.2",
     "immer": "^10.1.1",

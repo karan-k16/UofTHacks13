@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Mosaic,
   MosaicWindow,
@@ -14,9 +14,10 @@ import ChannelRack from '@/components/panels/ChannelRack';
 import Playlist from '@/components/panels/Playlist';
 import PianoRoll from '@/components/panels/PianoRoll';
 import Mixer from '@/components/panels/Mixer';
+import ChatPanel from '@/components/panels/ChatPanel';
 
 // Panel types
-type PanelType = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer';
+type PanelType = 'browser' | 'channelRack' | 'playlist' | 'pianoRoll' | 'mixer' | 'chat';
 
 // Panel titles
 const PANEL_TITLES: Record<PanelType, string> = {
@@ -25,6 +26,7 @@ const PANEL_TITLES: Record<PanelType, string> = {
   playlist: 'Playlist',
   pianoRoll: 'Piano Roll',
   mixer: 'Mixer',
+  chat: 'AI Assistant',
 };
 
 // Panel components
@@ -34,6 +36,7 @@ const PANEL_COMPONENTS: Record<PanelType, React.FC> = {
   playlist: Playlist,
   pianoRoll: PianoRoll,
   mixer: Mixer,
+  chat: ChatPanel,
 };
 
 // Default layout - Piano Roll is now a modal, not embedded
@@ -41,9 +44,14 @@ const DEFAULT_LAYOUT: MosaicNode<PanelType> = {
   direction: 'row',
   first: {
     direction: 'column',
-    first: 'browser',
-    second: 'channelRack',
-    splitPercentage: 40,
+    first: 'chat',
+    second: {
+      direction: 'column',
+      first: 'browser',
+      second: 'channelRack',
+      splitPercentage: 50,
+    },
+    splitPercentage: 30,
   },
   second: {
     direction: 'column',
@@ -80,14 +88,19 @@ export default function DockingLayout() {
     );
   }, []);
 
+  // Memoize the Mosaic component to prevent unnecessary re-initialization
+  const mosaicComponent = useMemo(() => (
+    <Mosaic<PanelType>
+      renderTile={renderTile}
+      value={layout}
+      onChange={handleChange}
+      className="mosaic-blueprint-theme"
+    />
+  ), [renderTile, layout, handleChange]);
+
   return (
     <div className="h-full w-full">
-      <Mosaic<PanelType>
-        renderTile={renderTile}
-        value={layout}
-        onChange={handleChange}
-        className="mosaic-blueprint-theme"
-      />
+      {mosaicComponent}
     </div>
   );
 }

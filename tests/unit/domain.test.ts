@@ -27,7 +27,6 @@ import {
   validateNote,
   validatePattern,
   validateChannel,
-  validateMixerRouting,
   isValidBpm,
   isValidMidiNote,
   isValidVelocity,
@@ -41,20 +40,20 @@ describe('Factory Functions', () => {
   describe('createProject', () => {
     it('should create a project with default values', () => {
       const project = createProject('Test Project', 'user-123');
-      
+
       expect(project.name).toBe('Test Project');
       expect(project.ownerId).toBe('user-123');
       expect(project.bpm).toBe(120);
       expect(project.ppq).toBe(96);
       expect(project.patterns.length).toBeGreaterThan(0);
       expect(project.channels.length).toBeGreaterThan(0);
-      expect(project.mixer.tracks.length).toBeGreaterThan(0);
+      expect(project.mixer.masterVolume).toBe(1);
     });
 
     it('should create unique IDs for each project', () => {
       const project1 = createProject('Project 1', 'user-123');
       const project2 = createProject('Project 2', 'user-123');
-      
+
       expect(project1.id).not.toBe(project2.id);
     });
   });
@@ -62,7 +61,7 @@ describe('Factory Functions', () => {
   describe('createPattern', () => {
     it('should create a pattern with default values', () => {
       const pattern = createPattern('Test Pattern');
-      
+
       expect(pattern.name).toBe('Test Pattern');
       expect(pattern.lengthInSteps).toBe(16);
       expect(pattern.stepsPerBeat).toBe(4);
@@ -74,7 +73,7 @@ describe('Factory Functions', () => {
   describe('createChannel', () => {
     it('should create a sampler channel', () => {
       const channel = createChannel('Kick', 'sampler');
-      
+
       expect(channel.name).toBe('Kick');
       expect(channel.type).toBe('sampler');
       expect(channel.samplerSettings).toBeDefined();
@@ -82,7 +81,7 @@ describe('Factory Functions', () => {
 
     it('should create a synth channel', () => {
       const channel = createChannel('Lead', 'synth');
-      
+
       expect(channel.name).toBe('Lead');
       expect(channel.type).toBe('synth');
       expect(channel.synthSettings).toBeDefined();
@@ -92,7 +91,7 @@ describe('Factory Functions', () => {
   describe('createNote', () => {
     it('should create a note with correct values', () => {
       const note = createNote(60, 0, 96, 100);
-      
+
       expect(note.pitch).toBe(60);
       expect(note.startTick).toBe(0);
       expect(note.durationTick).toBe(96);
@@ -110,7 +109,7 @@ describe('Note Operations', () => {
     it('should move note by pitch and tick delta', () => {
       const note = createNote(60, 0, 96, 100);
       const moved = moveNote(note, 2, 48);
-      
+
       expect(moved.pitch).toBe(62);
       expect(moved.startTick).toBe(48);
     });
@@ -118,14 +117,14 @@ describe('Note Operations', () => {
     it('should clamp pitch to valid MIDI range', () => {
       const note = createNote(127, 0, 96, 100);
       const moved = moveNote(note, 5, 0);
-      
+
       expect(moved.pitch).toBe(127);
     });
 
     it('should not allow negative start tick', () => {
       const note = createNote(60, 10, 96, 100);
       const moved = moveNote(note, 0, -20);
-      
+
       expect(moved.startTick).toBe(0);
     });
   });
@@ -134,14 +133,14 @@ describe('Note Operations', () => {
     it('should resize note duration', () => {
       const note = createNote(60, 0, 96, 100);
       const resized = resizeNote(note, 48);
-      
+
       expect(resized.durationTick).toBe(48);
     });
 
     it('should not allow zero or negative duration', () => {
       const note = createNote(60, 0, 96, 100);
       const resized = resizeNote(note, -10);
-      
+
       expect(resized.durationTick).toBe(1);
     });
   });
@@ -150,7 +149,7 @@ describe('Note Operations', () => {
     it('should quantize note to grid', () => {
       const note = createNote(60, 25, 90, 100);
       const quantized = quantizeNote(note, 24);
-      
+
       expect(quantized.startTick).toBe(24);
       expect(quantized.durationTick).toBe(96); // Rounded to nearest grid
     });
@@ -163,7 +162,7 @@ describe('Note Operations', () => {
         createNote(62, 50, 45, 80),
       ];
       const quantized = quantizeNotes(notes, 24);
-      
+
       expect(quantized[0]?.startTick).toBe(24);
       expect(quantized[1]?.startTick).toBe(48);
     });
@@ -278,7 +277,7 @@ describe('Validators', () => {
     it('should validate correct note', () => {
       const note = createNote(60, 0, 96, 100);
       const result = validateNote(note);
-      
+
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -286,7 +285,7 @@ describe('Validators', () => {
     it('should reject invalid pitch', () => {
       const note = createNote(200, 0, 96, 100);
       const result = validateNote(note);
-      
+
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.includes('pitch'))).toBe(true);
     });
@@ -294,7 +293,7 @@ describe('Validators', () => {
     it('should reject invalid velocity', () => {
       const note = createNote(60, 0, 96, 200);
       const result = validateNote(note);
-      
+
       expect(result.valid).toBe(false);
     });
   });
@@ -303,27 +302,15 @@ describe('Validators', () => {
     it('should validate correct pattern', () => {
       const pattern = createPattern('Test');
       const result = validatePattern(pattern);
-      
+
       expect(result.valid).toBe(true);
     });
 
     it('should reject empty name', () => {
       const pattern = createPattern('');
       const result = validatePattern(pattern);
-      
-      expect(result.valid).toBe(false);
-    });
-  });
 
-  describe('validateMixerRouting', () => {
-    it('should detect self-routing', () => {
-      const tracks = [{ id: 'track-1', name: 'Track 1', index: 0, volume: 1, pan: 0, mute: false, solo: false, inserts: [], color: '#fff' }];
-      const sends = [{ id: 'send-1', fromTrackId: 'track-1', toTrackId: 'track-1', gain: 0.5, preFader: false }];
-      
-      const result = validateMixerRouting(sends, tracks);
-      
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('itself'))).toBe(true);
     });
   });
 
@@ -367,7 +354,7 @@ describe('Pattern Operations', () => {
     it('should duplicate pattern with new ID', () => {
       const original = createPattern('Original');
       const duplicate = duplicatePattern(original);
-      
+
       expect(duplicate.id).not.toBe(original.id);
       expect(duplicate.name).toBe('Original (copy)');
       expect(duplicate.lengthInSteps).toBe(original.lengthInSteps);
@@ -376,7 +363,7 @@ describe('Pattern Operations', () => {
     it('should allow custom name', () => {
       const original = createPattern('Original');
       const duplicate = duplicatePattern(original, 'Custom Name');
-      
+
       expect(duplicate.name).toBe('Custom Name');
     });
   });

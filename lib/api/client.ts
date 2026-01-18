@@ -71,6 +71,32 @@ export const apiClient = {
         }
     },
 
+    async deleteProject(id: string): Promise<void> {
+        const response = await fetch(`/api/projects/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete project');
+        }
+    },
+
+    async renameProject(id: string, newName: string): Promise<void> {
+        const supabase = createClient();
+
+        const { error } = await supabase
+            .from('projects')
+            .update({
+                name: newName,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+    },
+
     async uploadAsset(
         projectId: string,
         file: File | Blob,

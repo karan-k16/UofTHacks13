@@ -7,9 +7,6 @@ import type {
   Pattern,
   Channel as ChannelType,
   Clip,
-  MixerTrack,
-  InsertEffect,
-  Send,
   UUID,
 } from '@/domain/types';
 import { ticksToSeconds, midiNoteToFrequency } from '@/domain/operations';
@@ -34,19 +31,6 @@ interface InstrumentNode {
   muted: boolean; // Track mute state
 }
 
-interface MixerTrackNode {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  channel: any; // This is now a Panner node
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  gain: any; // Gain node for volume control
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  meter: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inserts: Map<UUID, any>;
-  volume: number; // Track volume for mute/unmute
-  muted: boolean; // Track mute state
-}
-
 interface ScheduledEvent {
   id: number;
   dispose: () => void;
@@ -58,9 +42,12 @@ interface ScheduledEvent {
 
 export class AudioEngine {
   private static instance: AudioEngine | null = null;
-  private isInitialized = false;
+  private _isInitialized = false;
+  
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
   private instruments: Map<UUID, InstrumentNode> = new Map();
-  private mixerTracks: Map<UUID, MixerTrackNode> = new Map();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private masterChannel: any = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +56,7 @@ export class AudioEngine {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private metronome: any = null;
   private metronomeEnabled = false;
+  private metronomeScheduleId: number | null = null;
   private currentProject: Project | null = null;
   // Cache for preloaded audio buffers (URL -> ToneAudioBuffer)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,7 +86,7 @@ export class AudioEngine {
   // ==========================================
 
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this._isInitialized) return;
 
     // Client-side only
     if (typeof window === 'undefined') {
@@ -144,7 +132,7 @@ export class AudioEngine {
       console.warn('[AudioEngine] Transport not available');
     }
 
-    this.isInitialized = true;
+    this._isInitialized = true;
     console.log('[AudioEngine] Initialized successfully');
   }
 
@@ -153,7 +141,7 @@ export class AudioEngine {
   // ==========================================
 
   async loadProject(project: Project): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -167,17 +155,7 @@ export class AudioEngine {
     // Set BPM
     this.setBpm(project.bpm);
 
-    // Set up mixer tracks
-    for (const mixerTrack of project.mixer.tracks) {
-      this.setupMixerTrack(mixerTrack);
-    }
-
-    // Set up sends
-    for (const send of project.mixer.sends) {
-      this.setupSend(send);
-    }
-
-    // Set up instruments
+    // Set up instruments (they connect directly to master)
     for (const channel of project.channels) {
       await this.setupInstrument(channel);
     }
@@ -197,240 +175,12 @@ export class AudioEngine {
     }
     this.instruments.clear();
 
-    // Dispose mixer tracks (except master)
-    for (const [, track] of Array.from(this.mixerTracks.entries())) {
-      track.channel.dispose();
-      track.meter.dispose();
-      for (const [, effect] of Array.from(track.inserts.entries())) {
-        effect.dispose();
-      }
-    }
-    this.mixerTracks.clear();
-
     this.currentProject = null;
   }
 
   // ==========================================
-  // Mixer Setup
+  // Master Setup (Effects are applied offline via Apply button)
   // ==========================================
-
-  private setupMixerTrack(mixerTrack: MixerTrack): void {
-    const Tone = getTone();
-    if (!Tone) return;
-
-    const panner = new Tone.Panner(mixerTrack.pan);
-    const gain = new Tone.Gain(mixerTrack.volume);
-    gain.gain.value = mixerTrack.mute ? 0 : mixerTrack.volume;
-    panner.connect(gain);
-    const channel = panner;
-
-    const meter = new Tone.Meter();
-    gain.connect(meter);
-
-    // For master track, connect to destination
-    if (mixerTrack.index === 0) {
-      gain.toDestination();
-    } else {
-      // Connect to master
-      if (this.masterChannel) {
-        gain.connect(this.masterChannel);
-      }
-    }
-
-    // Set up inserts
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const inserts = new Map<UUID, any>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let lastNode: any = channel;
-
-    for (const insert of mixerTrack.inserts) {
-      if (!insert.enabled) continue;
-
-      const effectNode = this.createEffectNode(insert);
-      if (effectNode) {
-        lastNode.connect(effectNode);
-        inserts.set(insert.id, effectNode);
-        lastNode = effectNode;
-      }
-    }
-
-    this.mixerTracks.set(mixerTrack.id, {
-      channel,
-      gain,
-      meter,
-      inserts,
-      volume: mixerTrack.volume,
-      muted: mixerTrack.mute
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private createEffectNode(insert: InsertEffect): any | null {
-    const Tone = getTone();
-    if (!Tone) return null;
-
-    switch (insert.type) {
-      case 'eq': {
-        const params = insert.params as {
-          lowGain: number;
-          midGain: number;
-          highGain: number;
-          lowFreq: number;
-          highFreq: number;
-        };
-        const eq = new Tone.EQ3({
-          low: params.lowGain,
-          mid: params.midGain,
-          high: params.highGain,
-          lowFrequency: params.lowFreq,
-          highFrequency: params.highFreq,
-        });
-        return eq;
-      }
-      case 'compressor': {
-        const params = insert.params as {
-          threshold: number;
-          ratio: number;
-          attack: number;
-          release: number;
-        };
-        const comp = new Tone.Compressor({
-          threshold: params.threshold,
-          ratio: params.ratio,
-          attack: params.attack,
-          release: params.release,
-        });
-        return comp;
-      }
-      case 'reverb': {
-        const params = insert.params as {
-          decay: number;
-          preDelay: number;
-          wet: number;
-        };
-        const reverb = new Tone.Reverb({
-          decay: params.decay,
-          preDelay: params.preDelay,
-          wet: params.wet,
-        });
-        return reverb;
-      }
-      case 'delay': {
-        const params = insert.params as {
-          time: number;
-          feedback: number;
-          wet: number;
-        };
-        const delay = new Tone.FeedbackDelay({
-          delayTime: params.time,
-          feedback: params.feedback,
-          wet: params.wet,
-        });
-        return delay;
-      }
-      default:
-        return null;
-    }
-  }
-
-  private setupSend(send: Send): void {
-    const Tone = getTone();
-    if (!Tone) return;
-
-    const fromTrack = this.mixerTracks.get(send.fromTrackId);
-    const toTrack = this.mixerTracks.get(send.toTrackId);
-
-    if (fromTrack && toTrack) {
-      // Create a gain node for the send
-      const sendGain = new Tone.Gain(send.gain);
-      fromTrack.channel.connect(sendGain);
-      sendGain.connect(toTrack.channel);
-    }
-  }
-
-  // ==========================================
-  // Effect Parameter Updates
-  // ==========================================
-
-  updateEffectParams(
-    trackId: UUID,
-    effectId: UUID,
-    params: Record<string, number>
-  ): void {
-    const Tone = getTone();
-    if (!Tone) return;
-
-    const trackNode = this.mixerTracks.get(trackId);
-    if (!trackNode) return;
-
-    const effectNode = trackNode.inserts.get(effectId);
-    if (!effectNode) return;
-
-    // Update parameters based on effect type
-    for (const [key, value] of Object.entries(params)) {
-      try {
-        switch (key) {
-          // EQ parameters
-          case 'lowGain':
-            if (effectNode.low) effectNode.low.value = value;
-            break;
-          case 'midGain':
-            if (effectNode.mid) effectNode.mid.value = value;
-            break;
-          case 'highGain':
-            if (effectNode.high) effectNode.high.value = value;
-            break;
-          case 'lowFreq':
-            if (effectNode.lowFrequency) effectNode.lowFrequency.value = value;
-            break;
-          case 'highFreq':
-            if (effectNode.highFrequency) effectNode.highFrequency.value = value;
-            break;
-          // Compressor parameters
-          case 'threshold':
-            if (effectNode.threshold) effectNode.threshold.value = value;
-            break;
-          case 'ratio':
-            if (effectNode.ratio) effectNode.ratio.value = value;
-            break;
-          case 'attack':
-            if (effectNode.attack) effectNode.attack.value = value;
-            break;
-          case 'release':
-            if (effectNode.release) effectNode.release.value = value;
-            break;
-          case 'makeupGain':
-            // Compressor doesn't have direct makeup gain, handled separately
-            break;
-          // Reverb parameters
-          case 'decay':
-            if (effectNode.decay !== undefined) {
-              effectNode.decay = value;
-              // Reverb needs regeneration for decay changes
-              if (effectNode.generate) {
-                effectNode.generate();
-              }
-            }
-            break;
-          case 'preDelay':
-            if (effectNode.preDelay !== undefined) effectNode.preDelay = value;
-            break;
-          case 'wet':
-            if (effectNode.wet) effectNode.wet.value = value;
-            break;
-          // Delay parameters
-          case 'time':
-            if (effectNode.delayTime) effectNode.delayTime.value = value;
-            break;
-          case 'feedback':
-            if (effectNode.feedback) effectNode.feedback.value = value;
-            break;
-        }
-      } catch (error) {
-        console.error(`Error updating effect parameter ${key}:`, error);
-      }
-    }
-  }
 
   // ==========================================
   // Instrument Setup
@@ -440,9 +190,8 @@ export class AudioEngine {
     const Tone = getTone();
     if (!Tone) return;
 
-    const mixerTrack = this.mixerTracks.get(channel.mixerTrackId);
-    const output = mixerTrack?.channel || this.masterChannel;
-
+    // Route directly to master channel
+    const output = this.masterChannel;
     if (!output) return;
 
     // Create channel for routing
@@ -538,7 +287,7 @@ export class AudioEngine {
   }
 
   async play(): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -628,6 +377,7 @@ export class AudioEngine {
     transport.stop();
     transport.position = 0;
     this.clearScheduledEvents();
+    this.clearMetronome();
     this.stopPositionTracking();
   }
 
@@ -636,6 +386,8 @@ export class AudioEngine {
     if (!transport) return;
 
     transport.pause();
+    this.clearScheduledEvents();
+    this.clearMetronome();
     this.stopPositionTracking();
   }
 
@@ -762,13 +514,13 @@ export class AudioEngine {
         }
       } else if (clip.type === 'audio') {
         console.log('[AudioEngine] Scheduling audio clip:', clip.assetId);
-        this.scheduleAudioClip(clip, bpm, ppq);
+        this.scheduleAudioClip(clip, track, bpm, ppq);
       }
     }
 
     // Schedule metronome if enabled
     if (this.metronomeEnabled) {
-      this.scheduleMetronome();
+      this.startMetronome();
     }
   }
 
@@ -878,7 +630,7 @@ export class AudioEngine {
     }
   }
 
-  private scheduleAudioClip(clip: Clip, bpm: number, ppq: number): void {
+  private scheduleAudioClip(clip: Clip, playlistTrack: { index: number; mute: boolean; solo: boolean }, bpm: number, ppq: number): void {
     const Tone = getTone();
     const transport = this.getTransport();
     if (!Tone || !transport || !this.currentProject) return;
@@ -888,6 +640,13 @@ export class AudioEngine {
     if (!asset?.storageUrl) {
       console.warn('[AudioEngine] Audio clip missing asset or storageUrl:', clip.assetId,
         'Available assets:', this.currentProject.assets.map(a => ({ id: a.id, url: a.storageUrl })));
+      return;
+    }
+
+    // Route audio directly to master channel
+    const outputNode = this.masterChannel;
+    if (!outputNode) {
+      console.warn('[AudioEngine] No output node available for audio clip');
       return;
     }
 
@@ -939,13 +698,13 @@ export class AudioEngine {
           url: cachedBuffer,
           loop: false,
           autostart: false,
-        }).connect(this.masterChannel);
+        }).connect(outputNode);
       } else {
         player = new Tone.Player({
           url: asset.storageUrl,
           loop: false,
           autostart: false,
-        }).connect(this.masterChannel);
+        }).connect(outputNode);
       }
 
       let hasStarted = false;
@@ -993,35 +752,34 @@ export class AudioEngine {
     }
   }
 
-  private scheduleMetronome(): void {
+  private startMetronome(): void {
     if (!this.metronome || !this.currentProject) return;
 
     const transport = this.getTransport();
     if (!transport) return;
 
-    const bpm = this.currentProject.bpm;
-    const ppq = this.currentProject.ppq;
-    const totalBars = 32; // Schedule 32 bars ahead
+    // Clear any existing metronome schedule
+    this.clearMetronome();
+
     const beatsPerBar = this.currentProject.timeSignature.numerator;
+    let beatCount = 0;
 
-    for (let bar = 0; bar < totalBars; bar++) {
-      for (let beat = 0; beat < beatsPerBar; beat++) {
-        const ticks = (bar * beatsPerBar + beat) * ppq;
-        const time = ticksToSeconds(ticks, bpm, ppq);
-        const isDownbeat = beat === 0;
-
-        const eventId = transport.schedule((scheduledTime: number) => {
-          if (this.metronome) {
-            const freq = isDownbeat ? 1000 : 800;
-            this.metronome.triggerAttackRelease(freq, '32n', scheduledTime);
-          }
-        }, time);
-
-        this.scheduledEvents.push({
-          id: eventId,
-          dispose: () => transport.clear(eventId),
-        });
+    // Schedule a repeating event that triggers every beat
+    this.metronomeScheduleId = transport.scheduleRepeat((time: number) => {
+      if (this.metronome && this.metronomeEnabled) {
+        const isDownbeat = (beatCount % beatsPerBar) === 0;
+        const freq = isDownbeat ? 1000 : 800;
+        this.metronome.triggerAttackRelease(freq, '32n', time);
+        beatCount++;
       }
+    }, '4n', 0); // Repeat every quarter note, starting immediately
+  }
+
+  private clearMetronome(): void {
+    const transport = this.getTransport();
+    if (transport && this.metronomeScheduleId !== null) {
+      transport.clear(this.metronomeScheduleId);
+      this.metronomeScheduleId = null;
     }
   }
 
@@ -1038,6 +796,15 @@ export class AudioEngine {
 
   setMetronomeEnabled(enabled: boolean): void {
     this.metronomeEnabled = enabled;
+
+    // If playing, start or stop the metronome accordingly
+    if (this.isPlaying()) {
+      if (enabled) {
+        this.startMetronome();
+      } else {
+        this.clearMetronome();
+      }
+    }
   }
 
   // ==========================================
@@ -1057,7 +824,7 @@ export class AudioEngine {
    * @param deviceId - Optional device ID to record from
    */
   async startRecording(countInBars: number = 0, deviceId?: string): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -1154,41 +921,9 @@ export class AudioEngine {
     return typeof value === 'number' ? value : -60;
   }
 
-  getTrackLevel(trackId: UUID): number {
-    const track = this.mixerTracks.get(trackId);
-    if (!track) return -60;
-    const value = track.meter.getValue();
-    return typeof value === 'number' ? value : -60;
-  }
-
   // ==========================================
-  // Mixer Updates
+  // Channel Volume/Pan/Mute (kept for channel rack)
   // ==========================================
-
-  setMixerTrackVolume(trackId: UUID, volume: number): void {
-    const track = this.mixerTracks.get(trackId);
-    if (track && track.gain) {
-      track.volume = volume;
-      if (!track.muted) {
-        track.gain.gain.value = volume;
-      }
-    }
-  }
-
-  setMixerTrackPan(trackId: UUID, pan: number): void {
-    const track = this.mixerTracks.get(trackId);
-    if (track && track.channel) {
-      track.channel.pan.value = pan;
-    }
-  }
-
-  setMixerTrackMute(trackId: UUID, mute: boolean): void {
-    const track = this.mixerTracks.get(trackId);
-    if (track && track.gain) {
-      track.muted = mute;
-      track.gain.gain.value = mute ? 0 : track.volume;
-    }
-  }
 
   setChannelVolume(channelId: UUID, volume: number): void {
     const instrument = this.instruments.get(channelId);
@@ -1240,50 +975,6 @@ export class AudioEngine {
     }
   }
 
-  updateInsertEffect(trackId: UUID, effectId: UUID, params: Record<string, unknown>): void {
-    const track = this.mixerTracks.get(trackId);
-    if (!track) return;
-
-    const effectNode = track.inserts.get(effectId);
-    if (!effectNode) return;
-
-    console.log(`[AudioEngine] Updating insert effect ${effectId}`, params);
-
-    // Update effect parameters based on type
-    try {
-      // EQ3
-      if ('low' in effectNode || 'lowGain' in params) {
-        if (params.lowGain !== undefined) effectNode.low.value = params.lowGain;
-        if (params.midGain !== undefined) effectNode.mid.value = params.midGain;
-        if (params.highGain !== undefined) effectNode.high.value = params.highGain;
-        if (params.lowFreq !== undefined) effectNode.lowFrequency.value = params.lowFreq;
-        if (params.highFreq !== undefined) effectNode.highFrequency.value = params.highFreq;
-      }
-      // Compressor
-      else if ('threshold' in effectNode || 'threshold' in params) {
-        if (params.threshold !== undefined) effectNode.threshold.value = params.threshold;
-        if (params.ratio !== undefined) effectNode.ratio.value = params.ratio;
-        if (params.attack !== undefined) effectNode.attack.value = params.attack;
-        if (params.release !== undefined) effectNode.release.value = params.release;
-        // Note: makeupGain would need a separate gain node
-      }
-      // Reverb
-      else if ('decay' in effectNode || 'decay' in params) {
-        if (params.decay !== undefined) effectNode.decay = params.decay;
-        if (params.preDelay !== undefined) effectNode.preDelay = params.preDelay;
-        if (params.wet !== undefined) effectNode.wet.value = params.wet;
-      }
-      // Delay (FeedbackDelay)
-      else if ('delayTime' in effectNode || 'time' in params) {
-        if (params.time !== undefined) effectNode.delayTime.value = params.time;
-        if (params.feedback !== undefined) effectNode.feedback.value = params.feedback;
-        if (params.wet !== undefined) effectNode.wet.value = params.wet;
-      }
-    } catch (err) {
-      console.warn('[AudioEngine] Failed to update effect params:', err);
-    }
-  }
-
   // ==========================================
   // Playlist Track Mute/Solo
   // ==========================================
@@ -1317,7 +1008,7 @@ export class AudioEngine {
       this.metronome = null;
     }
 
-    this.isInitialized = false;
+    this._isInitialized = false;
     AudioEngine.instance = null;
   }
 }

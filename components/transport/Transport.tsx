@@ -1,17 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/state/store';
 import { formatTicksAsBBT, formatTicksAsTime } from '@/lib/utils/time';
 import { useAudioSync } from '@/lib/audio/useAudioSync';
-import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
 import LevelMeter from '@/components/common/LevelMeter';
 
 export default function Transport() {
   // Sync audio parameters in real-time
   useAudioSync();
-
-  const [isRecordingInProgress, setIsRecordingInProgress] = useState(false);
 
   const {
     transportState,
@@ -24,13 +21,128 @@ export default function Transport() {
     recording,
     toggleLoop,
     setLoopCount,
-    prepareRecording,
     setRecordingInputDevice,
     setCountInBars,
+    cancelRecording,
   } = useStore();
 
-  const { availableDevices, selectInputDevice, error: recorderError } = useAudioRecorder();
   const [showRecordingSettings, setShowRecordingSettings] = useState(false);
+  const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'unknown'>('unknown');
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [availableDevices, setAvailableDevices] = useState<MediaDeviceInfo[]>([]);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
+  const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Check microphone permission and enumerate devices
+  useEffect(() => {
+    const checkPermissionAndDevices = async () => {
+      try {
+        // Try to enumerate devices first
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(d => d.kind === 'audioinput');
+        
+        // If we have devices with labels, permission was granted
+        if (audioInputs.length > 0 && audioInputs[0].label) {
+          setPermissionState('granted');
+          setAvailableDevices(audioInputs);
+        } else if (audioInputs.length > 0) {
+          // Devices exist but no labels - permission not yet granted
+          setPermissionState('prompt');
+        }
+
+        // Also check permissions API if available
+        if (navigator.permissions && navigator.permissions.query) {
+          try {
+            const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+            setPermissionState(result.state as 'prompt' | 'granted' | 'denied');
+            
+            result.onchange = () => {
+              setPermissionState(result.state as 'prompt' | 'granted' | 'denied');
+              // Re-enumerate devices on permission change
+              navigator.mediaDevices.enumerateDevices().then(devs => {
+                setAvailableDevices(devs.filter(d => d.kind === 'audioinput'));
+              });
+            };
+          } catch {
+            // Permissions API not fully supported
+          }
+        }
+      } catch (err) {
+        console.error('Failed to enumerate devices:', err);
+      }
+    };
+    
+    checkPermissionAndDevices();
+
+    // Listen for device changes
+    const handleDeviceChange = () => {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        setAvailableDevices(devices.filter(d => d.kind === 'audioinput'));
+      });
+    };
+    
+    navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+    };
+  }, []);
+
+  // Update recording duration timer
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    
+    if (isRecording && recordingStartTime) {
+      interval = setInterval(() => {
+        setRecordingDuration((Date.now() - recordingStartTime) / 1000);
+      }, 100);
+    } else {
+      setRecordingDuration(0);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording, recordingStartTime]);
+
+  // Close settings when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowRecordingSettings(false);
+      }
+    };
+
+    if (showRecordingSettings) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showRecordingSettings]);
+
+  const requestMicrophonePermission = async () => {
+    setIsRequestingPermission(true);
+    setRecordingError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the tracks immediately - we just needed permission
+      stream.getTracks().forEach(track => track.stop());
+      setPermissionState('granted');
+      
+      // Re-enumerate devices after permission granted
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter(d => d.kind === 'audioinput');
+      setAvailableDevices(audioInputs);
+    } catch (error) {
+      console.error('Microphone permission denied:', error);
+      setPermissionState('denied');
+      setRecordingError('Microphone access was denied');
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
 
   const bpm = project?.bpm ?? 120;
   const ppq = project?.ppq ?? 96;
@@ -53,35 +165,52 @@ export default function Transport() {
     stop();
     if (isRecording) {
       cancelRecording();
+      setRecordingStartTime(null);
     }
   };
 
   const handleRecord = async () => {
-    if (isRecording || isRecordingInProgress) {
+    setRecordingError(null);
+    
+    if (isRecording) {
       // Stop recording
-      setIsRecordingInProgress(false);
       try {
         await useStore.getState().finishRecording();
+        setRecordingStartTime(null);
         console.log('[Transport] Recording finished');
       } catch (error) {
         console.error('[Transport] Failed to finish recording:', error);
+        setRecordingError(error instanceof Error ? error.message : 'Failed to stop recording');
       }
     } else {
-      // Start recording with 1 bar count-in
-      setIsRecordingInProgress(true);
+      // Check permission first
+      if (permissionState !== 'granted') {
+        setRecordingError('Please grant microphone permission first');
+        setShowRecordingSettings(true);
+        return;
+      }
+
+      // Start recording
       try {
-        await useStore.getState().recordAudio(1);
+        const countIn = recording.countInBars;
+        const deviceId = recording.inputDeviceId || undefined;
+        
+        console.log('[Transport] Starting recording with count-in:', countIn, 'device:', deviceId);
+        setRecordingStartTime(Date.now());
+        
+        await useStore.getState().recordAudio(countIn, deviceId);
         console.log('[Transport] Recording started');
       } catch (error) {
         console.error('[Transport] Failed to start recording:', error);
-        setIsRecordingInProgress(false);
+        setRecordingError(error instanceof Error ? error.message : 'Failed to start recording');
+        setRecordingStartTime(null);
       }
     }
   };
 
-  const handleInputDeviceChange = (deviceId: string) => {
+  const handleInputDeviceChange = async (deviceId: string) => {
     setRecordingInputDevice(deviceId);
-    selectInputDevice(deviceId);
+    setRecordingError(null);
   };
 
   // Convert 0-1 level to dB
@@ -90,8 +219,15 @@ export default function Transport() {
     return 20 * Math.log10(level);
   };
 
+  // Format duration as mm:ss.s
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = (seconds % 60).toFixed(1);
+    return `${mins}:${secs.padStart(4, '0')}`;
+  };
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 relative">
       {/* Position Display */}
       <div className="transport-display min-w-[100px] text-center">
         {formatTicksAsBBT(position, ppq, timeSignature)}
@@ -137,10 +273,13 @@ export default function Transport() {
 
         {/* Record */}
         <button
-          className={`btn btn-icon ${isRecording || isRecordingInProgress ? 'recording-indicator' : 'btn-ghost'}`}
+          className={`btn btn-icon transition-all ${
+            isRecording 
+              ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' 
+              : 'btn-ghost hover:bg-red-600/20 hover:text-red-400'
+          }`}
           onClick={handleRecord}
-          title="Record (1 bar count-in)"
-          disabled={isRecordingInProgress && !isRecording}
+          title={isRecording ? 'Stop Recording' : `Record (${recording.countInBars} bar count-in)`}
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <circle cx="10" cy="10" r="6" />
@@ -148,15 +287,120 @@ export default function Transport() {
         </button>
 
         {/* Recording Settings */}
-        <button
-          className={`btn btn-icon ${showRecordingSettings ? 'btn-secondary' : 'btn-ghost'}`}
-          onClick={() => setShowRecordingSettings(!showRecordingSettings)}
-          title="Recording Settings"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-          </svg>
-        </button>
+        <div className="relative" ref={settingsRef}>
+          <button
+            className={`btn btn-icon ${showRecordingSettings ? 'btn-secondary' : 'btn-ghost'}`}
+            onClick={() => setShowRecordingSettings(!showRecordingSettings)}
+            title="Recording Settings"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+            </svg>
+          </button>
+
+          {/* Recording Settings Panel */}
+          {showRecordingSettings && (
+            <div className="absolute top-full right-0 mt-2 bg-ps-bg-800 border border-ps-bg-600 rounded-lg p-4 shadow-xl z-50 min-w-[300px]">
+              <h3 className="text-sm font-semibold mb-3 text-ps-text-primary">Recording Settings</h3>
+
+              {/* Permission Request */}
+              {permissionState !== 'granted' && (
+                <div className="mb-4 p-3 bg-ps-bg-900 rounded-lg border border-ps-bg-700">
+                  {permissionState === 'denied' ? (
+                    <div className="text-center">
+                      <div className="text-red-400 text-sm mb-2">🚫 Microphone Access Denied</div>
+                      <p className="text-xs text-ps-text-muted">
+                        Please enable microphone access in your browser settings to use recording features.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-ps-text-secondary text-sm mb-2">🎤 Microphone Permission Required</div>
+                      <p className="text-xs text-ps-text-muted mb-3">
+                        Grant microphone access to record audio and see available input devices.
+                      </p>
+                      <button
+                        onClick={requestMicrophonePermission}
+                        disabled={isRequestingPermission}
+                        className="px-4 py-2 bg-ps-accent-primary text-white rounded-lg text-sm font-medium hover:bg-ps-accent-primary/80 transition-colors disabled:opacity-50"
+                      >
+                        {isRequestingPermission ? 'Requesting...' : 'Allow Microphone Access'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Input Device Selection */}
+              <div className="mb-3">
+                <label className="text-xs text-ps-text-muted block mb-1">Input Device</label>
+                <select
+                  className="w-full bg-ps-bg-900 border border-ps-bg-700 rounded px-2 py-1.5 text-sm text-ps-text-primary disabled:opacity-50 focus:border-ps-accent-primary focus:outline-none"
+                  value={recording.inputDeviceId || ''}
+                  onChange={(e) => handleInputDeviceChange(e.target.value)}
+                  disabled={permissionState !== 'granted'}
+                >
+                  {availableDevices.length === 0 ? (
+                    <option value="">{permissionState === 'granted' ? 'No devices found' : 'Grant permission first'}</option>
+                  ) : (
+                    <>
+                      <option value="">Default Microphone</option>
+                      {availableDevices.map((device) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
+              </div>
+
+              {/* Count-in Bars */}
+              <div className="mb-3">
+                <label className="text-xs text-ps-text-muted block mb-1">Count-in (bars)</label>
+                <select
+                  className="w-full bg-ps-bg-900 border border-ps-bg-700 rounded px-2 py-1.5 text-sm text-ps-text-primary focus:border-ps-accent-primary focus:outline-none"
+                  value={recording.countInBars}
+                  onChange={(e) => setCountInBars(parseInt(e.target.value))}
+                >
+                  <option value="0">None</option>
+                  <option value="1">1 bar</option>
+                  <option value="2">2 bars</option>
+                  <option value="4">4 bars</option>
+                </select>
+              </div>
+
+              {/* Input Level Preview */}
+              {permissionState === 'granted' && (
+                <div className="mb-3">
+                  <label className="text-xs text-ps-text-muted block mb-1">Input Level</label>
+                  <LevelMeter
+                    level={levelToDb(recording.inputLevel)}
+                    width={268}
+                    height={20}
+                    orientation="horizontal"
+                    showPeak={true}
+                  />
+                  <p className="text-xs text-ps-text-muted mt-1">
+                    {recording.inputLevel > 0 ? 'Microphone is active' : 'No input detected'}
+                  </p>
+                </div>
+              )}
+
+              {/* Error Display */}
+              {recordingError && (
+                <div className="text-xs text-red-400 mt-2 p-2 bg-red-900/20 rounded border border-red-900/50">
+                  ⚠️ {recordingError}
+                </div>
+              )}
+
+              {/* Help Text */}
+              <div className="text-xs text-ps-text-muted mt-3 pt-3 border-t border-ps-bg-700">
+                💡 Click the red record button to start. The metronome will play during count-in.
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Loop */}
         <button
@@ -186,71 +430,19 @@ export default function Transport() {
         )}
       </div>
 
-      {/* Input Level Meter */}
-      {(isRecording || recording.isPreparing || showRecordingSettings) && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400">Input:</span>
-          <LevelMeter
-            level={levelToDb(recording.inputLevel)}
-            width={80}
-            height={16}
-            orientation="horizontal"
-            showPeak={true}
-          />
-        </div>
-      )}
-
-      {/* Recording Settings Panel */}
-      {showRecordingSettings && (
-        <div className="absolute top-full left-0 mt-2 bg-neutral-800 border border-neutral-700 rounded-lg p-4 shadow-xl z-50 min-w-[300px]">
-          <h3 className="text-sm font-semibold mb-3">Recording Settings</h3>
-
-          {/* Input Device Selection */}
-          <div className="mb-3">
-            <label className="text-xs text-neutral-400 block mb-1">Input Device</label>
-            <select
-              className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-sm"
-              value={recording.inputDeviceId || ''}
-              onChange={(e) => handleInputDeviceChange(e.target.value)}
-            >
-              {availableDevices.length === 0 && (
-                <option value="">No devices available</option>
-              )}
-              {availableDevices.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label || `Device ${device.deviceId.slice(0, 8)}`}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Count-in Bars */}
-          <div className="mb-3">
-            <label className="text-xs text-neutral-400 block mb-1">Count-in (bars)</label>
-            <select
-              className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-sm"
-              value={recording.countInBars}
-              onChange={(e) => setCountInBars(parseInt(e.target.value))}
-            >
-              <option value="0">None</option>
-              <option value="1">1 bar</option>
-              <option value="2">2 bars</option>
-              <option value="4">4 bars</option>
-            </select>
-          </div>
-
-          {/* Error Display */}
-          {recorderError && (
-            <div className="text-xs text-red-400 mt-2">
-              {recorderError}
-            </div>
-          )}
+      {/* Recording Status */}
+      {isRecording && (
+        <div className="flex items-center gap-2 px-2 py-1 bg-red-600/20 rounded-lg border border-red-600/50">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          <span className="text-xs text-red-400 font-mono">
+            REC {formatDuration(recordingDuration)}
+          </span>
         </div>
       )}
 
       {/* Count-in Display */}
       {recording.isPreparing && recording.countInRemaining > 0 && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-1 bg-orange-600/20 rounded-lg border border-orange-600/50">
           <span className="text-sm text-orange-400 font-bold animate-pulse">
             Count-in: {recording.countInRemaining}
           </span>

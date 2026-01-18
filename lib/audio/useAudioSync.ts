@@ -3,28 +3,28 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/state/store';
 import { getAudioEngine } from './AudioEngine';
-import type { Channel, MixerTrack, InsertEffect } from '@/domain/types';
+import type { Channel } from '@/domain/types';
 
 /**
  * Hook to sync store state changes to AudioEngine in real-time
- * This handles pan, volume, mute, solo, synth settings, and mixer effect changes
+ * This handles channel controls: pan, volume, mute, solo, synth settings
+ * 
+ * NOTE: Mixer effects are applied via "Apply" button (non-destructive workflow)
+ * Track effects are NOT synced in real-time - they require offline processing
  */
 export function useAudioSync() {
     const { project } = useStore();
     const prevChannelsRef = useRef<Channel[]>([]);
-    const prevMixerTracksRef = useRef<MixerTrack[]>([]);
 
     useEffect(() => {
         if (!project) return;
 
         const engine = getAudioEngine();
         const channels = project.channels;
-        const mixerTracks = project.mixer.tracks;
 
         // First render - just store references
         if (prevChannelsRef.current.length === 0) {
             prevChannelsRef.current = JSON.parse(JSON.stringify(channels));
-            prevMixerTracksRef.current = JSON.parse(JSON.stringify(mixerTracks));
             return;
         }
 
@@ -95,29 +95,7 @@ export function useAudioSync() {
             }
         });
 
-        // Check each mixer track for effect changes
-        mixerTracks.forEach((track) => {
-            const prevTrack = prevMixerTracksRef.current.find((t) => t.id === track.id);
-            if (!prevTrack) return;
-
-            // Check each insert effect
-            track.inserts.forEach((insert) => {
-                const prevInsert = prevTrack.inserts.find((i) => i.id === insert.id);
-                if (!prevInsert) return;
-
-                // Compare params
-                const prevParams = JSON.stringify(prevInsert.params);
-                const currParams = JSON.stringify(insert.params);
-
-                if (prevParams !== currParams) {
-                    console.log(`[useAudioSync] Effect params changed for ${track.name} - ${insert.type}`);
-                    engine.updateInsertEffect(track.id, insert.id, insert.params as unknown as Record<string, unknown>);
-                }
-            });
-        });
-
         // Update references for next comparison
         prevChannelsRef.current = JSON.parse(JSON.stringify(channels));
-        prevMixerTracksRef.current = JSON.parse(JSON.stringify(mixerTracks));
     }, [project]);
 }

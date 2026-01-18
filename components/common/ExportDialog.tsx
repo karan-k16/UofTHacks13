@@ -15,58 +15,21 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
   const [isRendering, setIsRendering] = useState(false);
   const [progress, setProgress] = useState<RenderProgress | null>(null);
   const [fileName, setFileName] = useState(project?.name || 'export');
-  const [exportMode, setExportMode] = useState<'master' | 'stems'>('master');
-  const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
-
-  // Initialize selected tracks with all non-master tracks
-  useState(() => {
-    if (project) {
-      const trackIds = project.mixer.tracks
-        .filter(t => t.index !== 0)
-        .map(t => t.id);
-      setSelectedTracks(new Set(trackIds));
-    }
-  });
 
   const handleExport = async () => {
     if (!project) return;
 
     try {
       setIsRendering(true);
-      
+
       // Set up progress callback
       offlineRenderer.setProgressCallback((prog) => {
         setProgress(prog);
       });
 
-      if (exportMode === 'master') {
-        // Master render
-        const result = await offlineRenderer.render(project);
-        downloadBlob(result.wavBlob, `${fileName}.wav`);
-      } else {
-        // Stems render
-        const tracksToExport = project.mixer.tracks.filter(t => 
-          selectedTracks.has(t.id) && t.index !== 0
-        );
-
-        for (let i = 0; i < tracksToExport.length; i++) {
-          const track = tracksToExport[i];
-          setProgress({
-            phase: 'preparing',
-            progress: Math.round((i / tracksToExport.length) * 100),
-            message: `Rendering stem: ${track.name} (${i + 1}/${tracksToExport.length})`
-          });
-
-          // To render a stem, we temporarily mute other tracks
-          // but OfflineRenderer doesn't support track-specific rendering yet.
-          // For now, we'll implement the UI and then update the renderer.
-          const result = await offlineRenderer.render(project, {
-            onlyTrackId: track.id
-          });
-          
-          downloadBlob(result.wavBlob, `${fileName}_${track.name}.wav`);
-        }
-      }
+      // Render master mix
+      const result = await offlineRenderer.render(project);
+      downloadBlob(result.wavBlob, `${fileName}.wav`);
 
       // Close dialog after short delay
       setTimeout(() => {
@@ -91,16 +54,6 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
     URL.revokeObjectURL(url);
   };
 
-  const handleToggleTrack = (trackId: string) => {
-    const newSelected = new Set(selectedTracks);
-    if (newSelected.has(trackId)) {
-      newSelected.delete(trackId);
-    } else {
-      newSelected.add(trackId);
-    }
-    setSelectedTracks(newSelected);
-  };
-
   const handleClose = () => {
     if (!isRendering) {
       onClose();
@@ -123,79 +76,6 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
             placeholder="export"
           />
         </div>
-
-        {/* Export Mode */}
-        <div className="flex gap-2 p-1 bg-ps-bg-700 rounded">
-          <button
-            className={`flex-1 py-1.5 text-xs rounded transition-colors ${
-              exportMode === 'master'
-                ? 'bg-ps-accent-primary text-white'
-                : 'hover:bg-ps-bg-600 text-ps-text-muted'
-            }`}
-            onClick={() => setExportMode('master')}
-            disabled={isRendering}
-          >
-            Master Mix
-          </button>
-          <button
-            className={`flex-1 py-1.5 text-xs rounded transition-colors ${
-              exportMode === 'stems'
-                ? 'bg-ps-accent-primary text-white'
-                : 'hover:bg-ps-bg-600 text-ps-text-muted'
-            }`}
-            onClick={() => setExportMode('stems')}
-            disabled={isRendering}
-          >
-            Individual Stems
-          </button>
-        </div>
-
-        {/* Track Selection (only for stems) */}
-        {exportMode === 'stems' && project && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Select Tracks</label>
-            <div className="max-h-40 overflow-y-auto bg-ps-bg-700 rounded border border-ps-bg-500 p-1">
-              {project.mixer.tracks
-                .filter((t) => t.index !== 0) // Skip master
-                .map((track) => (
-                  <div
-                    key={track.id}
-                    className="flex items-center gap-2 p-2 hover:bg-ps-bg-600 rounded cursor-pointer"
-                    onClick={() => !isRendering && handleToggleTrack(track.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTracks.has(track.id)}
-                      onChange={() => {}} // Handled by div onClick
-                      disabled={isRendering}
-                      className="rounded border-ps-bg-500 text-ps-accent-primary"
-                    />
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: track.color }}
-                    />
-                    <span className="text-xs truncate">{track.name}</span>
-                  </div>
-                ))}
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="text-[10px] text-ps-accent-primary hover:underline"
-                onClick={() => setSelectedTracks(new Set(project.mixer.tracks.filter(t => t.index !== 0).map(t => t.id)))}
-                disabled={isRendering}
-              >
-                Select All
-              </button>
-              <button
-                className="text-[10px] text-ps-accent-primary hover:underline"
-                onClick={() => setSelectedTracks(new Set())}
-                disabled={isRendering}
-              >
-                Deselect All
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Format info */}
         <div className="bg-ps-bg-700 p-3 rounded">
