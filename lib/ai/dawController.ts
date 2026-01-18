@@ -11,8 +11,11 @@ import type {
   AddPatternCommand,
   DeletePatternCommand,
   AddNoteCommand,
+  AddNoteSequenceCommand,
+  ClearPatternNotesCommand,
   UpdateNoteCommand,
   DeleteNoteCommand,
+  FocusPanelCommand,
   PlayCommand,
   StopCommand,
   PauseCommand,
@@ -38,6 +41,7 @@ import type {
   ResetTrackEffectsCommand,
   ApplyTrackEffectsCommand,
   SetMasterVolumeCommand,
+  AddAudioSampleCommand,
 } from './types';
 import {
   validateBPM,
@@ -304,7 +308,224 @@ export function executeNoteCommand(
     }
   }
 
+  // Handle addNoteSequence - add multiple notes at once
+  if (cmd.action === 'addNoteSequence') {
+    const seqCmd = cmd as AddNoteSequenceCommand;
+
+    // Validate pattern exists
+    const pattern = project.patterns.find((p) => p.id === seqCmd.patternId);
+    if (!pattern) {
+      return { success: false, message: `Pattern not found: ${seqCmd.patternId}` };
+    }
+
+    if (!seqCmd.notes || seqCmd.notes.length === 0) {
+      return { success: false, message: 'No notes provided in sequence' };
+    }
+
+    // Validate all notes first
+    for (let i = 0; i < seqCmd.notes.length; i++) {
+      const note = seqCmd.notes[i];
+      const pitchValidation = validatePitch(note.pitch);
+      if (!pitchValidation.valid) {
+        return { success: false, message: `Note ${i + 1}: ${pitchValidation.error}` };
+      }
+      const tickValidation = validateTick(note.startTick);
+      if (!tickValidation.valid) {
+        return { success: false, message: `Note ${i + 1}: ${tickValidation.error}` };
+      }
+      const durationValidation = validateDuration(note.durationTick);
+      if (!durationValidation.valid) {
+        return { success: false, message: `Note ${i + 1}: ${durationValidation.error}` };
+      }
+    }
+
+    try {
+      const addedNoteIds: string[] = [];
+      for (const note of seqCmd.notes) {
+        const noteId = store.addNote(seqCmd.patternId, {
+          pitch: note.pitch,
+          startTick: note.startTick,
+          durationTick: note.durationTick,
+          velocity: note.velocity ?? 100,
+        });
+        if (noteId) {
+          addedNoteIds.push(noteId);
+        }
+      }
+
+      return {
+        success: true,
+        message: `Added ${addedNoteIds.length} notes to pattern "${pattern.name}"`,
+        data: { noteIds: addedNoteIds },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to add note sequence',
+      };
+    }
+  }
+
+  // Handle clearPatternNotes
+  if (cmd.action === 'clearPatternNotes') {
+    const clearCmd = cmd as ClearPatternNotesCommand;
+
+    const pattern = project.patterns.find((p) => p.id === clearCmd.patternId);
+    if (!pattern) {
+      return { success: false, message: `Pattern not found: ${clearCmd.patternId}` };
+    }
+
+    try {
+      store.clearPatternNotes(clearCmd.patternId);
+      return {
+        success: true,
+        message: `Cleared all notes from pattern "${pattern.name}"`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to clear pattern notes',
+      };
+    }
+  }
+
   return { success: false, message: 'Unknown note command' };
+}
+
+// ============================================
+// UI/Focus Operations
+// ============================================
+
+/**
+ * Execute UI focus commands
+ */
+export function executeFocusPanelCommand(cmd: FocusPanelCommand): CommandResult {
+  const store = useStore.getState();
+
+  const panelMap: Record<string, string> = {
+    browser: 'browser',
+    channelRack: 'channelRack',
+    mixer: 'mixer',
+    playlist: 'playlist',
+    pianoRoll: 'pianoRoll',
+    chat: 'chat',
+  };
+
+  const panelId = panelMap[cmd.panel];
+  if (!panelId) {
+    return { success: false, message: `Unknown panel: ${cmd.panel}` };
+  }
+
+  try {
+    store.setFocusedPanel(panelId as any);
+    return {
+      success: true,
+      message: `Focused ${cmd.panel} panel`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to focus panel',
+    };
+  }
+}
+
+// ============================================
+// Sample Operations
+// ============================================
+
+/**
+ * Execute sample loading commands
+ * Resolves sample by ID or search, then adds to project
+ */
+export async function executeSampleCommand(cmd: AddAudioSampleCommand): Promise<CommandResult> {
+  const store = useStore.getState();
+  const project = store.project;
+
+  if (!project) {
+    return { success: false, message: 'No project loaded' };
+  }
+
+  // We need to resolve the sample - this requires the sample library
+  // The sample library is loaded on the client via SampleLibrary.ts
+  // Import dynamically to avoid server-side issues
+  try {
+    const { loadSampleLibrary, getSampleById } = await import('@/lib/audio/SampleLibrary');
+    const library = await loadSampleLibrary();
+
+    if (!library) {
+      return { success: false, message: 'Sample library not available' };
+    }
+
+    let sample = null;
+
+    // Try to find by exact ID first
+    if (cmd.sampleId) {
+      sample = getSampleById(library, cmd.sampleId);
+    }
+
+    if (!sample) {
+      return {
+        success: false,
+        message: `Sample not found: ${cmd.sampleId || cmd.sampleName || 'unknown'}. Check sample ID is correct.`
+      };
+    }
+
+    // Add the audio asset from the sample path
+    const assetId = store.addAudioAssetFromUrl({
+      name: sample.name,
+      fileName: sample.filename,
+      storageUrl: sample.path,
+      duration: sample.duration,
+      format: 'mp3',
+    });
+
+    // Calculate duration in ticks (using project BPM and PPQ)
+    const durationSeconds = sample.duration || 1;
+    const beatsPerSecond = project.bpm / 60;
+    const durationBeats = durationSeconds * beatsPerSecond;
+    const durationTicks = Math.round(durationBeats * project.ppq);
+
+    // Add to a new track (or existing if trackIndex provided)
+    const startTick = 0;
+
+    if (cmd.trackIndex !== undefined) {
+      // Validate track index
+      if (cmd.trackIndex < 0 || cmd.trackIndex >= project.playlist.tracks.length) {
+        return { success: false, message: `Invalid track index: ${cmd.trackIndex}` };
+      }
+
+      // Add clip to existing track
+      store.addClip({
+        type: 'audio',
+        audioAssetId: assetId,
+        trackIndex: cmd.trackIndex,
+        startTick,
+        durationTick: durationTicks,
+        color: '#4a9eff',
+      });
+
+      return {
+        success: true,
+        message: `Added sample "${sample.name}" to track ${cmd.trackIndex}`,
+        data: { assetId, samplePath: sample.path },
+      };
+    } else {
+      // Create new track with the sample
+      await store.addAudioSampleToNewTrack(assetId, sample.name, startTick, durationTicks);
+
+      return {
+        success: true,
+        message: `Added sample "${sample.name}" to new track`,
+        data: { assetId, samplePath: sample.path },
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to add sample',
+    };
+  }
 }
 
 // ============================================
@@ -689,7 +910,7 @@ export function executePlaylistCommand(
       // Calculate duration from pattern length if not provided
       const ppq = project.ppq || 96;
       const patternDurationTicks = pattern.lengthInSteps * (ppq / pattern.stepsPerBeat);
-      
+
       const clipData: Omit<PatternClip, 'id'> = {
         type: 'pattern',
         patternId: cmd.patternId,
@@ -700,7 +921,7 @@ export function executePlaylistCommand(
         color: pattern.color,
         mute: false,
       };
-      
+
       store.addClip(clipData);
 
       return {
@@ -1030,26 +1251,26 @@ export function executeTrackEffectsCommand(
  * @param command - The typed command to execute
  * @returns Result with success status and message
  */
-export function executeCommand(command: AICommand): CommandResult {
+export async function executeCommand(command: AICommand): Promise<CommandResult> {
   // Log incoming command
   console.log('[DAW Controller] Executing command:', command.action, command);
 
   // Handle special commands
   if (command.action === 'unknown') {
-    console.warn('[DAW Controller] Unknown command received:', command.originalText);
+    console.warn('[DAW Controller] Unknown command received:', (command as any).originalText);
     return {
       success: false,
-      message: `Could not understand command: ${command.reason || 'Unknown reason'}`,
-      error: command.originalText,
+      message: `Could not understand command: ${(command as any).reason || 'Unknown reason'}`,
+      error: (command as any).originalText,
     };
   }
 
   if (command.action === 'clarificationNeeded') {
-    console.log('[DAW Controller] Clarification needed:', command.message);
+    console.log('[DAW Controller] Clarification needed:', (command as any).message);
     return {
       success: false,
-      message: command.message,
-      data: { suggestedOptions: command.suggestedOptions },
+      message: (command as any).message,
+      data: { suggestedOptions: (command as any).suggestedOptions },
     };
   }
 
@@ -1061,9 +1282,23 @@ export function executeCommand(command: AICommand): CommandResult {
     if (command.action === 'addPattern' || command.action === 'deletePattern') {
       result = executePatternCommand(command);
     }
-    // Note commands
-    else if (command.action === 'addNote' || command.action === 'updateNote' || command.action === 'deleteNote') {
-      result = executeNoteCommand(command);
+    // Note commands (including sequence)
+    else if (
+      command.action === 'addNote' ||
+      command.action === 'addNoteSequence' ||
+      command.action === 'clearPatternNotes' ||
+      command.action === 'updateNote' ||
+      command.action === 'deleteNote'
+    ) {
+      result = executeNoteCommand(command as AddNoteCommand | AddNoteSequenceCommand | ClearPatternNotesCommand | UpdateNoteCommand | DeleteNoteCommand);
+    }
+    // UI/Focus commands
+    else if (command.action === 'focusPanel') {
+      result = executeFocusPanelCommand(command);
+    }
+    // Sample commands
+    else if (command.action === 'addAudioSample') {
+      result = await executeSampleCommand(command);
     }
     // Transport commands
     else if (

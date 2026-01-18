@@ -3,6 +3,11 @@
  * Handles communication with Gemini and fallback models through Backboard SDK
  * 
  * Uses the official backboard-sdk package (SDK-first, no REST endpoints)
+ * 
+ * CONTEXT INJECTION: The system prompt is now dynamically generated based on:
+ * - Current project state (patterns, channels, tracks, clips)
+ * - Available samples from the sample library
+ * - DAW capabilities and constraints
  */
 
 import type { BackboardResponse } from './types';
@@ -20,30 +25,36 @@ const USE_MOCK = false;
 // Backboard client instance (singleton)
 let client: InstanceType<typeof BackboardClient> | null = null;
 
-// Cached assistant and thread IDs
+// Cached assistant and thread IDs - keyed by context hash for cache invalidation
 let cachedAssistantId: string | null = null;
 let cachedThreadId: string | null = null;
+let cachedContextHash: string | null = null;
 
-// System prompt for DAW assistant (avoid curly braces to prevent template issues)
-const DAW_SYSTEM_PROMPT = `You are a DAW (Digital Audio Workstation) assistant. Convert natural language commands into structured JSON actions.
-              
+// Default system prompt (fallback if no context provided)
+const DEFAULT_SYSTEM_PROMPT = `You are a DAW (Digital Audio Workstation) assistant for Pulse Studio. Convert natural language commands into structured JSON actions.
+
+IMPORTANT: Always respond with ONLY valid JSON, no markdown, no explanation.
+
+Response format:
+{
+  "action": "commandName",
+  "parameters": { ... },
+  "confidence": 0.0-1.0,
+  "reasoning": "brief explanation"
+}
+
 Available actions:
-- addPattern: Create a new pattern with name and lengthInSteps parameters
-- addNote: Add a note to a pattern with patternId, pitch, startTick, durationTick, velocity
-- setBpm: Set the tempo with bpm parameter
+- addPattern: Create a new pattern. Parameters: { name?: string, lengthInSteps?: number }
+- addNote: Add a note. Parameters: { patternId: string, pitch: number, startTick: number, durationTick: number, velocity?: number }
+- setBpm: Set tempo. Parameters: { bpm: number }
 - play, stop, pause: Control playback (no parameters)
-- addChannel: Add a synth or sampler channel with name and type parameters
-- addClip: Add a clip to the playlist with patternId, trackIndex, startTime parameters
-- setVolume, setPan: Adjust mixer settings with channelId and value parameters
-- toggleMute, toggleSolo: Mixer controls with channelId parameter
+- addChannel: Add instrument. Parameters: { name?: string, type: "synth"|"sampler", preset?: string }
+- addClip: Add clip to playlist. Parameters: { patternId: string, trackIndex: number, startTick: number }
+- setTrackEffect: Set mixer effect. Parameters: { trackId: string, effectKey: string, value: number }
+- addAudioSample: Add sample. Parameters: { sampleId: string, trackIndex?: number }
+- clarificationNeeded: When unclear. Parameters: { message: string, suggestedOptions?: string[] }
 
-Always respond with valid JSON only, no markdown, no explanation. Format:
-action: the action name
-parameters: object with action-specific parameters
-confidence: number between 0 and 1
-reasoning: brief explanation
-
-For unclear commands use action clarificationNeeded with parameters.message explaining what you need.`;
+For unclear commands use action "clarificationNeeded" with a message explaining what you need.`;
 
 /**
  * Sleep utility for retry delays
@@ -53,19 +64,32 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Simple hash function for context comparison
+ */
+function hashContext(context: string): string {
+  let hash = 0;
+  for (let i = 0; i < context.length; i++) {
+    const char = context.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString(16);
+}
+
+/**
  * Mock Backboard response for testing
  * Parses simple natural language commands into structured responses
  */
 function mockBackboardResponse(text: string, model: string): BackboardResponse {
   console.log(`[Mock Backboard] Processing: "${text}" with model: ${model}`);
-  
+
   const lowerText = text.toLowerCase();
-  
+
   // Pattern: "add a [instrument] pattern"
   if (lowerText.includes('pattern') && (lowerText.includes('add') || lowerText.includes('create'))) {
     const instruments = ['kick', 'snare', 'hihat', 'clap', 'tom', 'cymbal'];
     const found = instruments.find(inst => lowerText.includes(inst));
-    
+
     return {
       action: 'addPattern',
       parameters: {
@@ -76,12 +100,12 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
       reasoning: `Creating a new pattern${found ? ` for ${found}` : ''}`,
     };
   }
-  
+
   // Pattern: "set bpm to [number]"
   if (lowerText.includes('bpm') || lowerText.includes('tempo')) {
     const match = text.match(/\d+/);
     const bpm = match ? parseInt(match[0]) : 120;
-    
+
     return {
       action: 'setBpm',
       parameters: { bpm },
@@ -89,7 +113,7 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
       reasoning: `Setting tempo to ${bpm} BPM`,
     };
   }
-  
+
   // Pattern: "play"
   if (lowerText.match(/^(play|start)/) || lowerText.includes('play it')) {
     return {
@@ -99,7 +123,7 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
       reasoning: 'Starting playback',
     };
   }
-  
+
   // Pattern: "stop"
   if (lowerText.match(/^stop/)) {
     return {
@@ -109,7 +133,7 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
       reasoning: 'Stopping playback',
     };
   }
-  
+
   // Pattern: "add note" or "add [note]"
   if (lowerText.includes('note')) {
     return {
@@ -125,7 +149,7 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
       reasoning: 'Adding a note to the current pattern',
     };
   }
-  
+
   // Default: unknown command
   return {
     action: 'clarificationNeeded',
@@ -145,7 +169,7 @@ export function initializeBackboard(): void {
   if (!BACKBOARD_API_KEY) {
     throw new Error('BACKBOARD_API_KEY environment variable is not set');
   }
-  
+
   // Initialize the SDK client
   if (!client) {
     client = new BackboardClient({
@@ -170,20 +194,31 @@ function getClient(): InstanceType<typeof BackboardClient> {
 }
 
 /**
- * Create or get cached assistant
+ * Create or get cached assistant with dynamic system prompt
+ * If the context has changed significantly, create a new assistant
  */
-async function getAssistant(): Promise<string> {
+async function getAssistant(systemPrompt: string): Promise<string> {
+  const contextHash = hashContext(systemPrompt);
+
+  // If context changed significantly, invalidate cache
+  if (cachedAssistantId && cachedContextHash !== contextHash) {
+    console.log('[Backboard] Context changed, creating new assistant');
+    cachedAssistantId = null;
+    cachedThreadId = null;
+  }
+
   if (cachedAssistantId) {
     return cachedAssistantId;
   }
 
   const backboard = getClient();
   const assistant = await backboard.createAssistant({
-    name: 'Music Copilot',
-    description: DAW_SYSTEM_PROMPT,
+    name: 'Pulse Studio Music Copilot',
+    description: systemPrompt,
   });
 
   cachedAssistantId = assistant.assistantId;
+  cachedContextHash = contextHash;
   console.log(`[Backboard] Created assistant: ${cachedAssistantId}`);
   return cachedAssistantId!;
 }
@@ -198,7 +233,7 @@ async function getThread(assistantId: string): Promise<string> {
 
   const backboard = getClient();
   const thread = await backboard.createThread(assistantId);
-  
+
   cachedThreadId = thread.threadId;
   console.log(`[Backboard] Created thread: ${cachedThreadId}`);
   return cachedThreadId!;
@@ -210,25 +245,32 @@ async function getThread(assistantId: string): Promise<string> {
  * @param text - The user's natural language input
  * @param model - The model to use ('gemini' or 'fallback')
  * @param conversationHistory - Optional previous messages for context
+ * @param systemPrompt - Dynamic system prompt with project context (from contextBuilder)
  * @returns Parsed JSON response from the AI model
  * 
  * @example
- * const response = await sendToModel("add a kick drum pattern", "gemini");
- * console.log(response.action); // "addPattern"
- * console.log(response.parameters); // { name: "kick", ... }
+ * const context = buildDAWContext(project, sampleLibrary);
+ * const systemPrompt = generateSystemPrompt(context);
+ * const response = await sendToModel("add a kick drum", "gemini", [], systemPrompt);
+ * console.log(response.action); // "addAudioSample"
+ * console.log(response.parameters); // { sampleId: "drums_kick_..." }
  */
 export async function sendToModel(
   text: string,
   model: 'gemini' | 'fallback',
-  conversationHistory?: Array<{ role: string; content: string }>
+  conversationHistory?: Array<{ role: string; content: string }>,
+  systemPrompt?: string
 ): Promise<BackboardResponse> {
+  // Use provided system prompt or fall back to default
+  const effectiveSystemPrompt = systemPrompt || DEFAULT_SYSTEM_PROMPT;
+
   // MOCK MODE: Return mock responses for testing
   if (USE_MOCK) {
     console.log('[Backboard] Using MOCK mode');
     await sleep(300); // Simulate network delay
     return mockBackboardResponse(text, model);
   }
-  
+
   // REAL API MODE using Backboard SDK
   if (!BACKBOARD_API_KEY) {
     throw new Error('Backboard API key not configured');
@@ -239,8 +281,8 @@ export async function sendToModel(
   // Retry loop
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      // Get or create assistant and thread
-      const assistantId = await getAssistant();
+      // Get or create assistant and thread with dynamic context
+      const assistantId = await getAssistant(effectiveSystemPrompt);
       const threadId = await getThread(assistantId);
 
       // Use OpenAI models (Gemini not available on this Backboard instance)
@@ -263,13 +305,13 @@ export async function sendToModel(
 
       // Extract response content from SDK response
       let content = response.content || '';
-      
+
       // Try to parse JSON from the response
       try {
         // Remove markdown code blocks if present
         content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const parsed = JSON.parse(content);
-        
+
         return {
           action: parsed.action || 'unknown',
           parameters: parsed.parameters || {},

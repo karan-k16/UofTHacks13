@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/state/store';
 import type { ChatMessage, BackboardResponse } from '@/lib/ai/types';
 import { undoLastAIAction, canUndoAIAction } from '@/lib/ai/undoHandler';
 import { parseAIResponse } from '@/lib/ai/commandParser';
 import { executeCommand } from '@/lib/ai/dawController';
+import { buildDAWContext, generateSystemPrompt } from '@/lib/ai/contextBuilder';
+import { loadSampleLibrary } from '@/lib/audio/SampleLibrary';
 
 // Format timestamp as relative time
 function formatRelativeTime(timestamp: number): string {
@@ -120,7 +122,13 @@ export default function ChatPanel() {
     chat.setPending(true);
 
     try {
-      // Call API endpoint
+      // Build dynamic context from current project state and sample library
+      const project = useStore.getState().project;
+      const sampleLibrary = await loadSampleLibrary();
+      const dawContext = buildDAWContext(project, sampleLibrary);
+      const systemPrompt = generateSystemPrompt(dawContext);
+
+      // Call API endpoint with context
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -130,6 +138,7 @@ export default function ChatPanel() {
           text: userMessage,
           model: selectedModel,
           conversationHistory: messages.slice(-5), // Last 5 messages for context
+          systemPrompt, // Dynamic context for the AI
         }),
       });
 
@@ -153,8 +162,8 @@ export default function ChatPanel() {
           // Parse the AI response
           const command = parseAIResponse(backboardResponse);
 
-          // Execute the command
-          const result = executeCommand(command);
+          // Execute the command (async for sample operations)
+          const result = await executeCommand(command);
 
           // Add response message based on result
           if (result.success) {

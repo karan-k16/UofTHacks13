@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       model: body.model,
       timestamp: new Date().toISOString(),
       hasHistory: !!body.conversationHistory?.length,
+      hasContext: !!body.systemPrompt,
     };
     console.log('[AI Chat API] Request:', requestLog);
 
@@ -99,13 +100,14 @@ export async function POST(request: NextRequest) {
       content: msg.text,
     }));
 
-    // Call Backboard integration
+    // Call Backboard integration with dynamic context
     let backboardResponse: BackboardResponse;
     try {
       backboardResponse = await sendToModel(
         body.text,
         body.model,
-        conversationHistory
+        conversationHistory,
+        body.systemPrompt // Pass the dynamic system prompt with project context
       );
 
       // Log successful response

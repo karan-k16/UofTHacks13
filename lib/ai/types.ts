@@ -59,6 +59,27 @@ export interface DeleteNoteCommand extends BaseCommand {
   noteId: string;
 }
 
+export interface AddNoteSequenceCommand extends BaseCommand {
+  action: 'addNoteSequence';
+  patternId: string;
+  notes: Array<{
+    pitch: number;
+    startTick: number;
+    durationTick: number;
+    velocity?: number;
+  }>;
+}
+
+export interface ClearPatternNotesCommand extends BaseCommand {
+  action: 'clearPatternNotes';
+  patternId: string;
+}
+
+export interface FocusPanelCommand extends BaseCommand {
+  action: 'focusPanel';
+  panel: 'browser' | 'channelRack' | 'mixer' | 'playlist' | 'pianoRoll' | 'chat';
+}
+
 // Transport commands
 export interface PlayCommand extends BaseCommand {
   action: 'play';
@@ -254,8 +275,11 @@ export type AICommand =
   | SelectPatternCommand
   | OpenPianoRollCommand
   | AddNoteCommand
+  | AddNoteSequenceCommand
+  | ClearPatternNotesCommand
   | UpdateNoteCommand
   | DeleteNoteCommand
+  | FocusPanelCommand
   | PlayCommand
   | StopCommand
   | PauseCommand
@@ -367,13 +391,19 @@ export interface ChatAPIRequest {
   text: string;
   model: 'gemini' | 'fallback';
   conversationHistory?: ChatMessage[];
+  /**
+   * Dynamic system prompt with project context
+   * Generated on client side using contextBuilder.generateSystemPrompt()
+   * Includes current project state, available samples, and DAW capabilities
+   */
+  systemPrompt?: string;
 }
 
 export interface ChatAPIResponse {
   success: boolean;
   data?: {
     message: string;
-    commandResult?: CommandResult;
+    commandResult?: BackboardResponse;
   };
   error?: string;
 }
