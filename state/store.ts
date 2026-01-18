@@ -86,7 +86,7 @@ function getSynthPresetSettingsFromStore(preset: string): Partial<import('@/doma
     atmosphericPad: { oscillatorType: 'sine', attack: 1.0, decay: 0.5, sustain: 0.9, release: 2.0, filterCutoff: 1000, filterResonance: 0.3 },
     metallic: { oscillatorType: 'square', attack: 0.001, decay: 0.6, sustain: 0.2, release: 0.8, filterCutoff: 5000, filterResonance: 5 },
   };
-
+  
   const selectedPreset = PRESETS[preset];
   return selectedPreset !== undefined ? selectedPreset : PRESETS.default!;
 }
@@ -130,7 +130,6 @@ interface StoreState {
   position: number;
   isRecording: boolean;
   metronomeEnabled: boolean;
-  isAudioInitialized: boolean;
 
   // Recording State
   recording: RecordingState;
@@ -249,7 +248,6 @@ interface StoreState {
   startRecording: () => void;
   stopRecording: () => void;
   toggleMetronome: () => void;
-  setIsAudioInitialized: (isInitialized: boolean) => void;
 
   // Recording Workflow Actions
   recordAudio: (countInBars?: number, deviceId?: string) => Promise<void>;
@@ -420,7 +418,6 @@ export const useStore = create<StoreState>()(
         position: 0,
         isRecording: false,
         metronomeEnabled: false,
-        isAudioInitialized: false,
 
         // Recording State
         recording: {
@@ -1514,12 +1511,6 @@ export const useStore = create<StoreState>()(
           import('@/lib/audio/AudioEngine').then(({ getAudioEngine }) => {
             const engine = getAudioEngine();
             engine.setMetronomeEnabled(get().metronomeEnabled);
-          });
-        },
-
-        setIsAudioInitialized: (isInitialized) => {
-          set((state) => {
-            state.isAudioInitialized = isInitialized;
           });
         },
 
