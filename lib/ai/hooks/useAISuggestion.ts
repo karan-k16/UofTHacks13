@@ -205,10 +205,23 @@ export function useAISuggestion(): UseAISuggestionReturn {
                 // Use startTick from response if provided, otherwise use snapped position
                 const startTick = parameters.startTick ? Number(parameters.startTick) : snappedStartTick;
 
+                // Determine the final trackIndex to use
+                const finalTrackIndex = parameters.trackIndex !== undefined ? Number(parameters.trackIndex) : trackIndex;
+
+                // Update all batch commands to use the correct trackIndex
+                // This prevents ensureTracksExist from creating extra tracks
+                const correctedBatchCommands = batchCommands?.map(cmd => ({
+                    ...cmd,
+                    parameters: {
+                        ...cmd.parameters,
+                        trackIndex: finalTrackIndex
+                    }
+                }));
+
                 // Build ghost clip
                 const ghostClip: GhostClip = {
                     trackId,
-                    trackIndex: parameters.trackIndex !== undefined ? Number(parameters.trackIndex) : trackIndex,
+                    trackIndex: finalTrackIndex,
                     startTick,
                     durationTick,
                     patternId: parameters.patternId as string | undefined,
@@ -220,7 +233,7 @@ export function useAISuggestion(): UseAISuggestionReturn {
                     type: action === 'addAudioSample' ? 'audio' : 'pattern',
                     color: GHOST_CLIP_COLOR,
                     reasoning: backboardResponse.reasoning,
-                    batchCommands, // Store batch commands for execution
+                    batchCommands: correctedBatchCommands, // Store corrected batch commands
                 };
 
                 // Build the command to execute

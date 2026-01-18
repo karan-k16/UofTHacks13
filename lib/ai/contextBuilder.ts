@@ -350,11 +350,17 @@ export function generateSystemPrompt(context: DAWContext): string {
     // Build project state section
     let projectSection = '';
     if (project) {
+        const trackCount = project.playlistTracks.length;
+        const nextAvailableTrack = trackCount;
+        const maxExistingTrack = trackCount - 1;
+
         projectSection = `
 ## CURRENT PROJECT STATE
 - BPM: ${project.bpm}
 - Master Volume: ${(project.masterVolume * 100).toFixed(0)}%
 - PPQ (ticks per beat): ${project.ppq}
+- **Total Tracks: ${trackCount} (valid trackIndex: 0-${maxExistingTrack})**
+- **Next available track: ${nextAvailableTrack}**
 
 ### Patterns (${project.patterns.length} total):
 ${project.patterns.map((p) => `  - "${p.name}" (id: ${p.id}, ${p.lengthInSteps} steps, ${p.noteCount} notes)`).join('\n') || '  (none)'}
@@ -362,7 +368,7 @@ ${project.patterns.map((p) => `  - "${p.name}" (id: ${p.id}, ${p.lengthInSteps} 
 ### Channels (${project.channels.length} total):
 ${project.channels.map((c) => `  - "${c.name}" (id: ${c.id}, type: ${c.type}${c.preset ? `, preset: ${c.preset}` : ''}, vol: ${(c.volume * 100).toFixed(0)}%${c.muted ? ', MUTED' : ''})`).join('\n') || '  (none)'}
 
-### Playlist Tracks (${project.playlistTracks.length} total):
+### Playlist Tracks (${trackCount} total):
 ${project.playlistTracks.map((t) => `  - Track ${t.index}: "${t.name}" (id: ${t.id}, ${t.clipCount} clips${t.muted ? ', MUTED' : ''})`).join('\n') || '  (none)'}
 
 ### Clips on Timeline:
@@ -415,7 +421,7 @@ For simple single-action requests, you can still use the single format:
 7. MIDI pitch: ${capabilities.pitchRange.min}-${capabilities.pitchRange.max} (60 = middle C)
 8. Volume: 0.0-1.0 (1.0 = 100%)
 9. Pan: -1.0 (left) to 1.0 (right)
-10. Tracks are auto-created if trackIndex doesn't exist
+10. **TRACK USAGE: Use existing tracks (0 to max) or the "next available track" shown above. Avoid creating multiple new tracks unnecessarily.**
 11. Overlapping clips are auto-offset to avoid conflicts
 
 ## TIMING REFERENCE
@@ -612,26 +618,26 @@ When asked to add piano, melody, chords, bass line, or any melodic element:
 3. **Add notes using addNote or addNoteSequence** with correct pitches, timing, and velocities
 4. **Add a clip** to place the pattern on the playlist
 
-### Track Layout for Full Productions:
-- Tracks 0-2: Drums (kick, snare, hihat)
-- Track 3: Bass (synth bass or 808)
-- Track 4: Chords/Pads
-- Track 5: Lead melody
-- Track 6+: Additional elements
+### Track Organization Principles:
+- Group similar instruments together (e.g., all drums, all melodic elements)
+- Drums typically go on earlier tracks, melodic content on later tracks
+- Bass lines work well as a transition between drums and melodic elements
+- IMPORTANT: Always use the next available track (don't skip tracks or create gaps)
+- If there are already tracks in the project, add to an existing empty track or the next sequential track
 
 ### Example: Adding a Piano Chord Progression
 To add piano chords:
 1. addChannel with type: "synth", preset: "piano"
 2. addPattern with name: "Piano Chords"
 3. Use addNoteSequence to add chord notes (multiple pitches at same startTick)
-4. addClip to place on track 4
+4. addClip to place on the next available track
 
 ### Example: Adding a Bass Line
 To add a bass line:
 1. addChannel with type: "synth", preset: "bass" or "subBass"
 2. addPattern with name: "Bass Line"
 3. Add notes in the bass register (pitches 33-48)
-4. addClip to place on track 3
+4. addClip to place on the next available track
 
 ## AVAILABLE SYNTH PRESETS
 ${capabilities.synthPresets.join(', ')}
