@@ -107,26 +107,40 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-ps-bg-900 text-ps-text-primary">
-                Loading...
+            <div className="h-screen w-screen flex items-center justify-center bg-[#0a0a0a] text-white">
+                <div className="flex items-center gap-3">
+                    <svg className="animate-spin h-5 w-5 text-[#ff6b6b]" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span className="text-[#888]">Loading...</span>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-ps-bg-900 text-ps-text-primary">
+        <div className="min-h-screen bg-[#0a0a0a] text-white">
             {/* Header */}
-            <header className="h-16 border-b border-ps-bg-700 flex items-center justify-between px-8 bg-ps-bg-800">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ps-accent-primary to-ps-accent-secondary">
-                        Pulse Studio
+            <header className="h-16 border-b border-[#1a1a1a] flex items-center justify-between px-8 bg-gradient-to-r from-[#0d0d0d] to-[#111]">
+                <div className="flex items-center gap-3">
+                    {/* Logo matching landing page */}
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span className="text-lg font-semibold text-white tracking-tight">PULSE</span>
                     </Link>
+                    <div className="w-px h-6 bg-[#222] mx-2" />
+                    <span className="text-sm text-[#666]">Dashboard</span>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span className="text-sm text-ps-text-secondary">{userEmail}</span>
+                    <span className="text-sm text-[#888]">{userEmail}</span>
                     <button
                         onClick={handleSignOut}
-                        className="text-sm text-ps-text-muted hover:text-white transition-colors"
+                        className="text-sm text-[#666] hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-[#1a1a1a]"
                     >
                         Sign Out
                     </button>
@@ -135,33 +149,51 @@ export default function DashboardPage() {
 
             {/* Content */}
             <main className="container mx-auto px-8 py-12">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl font-bold">Your Projects</h1>
+                <div className="flex items-center justify-between mb-10">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-white mb-1">Your Projects</h1>
+                        <p className="text-sm text-[#666]">Create and manage your music projects</p>
+                    </div>
                     <button
                         onClick={handleCreateProject}
                         disabled={creating}
-                        className="btn btn-primary px-6 py-2 rounded-lg font-semibold hover:shadow-glow-orange transition-all disabled:opacity-50"
+                        className="px-6 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-50 bg-gradient-to-r from-[#ff6b6b] to-[#ff8585] text-white shadow-lg shadow-[#ff6b6b]/25 hover:shadow-[#ff6b6b]/40 hover:scale-[1.02]"
                     >
-                        {creating ? 'Creating...' : 'New Project'}
+                        {creating ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Creating...
+                            </span>
+                        ) : '+ New Project'}
                     </button>
                 </div>
 
                 {projects.length === 0 ? (
-                    <div className="text-center py-20 border border-dashed border-ps-bg-700 rounded-xl">
-                        <p className="text-ps-text-secondary mb-4">No projects yet</p>
+                    <div className="text-center py-20 border border-dashed border-[#222] rounded-2xl bg-[#0d0d0d]">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-[#222] flex items-center justify-center">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#444" strokeWidth="1.5">
+                                <path d="M9 18V5l12-2v13" />
+                                <circle cx="6" cy="18" r="3" />
+                                <circle cx="18" cy="16" r="3" />
+                            </svg>
+                        </div>
+                        <p className="text-[#888] mb-2">No projects yet</p>
                         <button
                             onClick={handleCreateProject}
-                            className="text-ps-accent-primary hover:underline"
+                            className="text-[#ff6b6b] hover:text-[#ff8585] transition-colors font-medium"
                         >
-                            Create your first project
+                            Create your first project →
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className="relative p-6 bg-ps-bg-800 rounded-xl border border-ps-bg-700 hover:border-ps-accent-primary/50 hover:shadow-lg transition-all group"
+                                className="relative p-5 bg-gradient-to-br from-[#111] to-[#0d0d0d] rounded-xl border border-[#1a1a1a] hover:border-[#ff6b6b]/30 hover:shadow-lg hover:shadow-[#ff6b6b]/5 transition-all group"
                             >
                                 {/* Action Buttons - visible on hover */}
                                 <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -170,7 +202,7 @@ export default function DashboardPage() {
                                             e.stopPropagation();
                                             handleStartRename(project);
                                         }}
-                                        className="p-1.5 rounded-md bg-ps-bg-700 hover:bg-ps-bg-600 text-ps-text-secondary hover:text-ps-text-primary transition-colors"
+                                        className="p-1.5 rounded-md bg-[#1a1a1a] hover:bg-[#222] text-[#666] hover:text-white transition-colors"
                                         title="Rename project"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +215,7 @@ export default function DashboardPage() {
                                             handleDeleteProject(project.id, project.name);
                                         }}
                                         disabled={deletingId === project.id}
-                                        className="p-1.5 rounded-md bg-ps-bg-700 hover:bg-red-500/20 text-ps-text-secondary hover:text-red-400 transition-colors disabled:opacity-50"
+                                        className="p-1.5 rounded-md bg-[#1a1a1a] hover:bg-red-500/20 text-[#666] hover:text-red-400 transition-colors disabled:opacity-50"
                                         title="Delete project"
                                     >
                                         {deletingId === project.id ? (
@@ -211,40 +243,40 @@ export default function DashboardPage() {
                                                     if (e.key === 'Enter') handleConfirmRename(project.id);
                                                     if (e.key === 'Escape') handleCancelRename();
                                                 }}
-                                                className="w-full bg-ps-bg-700 border border-ps-bg-600 rounded px-2 py-1 text-lg font-semibold focus:outline-none focus:border-ps-accent-primary"
+                                                className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-1.5 text-lg font-semibold focus:outline-none focus:border-[#ff6b6b] text-white"
                                                 autoFocus
                                             />
                                             <div className="flex gap-2 mt-2">
                                                 <button
                                                     onClick={() => handleConfirmRename(project.id)}
-                                                    className="text-xs px-2 py-1 bg-ps-accent-primary text-white rounded hover:bg-ps-accent-primary/80 transition-colors"
+                                                    className="text-xs px-3 py-1.5 bg-[#ff6b6b] text-white rounded-lg hover:bg-[#ff8585] transition-colors font-medium"
                                                 >
                                                     Save
                                                 </button>
                                                 <button
                                                     onClick={handleCancelRename}
-                                                    className="text-xs px-2 py-1 bg-ps-bg-600 text-ps-text-secondary rounded hover:bg-ps-bg-500 transition-colors"
+                                                    className="text-xs px-3 py-1.5 bg-[#1a1a1a] text-[#888] rounded-lg hover:bg-[#222] transition-colors"
                                                 >
                                                     Cancel
                                                 </button>
                                             </div>
                                         </div>
                                     ) : (
-                                        <h3 className="text-lg font-semibold truncate pr-4">
+                                        <h3 className="text-lg font-semibold truncate pr-4 text-white">
                                             {project.name}
                                         </h3>
                                     )}
-                                    <span className="text-xs bg-ps-bg-700 px-2 py-1 rounded text-ps-text-muted shrink-0">
+                                    <span className="text-[10px] bg-[#1a1a1a] px-2.5 py-1 rounded-full text-[#888] shrink-0 font-mono border border-[#222]">
                                         {project.bpm} BPM
                                     </span>
                                 </div>
-                                <div className="text-sm text-ps-text-secondary flex justify-between items-end">
-                                    <span>Modified {new Date(project.updatedAt).toLocaleDateString()}</span>
+                                <div className="text-sm text-[#666] flex justify-between items-end">
+                                    <span className="text-xs">Modified {new Date(project.updatedAt).toLocaleDateString()}</span>
                                     <Link
                                         href={`/project/${project.id}`}
-                                        className="text-sm font-medium px-3 py-1.5 bg-ps-accent-primary/10 text-ps-accent-primary rounded-md hover:bg-ps-accent-primary hover:text-white transition-all"
+                                        className="text-sm font-medium px-4 py-2 bg-[#1a1a1a] text-[#ff6b6b] rounded-lg hover:bg-[#ff6b6b] hover:text-white transition-all border border-[#222] hover:border-[#ff6b6b]"
                                     >
-                                        Open Studio →
+                                        Open →
                                     </Link>
                                 </div>
                             </div>
