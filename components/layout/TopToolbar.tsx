@@ -16,8 +16,6 @@ export default function TopToolbar() {
     redo,
     canUndo,
     canRedo,
-    toggleSnapToGrid,
-    snapToGrid,
     toggleMetronome,
     metronomeEnabled,
     createNewProject,
@@ -160,11 +158,6 @@ export default function TopToolbar() {
 
   // View Menu Items
   const viewMenuItems = [
-    {
-      label: snapToGrid ? '✓ Snap to Grid' : 'Snap to Grid',
-      onClick: () => toggleSnapToGrid(),
-      shortcut: 'G',
-    },
     {
       label: metronomeEnabled ? '✓ Metronome' : 'Metronome',
       onClick: () => toggleMetronome(),
@@ -339,20 +332,6 @@ export default function TopToolbar() {
           </button>
 
           <div className="w-px h-4 bg-ps-bg-600 mx-1" />
-
-          <button
-            className={`btn btn-icon ${snapToGrid ? 'btn-primary' : 'btn-ghost'}`}
-            onClick={toggleSnapToGrid}
-            title="Snap to Grid (G)"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
 
           <button
             className={`btn btn-icon ${metronomeEnabled ? 'btn-primary' : 'btn-ghost'}`}

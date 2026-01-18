@@ -9,25 +9,31 @@ interface KeyboardShortcutsModalProps {
 
 export default function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
   const shortcuts = [
-    { category: 'Transport', items: [
-      { keys: 'Space', description: 'Play/Pause' },
-      { keys: 'Enter', description: 'Stop' },
-      { keys: 'M', description: 'Toggle Metronome' },
-    ]},
-    { category: 'Editing', items: [
-      { keys: 'Ctrl+Z', description: 'Undo' },
-      { keys: 'Ctrl+Shift+Z', description: 'Redo' },
-      { keys: 'Ctrl+S', description: 'Save Project' },
-      { keys: 'Ctrl+C', description: 'Copy (Coming Soon)' },
-      { keys: 'Ctrl+V', description: 'Paste (Coming Soon)' },
-      { keys: 'Ctrl+X', description: 'Cut (Coming Soon)' },
-      { keys: 'Delete', description: 'Delete Selection (Coming Soon)' },
-    ]},
-    { category: 'View', items: [
-      { keys: 'G', description: 'Toggle Snap to Grid' },
-      { keys: 'Ctrl++', description: 'Zoom In (Coming Soon)' },
-      { keys: 'Ctrl+-', description: 'Zoom Out (Coming Soon)' },
-    ]},
+    {
+      category: 'Transport', items: [
+        { keys: 'Space', description: 'Play/Pause' },
+        { keys: 'Enter', description: 'Stop' },
+        { keys: 'M', description: 'Toggle Metronome' },
+      ]
+    },
+    {
+      category: 'Editing', items: [
+        { keys: 'Ctrl+Z', description: 'Undo' },
+        { keys: 'Ctrl+Shift+Z', description: 'Redo' },
+        { keys: 'Ctrl+S', description: 'Save Project' },
+        { keys: 'Ctrl+C', description: 'Copy (Coming Soon)' },
+        { keys: 'Ctrl+V', description: 'Paste (Coming Soon)' },
+        { keys: 'Ctrl+X', description: 'Cut (Coming Soon)' },
+        { keys: 'Delete', description: 'Delete Selection (Coming Soon)' },
+      ]
+    },
+    {
+      category: 'View', items: [
+
+        { keys: 'Ctrl++', description: 'Zoom In (Coming Soon)' },
+        { keys: 'Ctrl+-', description: 'Zoom Out (Coming Soon)' },
+      ]
+    },
   ];
 
   return (
