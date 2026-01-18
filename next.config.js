@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // Disabled to fix react-mosaic-component DND issues
   webpack: (config, { isServer }) => {
     // Handle audio worklet files
     config.module.rules.push({

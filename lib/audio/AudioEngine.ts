@@ -42,7 +42,11 @@ interface ScheduledEvent {
 
 export class AudioEngine {
   private static instance: AudioEngine | null = null;
-  private isInitialized = false;
+  private _isInitialized = false;
+  
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
   private instruments: Map<UUID, InstrumentNode> = new Map();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private masterChannel: any = null;
@@ -82,7 +86,7 @@ export class AudioEngine {
   // ==========================================
 
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this._isInitialized) return;
 
     // Client-side only
     if (typeof window === 'undefined') {
@@ -128,7 +132,7 @@ export class AudioEngine {
       console.warn('[AudioEngine] Transport not available');
     }
 
-    this.isInitialized = true;
+    this._isInitialized = true;
     console.log('[AudioEngine] Initialized successfully');
   }
 
@@ -137,7 +141,7 @@ export class AudioEngine {
   // ==========================================
 
   async loadProject(project: Project): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -283,7 +287,7 @@ export class AudioEngine {
   }
 
   async play(): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -382,6 +386,7 @@ export class AudioEngine {
     if (!transport) return;
 
     transport.pause();
+    this.clearScheduledEvents();
     this.clearMetronome();
     this.stopPositionTracking();
   }
@@ -819,7 +824,7 @@ export class AudioEngine {
    * @param deviceId - Optional device ID to record from
    */
   async startRecording(countInBars: number = 0, deviceId?: string): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -1003,7 +1008,7 @@ export class AudioEngine {
       this.metronome = null;
     }
 
-    this.isInitialized = false;
+    this._isInitialized = false;
     AudioEngine.instance = null;
   }
 }

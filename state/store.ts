@@ -1606,6 +1606,16 @@ export const useStore = create<StoreState>()(
         },
 
         cancelRecording: async () => {
+          console.log('[Store] Cancelling recording...');
+          try {
+            // Try to cancel in the audio engine
+            const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
+            const engine = getAudioEngine();
+            engine.cancelRecording();
+          } catch (error) {
+            console.error('[Store] Error cancelling recording:', error);
+          }
+          
           set((state) => {
             state.recording.isRecording = false;
             state.recording.isPreparing = false;
@@ -1973,19 +1983,46 @@ export const useStore = create<StoreState>()(
           }
 
           try {
+            console.log('[Store] recordAudio called with countInBars:', countInBars, 'deviceId:', deviceId);
+            
+            // Update state to show we're preparing to record
+            set((draft) => {
+              draft.recording.isPreparing = true;
+              draft.recording.countInRemaining = countInBars;
+              draft.recording.recordingStartPosition = draft.position;
+            });
+
             // Import audio engine dynamically
             const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
             const engine = getAudioEngine();
 
+            // Ensure engine is initialized
+            if (!engine.isInitialized) {
+              console.log('[Store] Initializing audio engine...');
+              await engine.initialize();
+            }
+
             // Start recording (includes count-in)
+            console.log('[Store] Starting engine recording...');
             await engine.startRecording(countInBars, deviceId);
 
-            // Update state
-            state.startRecording();
+            // Update state to show we're now recording
+            set((draft) => {
+              draft.recording.isPreparing = false;
+              draft.recording.isRecording = true;
+              draft.isRecording = true;
+              draft.transportState = 'recording';
+            });
 
-            console.log('[Store] Recording started');
+            console.log('[Store] Recording started successfully');
           } catch (error) {
             console.error('[Store] Failed to start recording:', error);
+            // Reset state on error
+            set((draft) => {
+              draft.recording.isPreparing = false;
+              draft.recording.isRecording = false;
+              draft.isRecording = false;
+            });
             throw error;
           }
         },
@@ -1995,20 +2032,34 @@ export const useStore = create<StoreState>()(
          */
         finishRecording: async () => {
           const state = get();
-          if (!state.project || !state.isRecording) {
+          if (!state.project) {
+            console.log('[Store] finishRecording: No project');
+            return;
+          }
+          
+          if (!state.isRecording && !state.recording.isRecording) {
+            console.log('[Store] finishRecording: Not recording');
             return;
           }
 
           try {
+            console.log('[Store] Finishing recording...');
+            
             // Import audio engine dynamically
             const { getAudioEngine } = await import('@/lib/audio/AudioEngine');
             const engine = getAudioEngine();
 
             // Stop recording and get result
             const result = await engine.stopRecording();
+            console.log('[Store] Recording stopped, duration:', result.duration);
 
-            // Update state
-            state.stopRecording();
+            // Update state immediately
+            set((draft) => {
+              draft.recording.isRecording = false;
+              draft.recording.isPreparing = false;
+              draft.isRecording = false;
+              draft.transportState = 'stopped';
+            });
 
             // Convert blob to base64 for storage
             const reader = new FileReader();

@@ -6,8 +6,10 @@ import { getWaveformForAsset, WAVEFORM_COLORS } from '@/lib/audio/waveform';
 interface WaveformCanvasProps {
     /** Unique identifier for the audio asset */
     assetId: string;
-    /** Base64 encoded audio data */
-    audioData: string;
+    /** Base64 encoded audio data (optional if audioUrl is provided) */
+    audioData?: string;
+    /** URL to audio file (optional if audioData is provided) */
+    audioUrl?: string;
     /** Width of the canvas in pixels */
     width?: number;
     /** Height of the canvas in pixels */
@@ -35,6 +37,7 @@ interface WaveformCanvasProps {
 function WaveformCanvasComponent({
     assetId,
     audioData,
+    audioUrl,
     width = 200,
     height = 40,
     color,
@@ -47,18 +50,62 @@ function WaveformCanvasComponent({
     const [waveformColor, setWaveformColor] = useState<string>(color || WAVEFORM_COLORS.default);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [loadedAudioData, setLoadedAudioData] = useState<string | null>(null);
 
     // Calculate number of samples based on width and zoom
     const numSamples = Math.floor(width * zoom);
+
+    // Load audio data from URL if needed
+    useEffect(() => {
+        let cancelled = false;
+
+        async function fetchAudioData() {
+            if (audioData) {
+                setLoadedAudioData(audioData);
+                return;
+            }
+
+            if (!audioUrl) {
+                setError('No audio data or URL provided');
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(audioUrl);
+                const arrayBuffer = await response.arrayBuffer();
+                const base64 = btoa(
+                    new Uint8Array(arrayBuffer).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                    )
+                );
+                
+                if (!cancelled) {
+                    setLoadedAudioData(base64);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('Failed to fetch audio:', err);
+                    setError('Failed to load audio');
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        fetchAudioData();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [audioData, audioUrl]);
 
     // Load waveform data
     useEffect(() => {
         let cancelled = false;
 
         async function loadWaveform() {
-            if (!audioData) {
-                setError('No audio data');
-                setIsLoading(false);
+            if (!loadedAudioData) {
                 return;
             }
 
@@ -66,7 +113,7 @@ function WaveformCanvasComponent({
             setError(null);
 
             try {
-                const result = await getWaveformForAsset(assetId, audioData, numSamples);
+                const result = await getWaveformForAsset(assetId, loadedAudioData, numSamples);
 
                 if (!cancelled) {
                     setWaveformData(result.data);
@@ -87,7 +134,7 @@ function WaveformCanvasComponent({
         return () => {
             cancelled = true;
         };
-    }, [assetId, audioData, numSamples, color]);
+    }, [assetId, loadedAudioData, numSamples, color]);
 
     // Draw waveform on canvas
     const drawWaveform = useCallback(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Mosaic,
   MosaicWindow,
@@ -80,14 +80,19 @@ export default function DockingLayout() {
     );
   }, []);
 
+  // Memoize the Mosaic component to prevent unnecessary re-initialization
+  const mosaicComponent = useMemo(() => (
+    <Mosaic<PanelType>
+      renderTile={renderTile}
+      value={layout}
+      onChange={handleChange}
+      className="mosaic-blueprint-theme"
+    />
+  ), [renderTile, layout, handleChange]);
+
   return (
     <div className="h-full w-full">
-      <Mosaic<PanelType>
-        renderTile={renderTile}
-        value={layout}
-        onChange={handleChange}
-        className="mosaic-blueprint-theme"
-      />
+      {mosaicComponent}
     </div>
   );
 }

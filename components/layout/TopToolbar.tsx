@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/state/store';
+import { apiClient } from '@/lib/api/client';
 import Transport from '@/components/transport/Transport';
 import Dropdown from '@/components/common/Dropdown';
 import KeyboardShortcutsModal from '@/components/common/KeyboardShortcutsModal';
@@ -16,22 +18,22 @@ export default function TopToolbar() {
     redo,
     canUndo,
     canRedo,
-    toggleSnapToGrid,
-    snapToGrid,
     toggleMetronome,
     metronomeEnabled,
     createNewProject,
     loadDemoProject,
     markSaved,
     playlistZoom,
-    pianoRollZoom,
     setPlaylistZoom,
-    setPianoRollZoom,
+    updateProjectName,
   } = useStore();
 
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const router = useRouter();
 
   // Listen for global shortcuts
   useEffect(() => {
@@ -160,11 +162,6 @@ export default function TopToolbar() {
   // View Menu Items
   const viewMenuItems = [
     {
-      label: snapToGrid ? '✓ Snap to Grid' : 'Snap to Grid',
-      onClick: () => toggleSnapToGrid(),
-      shortcut: 'G',
-    },
-    {
       label: metronomeEnabled ? '✓ Metronome' : 'Metronome',
       onClick: () => toggleMetronome(),
       shortcut: 'M',
@@ -185,19 +182,6 @@ export default function TopToolbar() {
       onClick: () => setPlaylistZoom(1),
       shortcut: 'Ctrl+0',
     },
-    { label: '', onClick: () => { }, divider: true },
-    {
-      label: 'Zoom In Piano Roll',
-      onClick: () => setPianoRollZoom(Math.min(4, pianoRollZoom * 1.2)),
-    },
-    {
-      label: 'Zoom Out Piano Roll',
-      onClick: () => setPianoRollZoom(Math.max(0.1, pianoRollZoom / 1.2)),
-    },
-    {
-      label: 'Reset Piano Roll Zoom',
-      onClick: () => setPianoRollZoom(1),
-    },
   ];
 
   // Help Menu Items
@@ -215,17 +199,28 @@ export default function TopToolbar() {
     {
       label: 'Documentation',
       onClick: () => {
-        alert('Documentation coming soon!');
+        window.open('https://github.com/karan-k16/UofTHacks13/blob/main/README.md', '_blank');
       },
-      disabled: true,
     },
   ];
 
   return (
     <>
       <div className="h-12 bg-ps-bg-800 border-b border-ps-bg-600 flex items-center px-4 gap-4 shrink-0">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
+        {/* Logo - Click to go to Dashboard */}
+        <button
+          onClick={() => {
+            if (hasUnsavedChanges) {
+              if (confirm('You have unsaved changes. Leave project?')) {
+                router.push('/dashboard');
+              }
+            } else {
+              router.push('/dashboard');
+            }
+          }}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          title="Go to Dashboard"
+        >
           <svg
             className="w-6 h-6"
             viewBox="0 0 100 100"
@@ -236,7 +231,7 @@ export default function TopToolbar() {
             <circle cx="50" cy="50" r="20" fill="#ff6b35" />
           </svg>
           <span className="font-bold text-sm text-ps-accent-primary">PULSE</span>
-        </div>
+        </button>
 
         {/* Divider */}
         <div className="w-px h-6 bg-ps-bg-600" />
@@ -267,9 +262,59 @@ export default function TopToolbar() {
         {/* Project Name */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-ps-text-secondary">Project:</span>
-          <span className="text-xs font-medium text-ps-text-primary">
-            {project?.name ?? 'Untitled'}
-          </span>
+          {isEditingName ? (
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onKeyDown={async (e) => {
+                  if (e.key === 'Enter') {
+                    const trimmed = editedName.trim();
+                    if (trimmed && trimmed !== project?.name && project?.id) {
+                      updateProjectName(trimmed);
+                      // Persist to database
+                      try {
+                        await apiClient.renameProject(project.id, trimmed);
+                      } catch (error) {
+                        console.error('Failed to save project name:', error);
+                      }
+                    }
+                    setIsEditingName(false);
+                  }
+                  if (e.key === 'Escape') {
+                    setIsEditingName(false);
+                  }
+                }}
+                onBlur={async () => {
+                  const trimmed = editedName.trim();
+                  if (trimmed && trimmed !== project?.name && project?.id) {
+                    updateProjectName(trimmed);
+                    // Persist to database
+                    try {
+                      await apiClient.renameProject(project.id, trimmed);
+                    } catch (error) {
+                      console.error('Failed to save project name:', error);
+                    }
+                  }
+                  setIsEditingName(false);
+                }}
+                className="text-xs font-medium bg-ps-bg-700 border border-ps-accent-primary rounded px-2 py-1 focus:outline-none w-40"
+                autoFocus
+              />
+            </div>
+          ) : (
+            <span
+              className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-2 py-1 rounded hover:bg-ps-bg-700 border border-transparent hover:border-ps-bg-600"
+              onClick={() => {
+                setEditedName(project?.name || 'Untitled');
+                setIsEditingName(true);
+              }}
+              title="Click to rename project"
+            >
+              {project?.name ?? 'Untitled'}
+            </span>
+          )}
           {hasUnsavedChanges && (
             <span className="text-xs text-ps-accent-tertiary">*</span>
           )}
@@ -330,20 +375,6 @@ export default function TopToolbar() {
           </button>
 
           <div className="w-px h-4 bg-ps-bg-600 mx-1" />
-
-          <button
-            className={`btn btn-icon ${snapToGrid ? 'btn-primary' : 'btn-ghost'}`}
-            onClick={toggleSnapToGrid}
-            title="Snap to Grid (G)"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
 
           <button
             className={`btn btn-icon ${metronomeEnabled ? 'btn-primary' : 'btn-ghost'}`}

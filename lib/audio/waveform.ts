@@ -100,10 +100,24 @@ export const WAVEFORM_COLORS = {
  * @returns Promise resolving to AudioBuffer
  */
 export async function decodeAudioFromBase64(base64Data: string): Promise<AudioBuffer> {
-    // Remove data URL prefix if present
+    // If the data is already a data URL, we can use fetch to decode it
+    // This is more reliable than manual base64 decoding for binary audio data
+    if (base64Data.startsWith('data:')) {
+        const response = await fetch(base64Data);
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Decode using Web Audio API
+        const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        await audioContext.close();
+        
+        return audioBuffer;
+    }
+
+    // Fallback: manual base64 decoding for non-data-URL formats
     const base64WithoutPrefix = base64Data.replace(/^data:audio\/[^;]+;base64,/, '');
 
-    // Decode base64 to binary
+    // Decode base64 to binary using a more robust method
     const binaryString = atob(base64WithoutPrefix);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
