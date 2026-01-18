@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/state/store';
 import Transport from '@/components/transport/Transport';
 import Dropdown from '@/components/common/Dropdown';
@@ -29,6 +30,7 @@ export default function TopToolbar() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const router = useRouter();
 
   // Listen for global shortcuts
   useEffect(() => {
@@ -202,8 +204,20 @@ export default function TopToolbar() {
   return (
     <>
       <div className="h-12 bg-ps-bg-800 border-b border-ps-bg-600 flex items-center px-4 gap-4 shrink-0">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
+        {/* Logo - Click to go to Dashboard */}
+        <button
+          onClick={() => {
+            if (hasUnsavedChanges) {
+              if (confirm('You have unsaved changes. Leave project?')) {
+                router.push('/dashboard');
+              }
+            } else {
+              router.push('/dashboard');
+            }
+          }}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          title="Go to Dashboard"
+        >
           <svg
             className="w-6 h-6"
             viewBox="0 0 100 100"
@@ -214,7 +228,7 @@ export default function TopToolbar() {
             <circle cx="50" cy="50" r="20" fill="#ff6b35" />
           </svg>
           <span className="font-bold text-sm text-ps-accent-primary">PULSE</span>
-        </div>
+        </button>
 
         {/* Divider */}
         <div className="w-px h-6 bg-ps-bg-600" />
