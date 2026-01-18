@@ -69,6 +69,7 @@ export class AudioEngine {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private metronome: any = null;
   private metronomeEnabled = false;
+  private metronomeScheduleId: number | null = null;
   private currentProject: Project | null = null;
   // Cache for preloaded audio buffers (URL -> ToneAudioBuffer)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -628,6 +629,7 @@ export class AudioEngine {
     transport.stop();
     transport.position = 0;
     this.clearScheduledEvents();
+    this.clearMetronome();
     this.stopPositionTracking();
   }
 
@@ -636,6 +638,7 @@ export class AudioEngine {
     if (!transport) return;
 
     transport.pause();
+    this.clearMetronome();
     this.stopPositionTracking();
   }
 
@@ -768,7 +771,7 @@ export class AudioEngine {
 
     // Schedule metronome if enabled
     if (this.metronomeEnabled) {
-      this.scheduleMetronome();
+      this.startMetronome();
     }
   }
 
@@ -993,35 +996,34 @@ export class AudioEngine {
     }
   }
 
-  private scheduleMetronome(): void {
+  private startMetronome(): void {
     if (!this.metronome || !this.currentProject) return;
 
     const transport = this.getTransport();
     if (!transport) return;
 
-    const bpm = this.currentProject.bpm;
-    const ppq = this.currentProject.ppq;
-    const totalBars = 32; // Schedule 32 bars ahead
+    // Clear any existing metronome schedule
+    this.clearMetronome();
+
     const beatsPerBar = this.currentProject.timeSignature.numerator;
+    let beatCount = 0;
 
-    for (let bar = 0; bar < totalBars; bar++) {
-      for (let beat = 0; beat < beatsPerBar; beat++) {
-        const ticks = (bar * beatsPerBar + beat) * ppq;
-        const time = ticksToSeconds(ticks, bpm, ppq);
-        const isDownbeat = beat === 0;
-
-        const eventId = transport.schedule((scheduledTime: number) => {
-          if (this.metronome) {
-            const freq = isDownbeat ? 1000 : 800;
-            this.metronome.triggerAttackRelease(freq, '32n', scheduledTime);
-          }
-        }, time);
-
-        this.scheduledEvents.push({
-          id: eventId,
-          dispose: () => transport.clear(eventId),
-        });
+    // Schedule a repeating event that triggers every beat
+    this.metronomeScheduleId = transport.scheduleRepeat((time: number) => {
+      if (this.metronome && this.metronomeEnabled) {
+        const isDownbeat = (beatCount % beatsPerBar) === 0;
+        const freq = isDownbeat ? 1000 : 800;
+        this.metronome.triggerAttackRelease(freq, '32n', time);
+        beatCount++;
       }
+    }, '4n', 0); // Repeat every quarter note, starting immediately
+  }
+
+  private clearMetronome(): void {
+    const transport = this.getTransport();
+    if (transport && this.metronomeScheduleId !== null) {
+      transport.clear(this.metronomeScheduleId);
+      this.metronomeScheduleId = null;
     }
   }
 
@@ -1038,6 +1040,15 @@ export class AudioEngine {
 
   setMetronomeEnabled(enabled: boolean): void {
     this.metronomeEnabled = enabled;
+    
+    // If playing, start or stop the metronome accordingly
+    if (this.isPlaying()) {
+      if (enabled) {
+        this.startMetronome();
+      } else {
+        this.clearMetronome();
+      }
+    }
   }
 
   // ==========================================
