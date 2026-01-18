@@ -1,0 +1,14 @@
+1. Delete presets
+2. New projects doesn't work.
+3. Load demo project doesnt work
+4. Mixer doesn't work
+5. Get rid of snap to grid button, it should always snap
+6. Get rid of zoom in/zoom out/reset for piano roll since that second ui isnt there anymore
+7. Make it clear you need to double click to open piano interface
+8. Settings button at the top doesnt do anything. Delete probably
+9. Add the patterns into demo
+10. Delete the double start page. (it asks to start creating again after making demo)
+11. Doesn't stop the music for uploaded samples with the pause button
+12. The +- in my samples section doesn't do anything
+13. Black bar under each sample, think it's supposed to show the waveform (delete or fix)
+14. Fix metronome
