@@ -12,18 +12,19 @@
 
 import type { BackboardResponse } from './types';
 
-// @ts-expect-error - backboard-sdk doesn't have TypeScript types
-import { BackboardClient } from 'backboard-sdk';
+// Backboard SDK is not yet available - using mock implementation
+// Once the SDK is published, uncomment:
+// import { BackboardClient } from 'backboard-sdk';
 
 const BACKBOARD_API_KEY = process.env.BACKBOARD_API_KEY;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
 // TEMPORARY: Mock mode for testing (set to false when real API is available)
-const USE_MOCK = false;
+const USE_MOCK = true; // Always use mock until SDK is available
 
-// Backboard client instance (singleton)
-let client: InstanceType<typeof BackboardClient> | null = null;
+// Backboard client instance (singleton) - currently null as SDK is not available
+let client: unknown | null = null;
 
 // Cached assistant and thread IDs - keyed by context hash for cache invalidation
 let cachedAssistantId: string | null = null;
@@ -167,6 +168,7 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
  */
 export function initializeBackboard(): void {
   if (!BACKBOARD_API_KEY) {
+<<<<<<< HEAD
     throw new Error('BACKBOARD_API_KEY environment variable is not set');
   }
 
@@ -175,27 +177,37 @@ export function initializeBackboard(): void {
     client = new BackboardClient({
       apiKey: BACKBOARD_API_KEY,
     });
+=======
+    console.warn('BACKBOARD_API_KEY not set - using mock mode');
+    return;
+>>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
   }
+
+  // SDK not yet available - using mock mode
+  console.log('[Backboard] Initialized in mock mode (SDK not available)');
 }
 
 /**
  * Get or create the Backboard client
+ * Currently returns null as SDK is not available
  */
-function getClient(): InstanceType<typeof BackboardClient> {
-  if (!client) {
-    if (!BACKBOARD_API_KEY) {
-      throw new Error('Backboard API key not configured');
-    }
-    client = new BackboardClient({
-      apiKey: BACKBOARD_API_KEY,
-    });
+function getClient(): unknown | null {
+  if (!BACKBOARD_API_KEY) {
+    console.warn('Backboard API key not configured - using mock mode');
+    return null;
   }
-  return client;
+  // SDK not available yet
+  return null;
 }
 
 /**
+<<<<<<< HEAD
  * Create or get cached assistant with dynamic system prompt
  * If the context has changed significantly, create a new assistant
+=======
+ * Create or get cached assistant
+ * Note: Currently returns placeholder as SDK is not available
+>>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
  */
 async function getAssistant(systemPrompt: string): Promise<string> {
   const contextHash = hashContext(systemPrompt);
@@ -211,6 +223,7 @@ async function getAssistant(systemPrompt: string): Promise<string> {
     return cachedAssistantId;
   }
 
+<<<<<<< HEAD
   const backboard = getClient();
   const assistant = await backboard.createAssistant({
     name: 'Pulse Studio Music Copilot',
@@ -221,22 +234,36 @@ async function getAssistant(systemPrompt: string): Promise<string> {
   cachedContextHash = contextHash;
   console.log(`[Backboard] Created assistant: ${cachedAssistantId}`);
   return cachedAssistantId!;
+=======
+  // SDK not available - return placeholder
+  console.warn('[Backboard] SDK not available - using placeholder assistant ID');
+  cachedAssistantId = 'mock-assistant-id';
+  return cachedAssistantId;
+>>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
 }
 
 /**
  * Create or get cached thread
+ * Note: Currently returns placeholder as SDK is not available
  */
 async function getThread(assistantId: string): Promise<string> {
   if (cachedThreadId) {
     return cachedThreadId;
   }
 
+<<<<<<< HEAD
   const backboard = getClient();
   const thread = await backboard.createThread(assistantId);
 
   cachedThreadId = thread.threadId;
   console.log(`[Backboard] Created thread: ${cachedThreadId}`);
   return cachedThreadId!;
+=======
+  // SDK not available - return placeholder
+  console.warn('[Backboard] SDK not available - using placeholder thread ID');
+  cachedThreadId = 'mock-thread-id';
+  return cachedThreadId;
+>>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
 }
 
 /**
@@ -289,6 +316,7 @@ export async function sendToModel(
       const llmProvider = 'openai';
       const modelName = model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini';
 
+<<<<<<< HEAD
       // Send message using SDK
       const backboard = getClient();
       const response = await backboard.addMessage(threadId, {
@@ -330,6 +358,11 @@ export async function sendToModel(
           },
         };
       }
+=======
+      // SDK not available - fall back to mock
+      console.warn('[Backboard] SDK not available - falling back to mock mode');
+      return mockBackboardResponse(text, model);
+>>>>>>> 8dab3ef1a8b52acd0cf15ba302d2c0c449c85b4d
     } catch (error) {
       lastError = error as Error;
       console.error(`Backboard request attempt ${attempt + 1} failed:`, error);
