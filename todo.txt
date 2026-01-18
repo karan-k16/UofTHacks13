@@ -10,6 +10,10 @@
 10. Delete the double start page. (it asks to start creating again after making demo)
 11. Doesn't stop the music for uploaded samples with the pause button
 12. The +- in my samples section doesn't do anything
+<<<<<<< HEAD
 13. Black bar under each sample, think it's supposed to show the waveform (delete or fix)
 14. Fix metronome
 15. Fill in documentation button under help
+=======
+13. Black bar under each sample, think it's supposed to show the waveform (delete or fix)
+>>>>>>> 3874296c41909b6ff56bd49962ae5355830e0dae

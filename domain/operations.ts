@@ -147,6 +147,7 @@ export function createDefaultSynthSettings(preset?: string): SynthSettings {
 function getSynthPresetSettings(preset: string): Partial<SynthSettings> {
   // Define presets inline to avoid circular dependencies
   const PRESETS: Record<string, Partial<SynthSettings>> = {
+    default: { oscillatorType: 'sawtooth', attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.3, filterCutoff: 2000, filterResonance: 1 },
     piano: { oscillatorType: 'sine', attack: 0.005, decay: 0.1, sustain: 0.3, release: 1.0, filterCutoff: 3000, filterResonance: 1 },
     electricPiano: { oscillatorType: 'triangle', attack: 0.002, decay: 0.3, sustain: 0.2, release: 0.5, filterCutoff: 2500, filterResonance: 1.5 },
     organ: { oscillatorType: 'sine', attack: 0.001, decay: 0.01, sustain: 0.9, release: 0.05, filterCutoff: 4000, filterResonance: 0.5 },
@@ -175,7 +176,7 @@ function getSynthPresetSettings(preset: string): Partial<SynthSettings> {
     metallic: { oscillatorType: 'square', attack: 0.001, decay: 0.6, sustain: 0.2, release: 0.8, filterCutoff: 5000, filterResonance: 5 },
   };
   
-  return PRESETS[preset] ?? PRESETS.default!;
+  return PRESETS[preset] ?? PRESETS.default;
 }
 
 export function createDefaultSamplerSettings(): SamplerSettings {
