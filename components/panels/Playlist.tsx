@@ -1340,7 +1340,7 @@ function ClipBlock({
         width: displayWidth,
         height,
         backgroundColor: clip.color,
-        transition: isDragging || isResizing ? 'none' : 'left 0.1s ease-out, top 0.1s ease-out, width 0.1s ease-out',
+        transition: isDragging || isResizing ? 'none' : 'left 0.05s ease-out, top 0.05s ease-out, width 0.05s ease-out',
       }}
       onClick={handleAltClick}
       onDoubleClick={(e) => {

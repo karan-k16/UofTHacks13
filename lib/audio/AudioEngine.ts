@@ -638,6 +638,7 @@ export class AudioEngine {
     if (!transport) return;
 
     transport.pause();
+    this.clearScheduledEvents();
     this.clearMetronome();
     this.stopPositionTracking();
   }
@@ -1040,7 +1041,7 @@ export class AudioEngine {
 
   setMetronomeEnabled(enabled: boolean): void {
     this.metronomeEnabled = enabled;
-    
+
     // If playing, start or stop the metronome accordingly
     if (this.isPlaying()) {
       if (enabled) {

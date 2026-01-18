@@ -32,7 +32,7 @@ export default function LandingPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={() => router.push('/demo')}
+            onClick={() => router.push('/demo?autostart=true')}
             className="btn btn-primary px-8 py-3 text-lg font-semibold rounded-lg hover:shadow-glow-orange transition-all"
           >
             Try Demo

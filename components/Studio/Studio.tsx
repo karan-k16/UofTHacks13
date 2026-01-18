@@ -11,7 +11,7 @@ import { useAutosave } from '@/lib/audio/useAutosave';
 
 import { apiClient } from '@/lib/api/client';
 
-export default function Studio({ isDemo = true, projectId }: { isDemo?: boolean; projectId?: string }) {
+export default function Studio({ isDemo = true, projectId, autoStart = false }: { isDemo?: boolean; projectId?: string; autoStart?: boolean }) {
     const [isAudioInitialized, setIsAudioInitialized] = useState(false);
     const [showStartPrompt, setShowStartPrompt] = useState(true);
     const [initError, setInitError] = useState<string | null>(null);
@@ -130,6 +130,29 @@ export default function Studio({ isDemo = true, projectId }: { isDemo?: boolean;
         }
     }, [loadDemoProject, isInitializing, toneLoaded, isDemo, project, projectId]);
 
+    // Auto-start audio if autoStart prop is true
+    useEffect(() => {
+        if (autoStart && toneLoaded && !isAudioInitialized && !isInitializing) {
+            console.log('[Studio] Auto-starting audio initialization...');
+            initializeAudio();
+        }
+    }, [autoStart, toneLoaded, isAudioInitialized, isInitializing, initializeAudio]);
+
+    // Add timeout for autostart to prevent infinite loading
+    useEffect(() => {
+        if (!autoStart) return;
+
+        const timeout = setTimeout(() => {
+            if (!isAudioInitialized) {
+                console.error('[Studio] Auto-start timeout - initialization took too long');
+                setInitError('Failed to load studio. Please refresh the page.');
+                setShowStartPrompt(true); // Show the manual start button
+            }
+        }, 5000); // 5 second timeout
+
+        return () => clearTimeout(timeout);
+    }, [autoStart, isAudioInitialized]);
+
     // Set up audio engine position tracking
     useEffect(() => {
         if (!isAudioInitialized || !project) return;
@@ -226,7 +249,8 @@ export default function Studio({ isDemo = true, projectId }: { isDemo?: boolean;
         };
     }, []);
 
-    if (showStartPrompt) {
+    // Skip the start prompt if autostart is enabled
+    if (showStartPrompt && !autoStart) {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-ps-bg-900">
                 <div className="text-center">
@@ -272,6 +296,34 @@ export default function Studio({ isDemo = true, projectId }: { isDemo?: boolean;
                     <p className="mt-4 text-ps-text-muted text-xs">
                         Click to enable audio and load the demo project
                     </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show simple loading screen when autostarting
+    if (autoStart && !isAudioInitialized) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-ps-bg-900">
+                <div className="text-center max-w-md px-4">
+                    {!initError ? (
+                        <>
+                            <div className="w-16 h-16 border-4 border-ps-accent-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-ps-text-secondary text-sm">Loading studio...</p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="text-red-400 text-4xl mb-4">⚠️</div>
+                            <p className="text-ps-text-primary font-semibold mb-2">Failed to Load</p>
+                            <p className="text-ps-text-secondary text-sm mb-4">{initError}</p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="btn btn-primary px-6 py-2 rounded-lg"
+                            >
+                                Reload Page
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         );
