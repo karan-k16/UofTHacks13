@@ -1,0 +1,657 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================ */
+/* Pulse Studio - Global Styles */
+/* ============================================ */
+
+:root {
+  --ps-bg-900: #0d0d0d;
+  --ps-bg-800: #141414;
+  --ps-bg-700: #1a1a1a;
+  --ps-bg-600: #242424;
+  --ps-bg-500: #2d2d2d;
+  --ps-bg-400: #3a3a3a;
+
+  --ps-accent-primary: #ff6b35;
+  --ps-accent-secondary: #4ecdc4;
+  --ps-accent-tertiary: #ffe66d;
+
+  --ps-text-primary: #e8e8e8;
+  --ps-text-secondary: #a0a0a0;
+  --ps-text-muted: #666666;
+
+  --ps-grid-line: #2a2a2a;
+  --ps-grid-beat: #3a3a3a;
+  --ps-grid-bar: #4a4a4a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--ps-bg-900);
+  color: var(--ps-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#__next {
+  height: 100%;
+}
+
+/* ============================================ */
+/* Scrollbar Styles */
+/* ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ps-bg-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ps-bg-500);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ps-bg-400);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--ps-bg-800);
+}
+
+/* ============================================ */
+/* Selection */
+/* ============================================ */
+
+::selection {
+  background: rgba(255, 107, 53, 0.3);
+  color: var(--ps-text-primary);
+}
+
+/* ============================================ */
+/* Focus Styles */
+/* ============================================ */
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ps-accent-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================ */
+/* Panel Styles */
+/* ============================================ */
+
+.panel {
+  background: var(--ps-bg-800);
+  border: 1px solid var(--ps-bg-600);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.panel-header {
+  background: var(--ps-bg-700);
+  border-bottom: 1px solid var(--ps-bg-600);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ps-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.panel-content {
+  overflow: auto;
+  height: calc(100% - 28px);
+}
+
+/* ============================================ */
+/* Button Styles */
+/* ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  user-select: none;
+}
+
+.btn-primary {
+  background: var(--ps-accent-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #ff8555;
+}
+
+.btn-secondary {
+  background: var(--ps-bg-500);
+  color: var(--ps-text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--ps-bg-400);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ps-text-secondary);
+}
+
+.btn-ghost:hover {
+  background: var(--ps-bg-600);
+  color: var(--ps-text-primary);
+}
+
+.btn-icon {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+/* ============================================ */
+/* Input Styles */
+/* ============================================ */
+
+input[type="text"],
+input[type="number"],
+select {
+  background: var(--ps-bg-700);
+  border: 1px solid var(--ps-bg-500);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--ps-text-primary);
+  transition: border-color 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  border-color: var(--ps-accent-primary);
+}
+
+input[type="number"] {
+  width: 60px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  background: var(--ps-bg-600);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--ps-accent-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--ps-accent-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Custom slider styles for effect editor */
+.slider-thumb {
+  accent-color: var(--ps-accent-primary);
+}
+
+.slider-thumb:hover::-webkit-slider-thumb {
+  background: #ff8555;
+  transform: scale(1.1);
+}
+
+.slider-thumb:hover::-moz-range-thumb {
+  background: #ff8555;
+  transform: scale(1.1);
+}
+
+/* ============================================ */
+/* Grid Canvas Styles */
+/* ============================================ */
+
+.grid-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ============================================ */
+/* Docking Layout Overrides (react-mosaic) */
+/* ============================================ */
+
+.mosaic {
+  background: var(--ps-bg-900) !important;
+}
+
+.mosaic-tile {
+  margin: 2px !important;
+}
+
+.mosaic-window {
+  border-radius: 4px !important;
+  overflow: hidden !important;
+}
+
+.mosaic-window-toolbar {
+  background: var(--ps-bg-700) !important;
+  height: 28px !important;
+  border-bottom: 1px solid var(--ps-bg-600) !important;
+}
+
+.mosaic-window-title {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: var(--ps-text-secondary) !important;
+}
+
+.mosaic-window-body {
+  background: var(--ps-bg-800) !important;
+}
+
+.mosaic-split {
+  background: var(--ps-bg-900) !important;
+}
+
+.mosaic-split:hover {
+  background: var(--ps-accent-primary) !important;
+}
+
+/* ============================================ */
+/* Piano Roll Grid */
+/* ============================================ */
+
+.piano-key {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.piano-key-white {
+  background: linear-gradient(to bottom, #f8f8f8, #e0e0e0);
+  border-bottom: 1px solid #ccc;
+}
+
+.piano-key-white:hover {
+  background: linear-gradient(to bottom, #fff, #f0f0f0);
+}
+
+.piano-key-black {
+  background: linear-gradient(to bottom, #333, #1a1a1a);
+  border-bottom: 1px solid #000;
+}
+
+.piano-key-black:hover {
+  background: linear-gradient(to bottom, #444, #2a2a2a);
+}
+
+.piano-key-active {
+  background: var(--ps-accent-primary) !important;
+}
+
+/* ============================================ */
+/* Note Colors */
+/* ============================================ */
+
+.note {
+  border-radius: 2px;
+  cursor: move;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.note:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+.note-selected {
+  box-shadow: 0 0 0 2px var(--ps-accent-tertiary);
+  z-index: 10;
+}
+
+.note-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* Note resize handles */
+.note .resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.1s ease;
+  z-index: 20;
+}
+
+.note:hover .resize-handle {
+  opacity: 0.6;
+}
+
+.note .resize-handle:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ============================================ */
+/* Clip Styles */
+/* ============================================ */
+
+.clip {
+  border-radius: 3px;
+  cursor: move;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  overflow: visible;
+  position: absolute;
+}
+
+.clip:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+
+.clip-selected {
+  box-shadow: 0 0 0 2px var(--ps-accent-tertiary) !important;
+  z-index: 10;
+}
+
+.clip-muted {
+  opacity: 0.5;
+}
+
+.clip-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* Resize handles - visible on hover */
+.clip .resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.1s ease;
+  z-index: 20;
+}
+
+.clip:hover .resize-handle {
+  opacity: 0.6;
+}
+
+.clip .resize-handle:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.clip .resize-handle-left {
+  left: 0;
+  cursor: ew-resize;
+}
+
+.clip .resize-handle-right {
+  right: 0;
+  cursor: ew-resize;
+}
+
+/* ============================================ */
+/* Mixer Styles */
+/* ============================================ */
+
+.mixer-track {
+  background: var(--ps-bg-700);
+  border: 1px solid var(--ps-bg-600);
+  border-radius: 4px;
+}
+
+.fader-track {
+  background: var(--ps-bg-600);
+  border-radius: 2px;
+  position: relative;
+}
+
+.fader-thumb {
+  background: linear-gradient(to bottom, #666, #444);
+  border: 1px solid #888;
+  border-radius: 2px;
+  cursor: ns-resize;
+}
+
+.level-meter {
+  background: var(--ps-bg-900);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.level-meter-fill {
+  background: linear-gradient(to top, #27ae60, #f1c40f, #e74c3c);
+  transition: height 0.05s linear;
+}
+
+/* ============================================ */
+/* Knob Styles */
+/* ============================================ */
+
+.knob {
+  cursor: pointer;
+  user-select: none;
+}
+
+.knob-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--ps-text-muted);
+  text-align: center;
+}
+
+/* ============================================ */
+/* Animation */
+/* ============================================ */
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes recording-blink {
+
+  0%,
+  100% {
+    background-color: #e74c3c;
+  }
+
+  50% {
+    background-color: #c0392b;
+  }
+}
+
+.recording-indicator {
+  animation: recording-blink 1s infinite;
+}
+
+/* ============================================ */
+/* Step Sequencer */
+/* ============================================ */
+
+.step {
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.05s ease;
+}
+
+.step:hover {
+  transform: scale(1.05);
+}
+
+.step-active {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.step-playing {
+  box-shadow: 0 0 8px var(--ps-accent-primary);
+}
+
+/* ============================================ */
+/* Transport */
+/* ============================================ */
+
+.transport-display {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  background: var(--ps-bg-900);
+  border: 1px solid var(--ps-bg-600);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* ============================================ */
+/* Context Menu */
+/* ============================================ */
+
+.context-menu {
+  background: var(--ps-bg-700);
+  border: 1px solid var(--ps-bg-500);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 4px 0;
+  min-width: 160px;
+}
+
+.context-menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item:hover {
+  background: var(--ps-bg-600);
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--ps-bg-500);
+  margin: 4px 0;
+}
+
+/* ============================================ */
+/* Tooltip */
+/* ============================================ */
+
+.tooltip {
+  background: var(--ps-bg-600);
+  border: 1px solid var(--ps-bg-500);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--ps-text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
+/* ============================================ */
+/* Loading */
+/* ============================================ */
+
+.loading-spinner {
+  border: 2px solid var(--ps-bg-500);
+  border-top-color: var(--ps-accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================ */
+/* Modal Animations */
+/* ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.25s ease-out;
+}

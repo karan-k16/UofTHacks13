@@ -1,0 +1,2 @@
+# This file ensures the samples directory structure is preserved in git
+# Audio files are downloaded via scripts/download-samples.js

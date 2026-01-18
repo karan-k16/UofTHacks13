@@ -1,0 +1,2250 @@
+{
+    "libraryName": "StockFactoryPack",
+    "version": "1.0.1",
+    "createdAt": "2026-01-17T21:11:35.890Z",
+    "totalSamples": 220,
+    "categories": {
+        "drums": {
+            "kick": [
+                {
+                    "id": "drums_kick_drums-kick-01-synth-kick-3_mp3_0",
+                    "name": "drums-kick-01-synth-kick-3.mp3",
+                    "filename": "drums-kick-01-synth-kick-3.mp3",
+                    "path": "/samples/drums/kick/drums-kick-01-synth-kick-3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-02-kick-1_mp3_1",
+                    "name": "drums-kick-02-kick-1.mp3",
+                    "filename": "drums-kick-02-kick-1.mp3",
+                    "path": "/samples/drums/kick/drums-kick-02-kick-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-03-fx-boom_mp3_2",
+                    "name": "drums-kick-03-fx-boom.mp3",
+                    "filename": "drums-kick-03-fx-boom.mp3",
+                    "path": "/samples/drums/kick/drums-kick-03-fx-boom.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-04-gloss-stomp-messy_mp3_3",
+                    "name": "drums-kick-04-gloss-stomp-messy.mp3",
+                    "filename": "drums-kick-04-gloss-stomp-messy.mp3",
+                    "path": "/samples/drums/kick/drums-kick-04-gloss-stomp-messy.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-05-kick80-flac_mp3_4",
+                    "name": "drums-kick-05-kick80-flac.mp3",
+                    "filename": "drums-kick-05-kick80-flac.mp3",
+                    "path": "/samples/drums/kick/drums-kick-05-kick80-flac.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-06-kb-kick-acoustic-2_mp3_5",
+                    "name": "drums-kick-06-kb-kick-acoustic-2.mp3",
+                    "filename": "drums-kick-06-kb-kick-acoustic-2.mp3",
+                    "path": "/samples/drums/kick/drums-kick-06-kb-kick-acoustic-2.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-07-bd-magneto_mp3_6",
+                    "name": "drums-kick-07-bd-magneto.mp3",
+                    "filename": "drums-kick-07-bd-magneto.mp3",
+                    "path": "/samples/drums/kick/drums-kick-07-bd-magneto.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-08-thud-2-highshortreverb_mp3_7",
+                    "name": "drums-kick-08-thud-2-highshortreverb.mp3",
+                    "filename": "drums-kick-08-thud-2-highshortreverb.mp3",
+                    "path": "/samples/drums/kick/drums-kick-08-thud-2-highshortreverb.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-09-yamahaab_mp3_8",
+                    "name": "drums-kick-09-yamahaab.mp3",
+                    "filename": "drums-kick-09-yamahaab.mp3",
+                    "path": "/samples/drums/kick/drums-kick-09-yamahaab.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-10-pd-kick-28_mp3_9",
+                    "name": "drums-kick-10-pd-kick-28.mp3",
+                    "filename": "drums-kick-10-pd-kick-28.mp3",
+                    "path": "/samples/drums/kick/drums-kick-10-pd-kick-28.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-11-kick3_mp3_10",
+                    "name": "drums-kick-11-kick3.mp3",
+                    "filename": "drums-kick-11-kick3.mp3",
+                    "path": "/samples/drums/kick/drums-kick-11-kick3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_kick_drums-kick-12-edited-hard-kick_mp3_11",
+                    "name": "drums-kick-12-edited-hard-kick.mp3",
+                    "filename": "drums-kick-12-edited-hard-kick.mp3",
+                    "path": "/samples/drums/kick/drums-kick-12-edited-hard-kick.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "snare": [
+                {
+                    "id": "drums_snare_drums-snare-01-sbuc-snare-002_mp3_0",
+                    "name": "drums-snare-01-sbuc-snare-002.mp3",
+                    "filename": "drums-snare-01-sbuc-snare-002.mp3",
+                    "path": "/samples/drums/snare/drums-snare-01-sbuc-snare-002.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-02-fx-boom_mp3_1",
+                    "name": "drums-snare-02-fx-boom.mp3",
+                    "filename": "drums-snare-02-fx-boom.mp3",
+                    "path": "/samples/drums/snare/drums-snare-02-fx-boom.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-03-kick80-flac_mp3_2",
+                    "name": "drums-snare-03-kick80-flac.mp3",
+                    "filename": "drums-snare-03-kick80-flac.mp3",
+                    "path": "/samples/drums/snare/drums-snare-03-kick80-flac.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-04-metallic-snare_mp3_3",
+                    "name": "drums-snare-04-metallic-snare.mp3",
+                    "filename": "drums-snare-04-metallic-snare.mp3",
+                    "path": "/samples/drums/snare/drums-snare-04-metallic-snare.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-05-snare1drum_mp3_4",
+                    "name": "drums-snare-05-snare1drum.mp3",
+                    "filename": "drums-snare-05-snare1drum.mp3",
+                    "path": "/samples/drums/snare/drums-snare-05-snare1drum.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-06-snare-3-14x6-5_mp3_5",
+                    "name": "drums-snare-06-snare-3-14x6-5.mp3",
+                    "filename": "drums-snare-06-snare-3-14x6-5.mp3",
+                    "path": "/samples/drums/snare/drums-snare-06-snare-3-14x6-5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-07-snare-processed-soft-roll-short-14-by-6_mp3_6",
+                    "name": "drums-snare-07-snare-processed-soft-roll-short-14-by-6.mp3",
+                    "filename": "drums-snare-07-snare-processed-soft-roll-short-14-by-6.mp3",
+                    "path": "/samples/drums/snare/drums-snare-07-snare-processed-soft-roll-short-14-by-6.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-08-snare-natural-full-strong-hit-1_mp3_7",
+                    "name": "drums-snare-08-snare-natural-full-strong-hit-1.mp3",
+                    "filename": "drums-snare-08-snare-natural-full-strong-hit-1.mp3",
+                    "path": "/samples/drums/snare/drums-snare-08-snare-natural-full-strong-hit-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-09-snare-processed-two-shot-14-by-6-5-inch_mp3_8",
+                    "name": "drums-snare-09-snare-processed-two-shot-14-by-6-5-inch.mp3",
+                    "filename": "drums-snare-09-snare-processed-two-shot-14-by-6-5-inch.mp3",
+                    "path": "/samples/drums/snare/drums-snare-09-snare-processed-two-shot-14-by-6-5-inch.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-10-snare-processed-steady-fill-2-14-by-6-5_mp3_9",
+                    "name": "drums-snare-10-snare-processed-steady-fill-2-14-by-6-5.mp3",
+                    "filename": "drums-snare-10-snare-processed-steady-fill-2-14-by-6-5.mp3",
+                    "path": "/samples/drums/snare/drums-snare-10-snare-processed-steady-fill-2-14-by-6-5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-11-snare-processed-steady-fill-14-by-6-5-in_mp3_10",
+                    "name": "drums-snare-11-snare-processed-steady-fill-14-by-6-5-in.mp3",
+                    "filename": "drums-snare-11-snare-processed-steady-fill-14-by-6-5-in.mp3",
+                    "path": "/samples/drums/snare/drums-snare-11-snare-processed-steady-fill-14-by-6-5-in.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_snare_drums-snare-12-drums-house-snare-slight-intro-reverse_mp3_11",
+                    "name": "drums-snare-12-drums-house-snare-slight-intro-reverse.mp3",
+                    "filename": "drums-snare-12-drums-house-snare-slight-intro-reverse.mp3",
+                    "path": "/samples/drums/snare/drums-snare-12-drums-house-snare-slight-intro-reverse.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "hihat_closed": [
+                {
+                    "id": "drums_hihat_closed_drums-hihat-closed-02-skibacus_mp3_0",
+                    "name": "drums-hihat-closed-02-skibacus.mp3",
+                    "filename": "drums-hihat-closed-02-skibacus.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat-closed-02-skibacus.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat-closed-05-skibacus_mp3_1",
+                    "name": "drums-hihat-closed-05-skibacus.mp3",
+                    "filename": "drums-hihat-closed-05-skibacus.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat-closed-05-skibacus.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-01-chh_mp3_2",
+                    "name": "drums-hihat_closed-01-chh.mp3",
+                    "filename": "drums-hihat_closed-01-chh.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-01-chh.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-03-ad-hat_mp3_3",
+                    "name": "drums-hihat_closed-03-ad-hat.mp3",
+                    "filename": "drums-hihat_closed-03-ad-hat.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-03-ad-hat.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-04-meinl-mb20-14-heavy-soundwave-hi-hat-e-f_mp3_4",
+                    "name": "drums-hihat_closed-04-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "filename": "drums-hihat_closed-04-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-04-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-06-fx5-closed-hihat_mp3_5",
+                    "name": "drums-hihat_closed-06-fx5-closed-hihat.mp3",
+                    "filename": "drums-hihat_closed-06-fx5-closed-hihat.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-06-fx5-closed-hihat.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-07-hihat-closed6_mp3_6",
+                    "name": "drums-hihat_closed-07-hihat-closed6.mp3",
+                    "filename": "drums-hihat_closed-07-hihat-closed6.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-07-hihat-closed6.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-08-hihat-closed1_mp3_7",
+                    "name": "drums-hihat_closed-08-hihat-closed1.mp3",
+                    "filename": "drums-hihat_closed-08-hihat-closed1.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-08-hihat-closed1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-09-ai-hi-hat-closed-4_mp3_8",
+                    "name": "drums-hihat_closed-09-ai-hi-hat-closed-4.mp3",
+                    "filename": "drums-hihat_closed-09-ai-hi-hat-closed-4.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-09-ai-hi-hat-closed-4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-10-ks-hihat-18-inch-closed_mp3_9",
+                    "name": "drums-hihat_closed-10-ks-hihat-18-inch-closed.mp3",
+                    "filename": "drums-hihat_closed-10-ks-hihat-18-inch-closed.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-10-ks-hihat-18-inch-closed.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-11-inch-hi-hat-closed_mp3_10",
+                    "name": "drums-hihat_closed-11-inch-hi-hat-closed.mp3",
+                    "filename": "drums-hihat_closed-11-inch-hi-hat-closed.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-11-inch-hi-hat-closed.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_closed_drums-hihat_closed-12-hi-hat-002_mp3_11",
+                    "name": "drums-hihat_closed-12-hi-hat-002.mp3",
+                    "filename": "drums-hihat_closed-12-hi-hat-002.mp3",
+                    "path": "/samples/drums/hihat_closed/drums-hihat_closed-12-hi-hat-002.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "hihat_open": [
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-01-meinl-mb20-14-heavy-soundwave-hi-hat-e-f_mp3_0",
+                    "name": "drums-hihat_open-01-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "filename": "drums-hihat_open-01-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-01-meinl-mb20-14-heavy-soundwave-hi-hat-e-f.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-02-open-then-closed-hat-1_mp3_1",
+                    "name": "drums-hihat_open-02-open-then-closed-hat-1.mp3",
+                    "filename": "drums-hihat_open-02-open-then-closed-hat-1.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-02-open-then-closed-hat-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-03-tr-808-hi-hat-open_mp3_2",
+                    "name": "drums-hihat_open-03-tr-808-hi-hat-open.mp3",
+                    "filename": "drums-hihat_open-03-tr-808-hi-hat-open.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-03-tr-808-hi-hat-open.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-04-rock-beat-loop-8-open-hh_mp3_3",
+                    "name": "drums-hihat_open-04-rock-beat-loop-8-open-hh.mp3",
+                    "filename": "drums-hihat_open-04-rock-beat-loop-8-open-hh.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-04-rock-beat-loop-8-open-hh.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-05-oh_mp3_4",
+                    "name": "drums-hihat_open-05-oh.mp3",
+                    "filename": "drums-hihat_open-05-oh.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-05-oh.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-06-hho_mp3_5",
+                    "name": "drums-hihat_open-06-hho.mp3",
+                    "filename": "drums-hihat_open-06-hho.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-06-hho.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-07-drumsticks-dave-weckl-evolution-open-wid_mp3_6",
+                    "name": "drums-hihat_open-07-drumsticks-dave-weckl-evolution-open-wid.mp3",
+                    "filename": "drums-hihat_open-07-drumsticks-dave-weckl-evolution-open-wid.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-07-drumsticks-dave-weckl-evolution-open-wid.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-08-hihat-op2-sm58-10_mp3_7",
+                    "name": "drums-hihat_open-08-hihat-op2-sm58-10.mp3",
+                    "filename": "drums-hihat_open-08-hihat-op2-sm58-10.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-08-hihat-op2-sm58-10.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-09-hihat-op2-sm58-03_mp3_8",
+                    "name": "drums-hihat_open-09-hihat-op2-sm58-03.mp3",
+                    "filename": "drums-hihat_open-09-hihat-op2-sm58-03.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-09-hihat-op2-sm58-03.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-10-hat-open3_mp3_9",
+                    "name": "drums-hihat_open-10-hat-open3.mp3",
+                    "filename": "drums-hihat_open-10-hat-open3.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-10-hat-open3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-11-open-hihat-2_mp3_10",
+                    "name": "drums-hihat_open-11-open-hihat-2.mp3",
+                    "filename": "drums-hihat_open-11-open-hihat-2.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-11-open-hihat-2.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_hihat_open_drums-hihat_open-12-xbhhopen_mp3_11",
+                    "name": "drums-hihat_open-12-xbhhopen.mp3",
+                    "filename": "drums-hihat_open-12-xbhhopen.mp3",
+                    "path": "/samples/drums/hihat_open/drums-hihat_open-12-xbhhopen.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "clap": [
+                {
+                    "id": "drums_clap_drums-clap-01-clap_mp3_0",
+                    "name": "drums-clap-01-clap.mp3",
+                    "filename": "drums-clap-01-clap.mp3",
+                    "path": "/samples/drums/clap/drums-clap-01-clap.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-02-clap-05_mp3_1",
+                    "name": "drums-clap-02-clap-05.mp3",
+                    "filename": "drums-clap-02-clap-05.mp3",
+                    "path": "/samples/drums/clap/drums-clap-02-clap-05.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-03-clap-single-5_mp3_2",
+                    "name": "drums-clap-03-clap-single-5.mp3",
+                    "filename": "drums-clap-03-clap-single-5.mp3",
+                    "path": "/samples/drums/clap/drums-clap-03-clap-single-5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-04-clap-3_mp3_3",
+                    "name": "drums-clap-04-clap-3.mp3",
+                    "filename": "drums-clap-04-clap-3.mp3",
+                    "path": "/samples/drums/clap/drums-clap-04-clap-3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-05-clap-single-3_mp3_4",
+                    "name": "drums-clap-05-clap-single-3.mp3",
+                    "filename": "drums-clap-05-clap-single-3.mp3",
+                    "path": "/samples/drums/clap/drums-clap-05-clap-single-3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-06-clap1_mp3_5",
+                    "name": "drums-clap-06-clap1.mp3",
+                    "filename": "drums-clap-06-clap1.mp3",
+                    "path": "/samples/drums/clap/drums-clap-06-clap1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-07-handclap07_mp3_6",
+                    "name": "drums-clap-07-handclap07.mp3",
+                    "filename": "drums-clap-07-handclap07.mp3",
+                    "path": "/samples/drums/clap/drums-clap-07-handclap07.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-08-clap-6_mp3_7",
+                    "name": "drums-clap-08-clap-6.mp3",
+                    "filename": "drums-clap-08-clap-6.mp3",
+                    "path": "/samples/drums/clap/drums-clap-08-clap-6.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-09-clap-8_mp3_8",
+                    "name": "drums-clap-09-clap-8.mp3",
+                    "filename": "drums-clap-09-clap-8.mp3",
+                    "path": "/samples/drums/clap/drums-clap-09-clap-8.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-10-handclap10_mp3_9",
+                    "name": "drums-clap-10-handclap10.mp3",
+                    "filename": "drums-clap-10-handclap10.mp3",
+                    "path": "/samples/drums/clap/drums-clap-10-handclap10.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-11-clap_mp3_10",
+                    "name": "drums-clap-11-clap.mp3",
+                    "filename": "drums-clap-11-clap.mp3",
+                    "path": "/samples/drums/clap/drums-clap-11-clap.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_clap_drums-clap-12-clap-06_mp3_11",
+                    "name": "drums-clap-12-clap-06.mp3",
+                    "filename": "drums-clap-12-clap-06.mp3",
+                    "path": "/samples/drums/clap/drums-clap-12-clap-06.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "perc": [
+                {
+                    "id": "drums_perc_drums-perc-01-perc-checkout_mp3_0",
+                    "name": "drums-perc-01-perc-checkout.mp3",
+                    "filename": "drums-perc-01-perc-checkout.mp3",
+                    "path": "/samples/drums/perc/drums-perc-01-perc-checkout.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-02-tom-5_mp3_1",
+                    "name": "drums-perc-02-tom-5.mp3",
+                    "filename": "drums-perc-02-tom-5.mp3",
+                    "path": "/samples/drums/perc/drums-perc-02-tom-5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-03-shaker-shake8-wav_mp3_2",
+                    "name": "drums-perc-03-shaker-shake8-wav.mp3",
+                    "filename": "drums-perc-03-shaker-shake8-wav.mp3",
+                    "path": "/samples/drums/perc/drums-perc-03-shaker-shake8-wav.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-04-fractanimal-acoustic-drum-kit-kick-7_mp3_3",
+                    "name": "drums-perc-04-fractanimal-acoustic-drum-kit-kick-7.mp3",
+                    "filename": "drums-perc-04-fractanimal-acoustic-drum-kit-kick-7.mp3",
+                    "path": "/samples/drums/perc/drums-perc-04-fractanimal-acoustic-drum-kit-kick-7.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-05-bell-13-6-os-grelots_mp3_4",
+                    "name": "drums-perc-05-bell-13-6-os-grelots.mp3",
+                    "filename": "drums-perc-05-bell-13-6-os-grelots.mp3",
+                    "path": "/samples/drums/perc/drums-perc-05-bell-13-6-os-grelots.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-06-vibraslap-vibraslap3-wav_mp3_5",
+                    "name": "drums-perc-06-vibraslap-vibraslap3-wav.mp3",
+                    "filename": "drums-perc-06-vibraslap-vibraslap3-wav.mp3",
+                    "path": "/samples/drums/perc/drums-perc-06-vibraslap-vibraslap3-wav.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-07-tuff-shaker-beatbox-oneshot-sample-drum_mp3_6",
+                    "name": "drums-perc-07-tuff-shaker-beatbox-oneshot-sample-drum.mp3",
+                    "filename": "drums-perc-07-tuff-shaker-beatbox-oneshot-sample-drum.mp3",
+                    "path": "/samples/drums/perc/drums-perc-07-tuff-shaker-beatbox-oneshot-sample-drum.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-08-timbales-low-hembra_mp3_7",
+                    "name": "drums-perc-08-timbales-low-hembra.mp3",
+                    "filename": "drums-perc-08-timbales-low-hembra.mp3",
+                    "path": "/samples/drums/perc/drums-perc-08-timbales-low-hembra.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-09-fractanimal-acoustic-drum-kit-low-tom-1_mp3_8",
+                    "name": "drums-perc-09-fractanimal-acoustic-drum-kit-low-tom-1.mp3",
+                    "filename": "drums-perc-09-fractanimal-acoustic-drum-kit-low-tom-1.mp3",
+                    "path": "/samples/drums/perc/drums-perc-09-fractanimal-acoustic-drum-kit-low-tom-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-10-snare-sample-2015-7-gentle_mp3_9",
+                    "name": "drums-perc-10-snare-sample-2015-7-gentle.mp3",
+                    "filename": "drums-perc-10-snare-sample-2015-7-gentle.mp3",
+                    "path": "/samples/drums/perc/drums-perc-10-snare-sample-2015-7-gentle.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-11-xylophone-c5-xylo-medium-c5-ff-01-far-wa_mp3_10",
+                    "name": "drums-perc-11-xylophone-c5-xylo-medium-c5-ff-01-far-wa.mp3",
+                    "filename": "drums-perc-11-xylophone-c5-xylo-medium-c5-ff-01-far-wa.mp3",
+                    "path": "/samples/drums/perc/drums-perc-11-xylophone-c5-xylo-medium-c5-ff-01-far-wa.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "drums_perc_drums-perc-12-fractanimal-acoustic-drum-kit-high-hat-3_mp3_11",
+                    "name": "drums-perc-12-fractanimal-acoustic-drum-kit-high-hat-3.mp3",
+                    "filename": "drums-perc-12-fractanimal-acoustic-drum-kit-high-hat-3.mp3",
+                    "path": "/samples/drums/perc/drums-perc-12-fractanimal-acoustic-drum-kit-high-hat-3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ]
+        },
+        "instruments": {
+            "piano": [
+                {
+                    "id": "instruments_piano_instruments-piano-01-piano-agudo_mp3_0",
+                    "name": "instruments-piano-01-piano-agudo.mp3",
+                    "filename": "instruments-piano-01-piano-agudo.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-01-piano-agudo.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-02-kalimba-c3_mp3_1",
+                    "name": "instruments-piano-02-kalimba-c3.mp3",
+                    "filename": "instruments-piano-02-kalimba-c3.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-02-kalimba-c3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-03-kalimba-c1_mp3_2",
+                    "name": "instruments-piano-03-kalimba-c1.mp3",
+                    "filename": "instruments-piano-03-kalimba-c1.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-03-kalimba-c1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-04-grandmither-s-piano-41_mp3_3",
+                    "name": "instruments-piano-04-grandmither-s-piano-41.mp3",
+                    "filename": "instruments-piano-04-grandmither-s-piano-41.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-04-grandmither-s-piano-41.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-05-manthey-c3_mp3_4",
+                    "name": "instruments-piano-05-manthey-c3.mp3",
+                    "filename": "instruments-piano-05-manthey-c3.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-05-manthey-c3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-06-reversed-piano-note-with-clean-no-reverb_mp3_5",
+                    "name": "instruments-piano-06-reversed-piano-note-with-clean-no-reverb.mp3",
+                    "filename": "instruments-piano-06-reversed-piano-note-with-clean-no-reverb.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-06-reversed-piano-note-with-clean-no-reverb.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-07-e4_mp3_6",
+                    "name": "instruments-piano-07-e4.mp3",
+                    "filename": "instruments-piano-07-e4.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-07-e4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-08-sogukpiyano-e_mp3_7",
+                    "name": "instruments-piano-08-sogukpiyano-e.mp3",
+                    "filename": "instruments-piano-08-sogukpiyano-e.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-08-sogukpiyano-e.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-09-piano-5_mp3_8",
+                    "name": "instruments-piano-09-piano-5.mp3",
+                    "filename": "instruments-piano-09-piano-5.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-09-piano-5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-10-manthey-f4_mp3_9",
+                    "name": "instruments-piano-10-manthey-f4.mp3",
+                    "filename": "instruments-piano-10-manthey-f4.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-10-manthey-f4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-11-piano-pp-ab4_mp3_10",
+                    "name": "instruments-piano-11-piano-pp-ab4.mp3",
+                    "filename": "instruments-piano-11-piano-pp-ab4.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-11-piano-pp-ab4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_piano_instruments-piano-12-piano-string-hit-medium-3_mp3_11",
+                    "name": "instruments-piano-12-piano-string-hit-medium-3.mp3",
+                    "filename": "instruments-piano-12-piano-string-hit-medium-3.mp3",
+                    "path": "/samples/instruments/piano/instruments-piano-12-piano-string-hit-medium-3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "epiano": [
+                {
+                    "id": "instruments_epiano_instruments-epiano-01-silver-fishes-logo_mp3_0",
+                    "name": "instruments-epiano-01-silver-fishes-logo.mp3",
+                    "filename": "instruments-epiano-01-silver-fishes-logo.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-01-silver-fishes-logo.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-02-bwaaaaam_mp3_1",
+                    "name": "instruments-epiano-02-bwaaaaam.mp3",
+                    "filename": "instruments-epiano-02-bwaaaaam.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-02-bwaaaaam.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-03-rhodes-pan_mp3_2",
+                    "name": "instruments-epiano-03-rhodes-pan.mp3",
+                    "filename": "instruments-epiano-03-rhodes-pan.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-03-rhodes-pan.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-04-electricpiano_mp3_3",
+                    "name": "instruments-epiano-04-electricpiano.mp3",
+                    "filename": "instruments-epiano-04-electricpiano.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-04-electricpiano.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-05-melody-98-gm7-warped-piano_mp3_4",
+                    "name": "instruments-epiano-05-melody-98-gm7-warped-piano.mp3",
+                    "filename": "instruments-epiano-05-melody-98-gm7-warped-piano.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-05-melody-98-gm7-warped-piano.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-06-horns-morphed-lfo_mp3_5",
+                    "name": "instruments-epiano-06-horns-morphed-lfo.mp3",
+                    "filename": "instruments-epiano-06-horns-morphed-lfo.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-06-horns-morphed-lfo.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-07-glitch_mp3_6",
+                    "name": "instruments-epiano-07-glitch.mp3",
+                    "filename": "instruments-epiano-07-glitch.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-07-glitch.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-08-dm-piano-chord_mp3_7",
+                    "name": "instruments-epiano-08-dm-piano-chord.mp3",
+                    "filename": "instruments-epiano-08-dm-piano-chord.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-08-dm-piano-chord.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-09-dissonant-electric-piano-sting-4_mp3_8",
+                    "name": "instruments-epiano-09-dissonant-electric-piano-sting-4.mp3",
+                    "filename": "instruments-epiano-09-dissonant-electric-piano-sting-4.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-09-dissonant-electric-piano-sting-4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-10-bass-guitar-piano_mp3_9",
+                    "name": "instruments-epiano-10-bass-guitar-piano.mp3",
+                    "filename": "instruments-epiano-10-bass-guitar-piano.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-10-bass-guitar-piano.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-11-ep-3-c1_mp3_10",
+                    "name": "instruments-epiano-11-ep-3-c1.mp3",
+                    "filename": "instruments-epiano-11-ep-3-c1.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-11-ep-3-c1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_epiano_instruments-epiano-12-g-piano-chord_mp3_11",
+                    "name": "instruments-epiano-12-g-piano-chord.mp3",
+                    "filename": "instruments-epiano-12-g-piano-chord.mp3",
+                    "path": "/samples/instruments/epiano/instruments-epiano-12-g-piano-chord.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "bass": [
+                {
+                    "id": "instruments_bass_synth-bass-01-rec-inside-knock-glass-door-flac_mp3_0",
+                    "name": "synth-bass-01-rec-inside-knock-glass-door-flac.mp3",
+                    "filename": "synth-bass-01-rec-inside-knock-glass-door-flac.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-01-rec-inside-knock-glass-door-flac.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-03-ambient-bass-a-note_mp3_1",
+                    "name": "synth-bass-03-ambient-bass-a-note.mp3",
+                    "filename": "synth-bass-03-ambient-bass-a-note.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-03-ambient-bass-a-note.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-05-analogue-synth-bass-sweep_mp3_2",
+                    "name": "synth-bass-05-analogue-synth-bass-sweep.mp3",
+                    "filename": "synth-bass-05-analogue-synth-bass-sweep.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-05-analogue-synth-bass-sweep.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-07-analog-bass-sweeps-and-fx-001_mp3_3",
+                    "name": "synth-bass-07-analog-bass-sweeps-and-fx-001.mp3",
+                    "filename": "synth-bass-07-analog-bass-sweeps-and-fx-001.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-07-analog-bass-sweeps-and-fx-001.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-09-crystal-bell-08-flac_mp3_4",
+                    "name": "synth-bass-09-crystal-bell-08-flac.mp3",
+                    "filename": "synth-bass-09-crystal-bell-08-flac.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-09-crystal-bell-08-flac.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-12-tanpura-note-a-sharp_mp3_5",
+                    "name": "synth-bass-12-tanpura-note-a-sharp.mp3",
+                    "filename": "synth-bass-12-tanpura-note-a-sharp.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-12-tanpura-note-a-sharp.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-13-beats-bass-pattern-loop-120-bpm_mp3_6",
+                    "name": "synth-bass-13-beats-bass-pattern-loop-120-bpm.mp3",
+                    "filename": "synth-bass-13-beats-bass-pattern-loop-120-bpm.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-13-beats-bass-pattern-loop-120-bpm.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-16-rick-tripper_mp3_7",
+                    "name": "synth-bass-16-rick-tripper.mp3",
+                    "filename": "synth-bass-16-rick-tripper.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-16-rick-tripper.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-17-harp-short-12_mp3_8",
+                    "name": "synth-bass-17-harp-short-12.mp3",
+                    "filename": "synth-bass-17-harp-short-12.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-17-harp-short-12.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-19-kick-deadmau5-style-kick-drum-alternate_mp3_9",
+                    "name": "synth-bass-19-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "filename": "synth-bass-19-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-19-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-21-kick-deadmau5-style-kick-drum-alternate_mp3_10",
+                    "name": "synth-bass-21-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "filename": "synth-bass-21-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-21-kick-deadmau5-style-kick-drum-alternate.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_bass_synth-bass-23-bass-kicks_mp3_11",
+                    "name": "synth-bass-23-bass-kicks.mp3",
+                    "filename": "synth-bass-23-bass-kicks.mp3",
+                    "path": "/samples/instruments/bass/synth-bass-23-bass-kicks.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "guitar_clean": [
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-01-guitar-jingle3_mp3_0",
+                    "name": "instruments-guitar_clean-01-guitar-jingle3.mp3",
+                    "filename": "instruments-guitar_clean-01-guitar-jingle3.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-01-guitar-jingle3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-02-guitar-jingle1_mp3_1",
+                    "name": "instruments-guitar_clean-02-guitar-jingle1.mp3",
+                    "filename": "instruments-guitar_clean-02-guitar-jingle1.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-02-guitar-jingle1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-03-guitar-loop-heatwave-129-f-min_mp3_2",
+                    "name": "instruments-guitar_clean-03-guitar-loop-heatwave-129-f-min.mp3",
+                    "filename": "instruments-guitar_clean-03-guitar-loop-heatwave-129-f-min.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-03-guitar-loop-heatwave-129-f-min.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-04-twangy-electric-guitar-2-16-2-20_mp3_3",
+                    "name": "instruments-guitar_clean-04-twangy-electric-guitar-2-16-2-20.mp3",
+                    "filename": "instruments-guitar_clean-04-twangy-electric-guitar-2-16-2-20.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-04-twangy-electric-guitar-2-16-2-20.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-05-guitar-jingle5_mp3_4",
+                    "name": "instruments-guitar_clean-05-guitar-jingle5.mp3",
+                    "filename": "instruments-guitar_clean-05-guitar-jingle5.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-05-guitar-jingle5.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-06-electric-amp-bass_mp3_5",
+                    "name": "instruments-guitar_clean-06-electric-amp-bass.mp3",
+                    "filename": "instruments-guitar_clean-06-electric-amp-bass.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-06-electric-amp-bass.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-07-c-minor-skank_mp3_6",
+                    "name": "instruments-guitar_clean-07-c-minor-skank.mp3",
+                    "filename": "instruments-guitar_clean-07-c-minor-skank.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-07-c-minor-skank.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-08-g-major-skank_mp3_7",
+                    "name": "instruments-guitar_clean-08-g-major-skank.mp3",
+                    "filename": "instruments-guitar_clean-08-g-major-skank.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-08-g-major-skank.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-09-gtr-clean-545_mp3_8",
+                    "name": "instruments-guitar_clean-09-gtr-clean-545.mp3",
+                    "filename": "instruments-guitar_clean-09-gtr-clean-545.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-09-gtr-clean-545.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-10-clean-guitarr-riff_mp3_9",
+                    "name": "instruments-guitar_clean-10-clean-guitarr-riff.mp3",
+                    "filename": "instruments-guitar_clean-10-clean-guitarr-riff.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-10-clean-guitarr-riff.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-11-brylie-christopher-oxley-guitar-2018-03_mp3_10",
+                    "name": "instruments-guitar_clean-11-brylie-christopher-oxley-guitar-2018-03.mp3",
+                    "filename": "instruments-guitar_clean-11-brylie-christopher-oxley-guitar-2018-03.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-11-brylie-christopher-oxley-guitar-2018-03.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_clean_instruments-guitar_clean-12-short-electric-guitar-phrase_mp3_11",
+                    "name": "instruments-guitar_clean-12-short-electric-guitar-phrase.mp3",
+                    "filename": "instruments-guitar_clean-12-short-electric-guitar-phrase.mp3",
+                    "path": "/samples/instruments/guitar_clean/instruments-guitar_clean-12-short-electric-guitar-phrase.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "guitar_pluck": [
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-01-guitar-nylon-open-g4_mp3_0",
+                    "name": "instruments-guitar_pluck-01-guitar-nylon-open-g4.mp3",
+                    "filename": "instruments-guitar_pluck-01-guitar-nylon-open-g4.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-01-guitar-nylon-open-g4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-02-string-pluck-delay_mp3_1",
+                    "name": "instruments-guitar_pluck-02-string-pluck-delay.mp3",
+                    "filename": "instruments-guitar_pluck-02-string-pluck-delay.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-02-string-pluck-delay.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-03-monochord-05_mp3_2",
+                    "name": "instruments-guitar_pluck-03-monochord-05.mp3",
+                    "filename": "instruments-guitar_pluck-03-monochord-05.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-03-monochord-05.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-04-guitar-nylon-open-a4_mp3_3",
+                    "name": "instruments-guitar_pluck-04-guitar-nylon-open-a4.mp3",
+                    "filename": "instruments-guitar_pluck-04-guitar-nylon-open-a4.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-04-guitar-nylon-open-a4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-05-monochord-02_mp3_4",
+                    "name": "instruments-guitar_pluck-05-monochord-02.mp3",
+                    "filename": "instruments-guitar_pluck-05-monochord-02.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-05-monochord-02.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-06-bass-guitar-pluck-01_mp3_5",
+                    "name": "instruments-guitar_pluck-06-bass-guitar-pluck-01.mp3",
+                    "filename": "instruments-guitar_pluck-06-bass-guitar-pluck-01.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-06-bass-guitar-pluck-01.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-07-flamenco-finale-7_mp3_6",
+                    "name": "instruments-guitar_pluck-07-flamenco-finale-7.mp3",
+                    "filename": "instruments-guitar_pluck-07-flamenco-finale-7.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-07-flamenco-finale-7.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-08-flamenco-loop-4_mp3_7",
+                    "name": "instruments-guitar_pluck-08-flamenco-loop-4.mp3",
+                    "filename": "instruments-guitar_pluck-08-flamenco-loop-4.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-08-flamenco-loop-4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-09-flamenco-finale-6_mp3_8",
+                    "name": "instruments-guitar_pluck-09-flamenco-finale-6.mp3",
+                    "filename": "instruments-guitar_pluck-09-flamenco-finale-6.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-09-flamenco-finale-6.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-10-bass-guitar-pluck-02_mp3_9",
+                    "name": "instruments-guitar_pluck-10-bass-guitar-pluck-02.mp3",
+                    "filename": "instruments-guitar_pluck-10-bass-guitar-pluck-02.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-10-bass-guitar-pluck-02.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-11-flamenco-finale-9_mp3_10",
+                    "name": "instruments-guitar_pluck-11-flamenco-finale-9.mp3",
+                    "filename": "instruments-guitar_pluck-11-flamenco-finale-9.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-11-flamenco-finale-9.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "instruments_guitar_pluck_instruments-guitar_pluck-12-flamenco-finale-8_mp3_11",
+                    "name": "instruments-guitar_pluck-12-flamenco-finale-8.mp3",
+                    "filename": "instruments-guitar_pluck-12-flamenco-finale-8.mp3",
+                    "path": "/samples/instruments/guitar_pluck/instruments-guitar_pluck-12-flamenco-finale-8.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ]
+        },
+        "synth": {
+            "wavetables": [
+                {
+                    "id": "synth_wavetables_synth-wavetables-01-sqr-blip-hi-quality_mp3_0",
+                    "name": "synth-wavetables-01-sqr-blip-hi-quality.mp3",
+                    "filename": "synth-wavetables-01-sqr-blip-hi-quality.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-01-sqr-blip-hi-quality.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-02-dubstep-kick-3-mellow_mp3_1",
+                    "name": "synth-wavetables-02-dubstep-kick-3-mellow.mp3",
+                    "filename": "synth-wavetables-02-dubstep-kick-3-mellow.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-02-dubstep-kick-3-mellow.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-03-square-wave-octave-thing_mp3_2",
+                    "name": "synth-wavetables-03-square-wave-octave-thing.mp3",
+                    "filename": "synth-wavetables-03-square-wave-octave-thing.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-03-square-wave-octave-thing.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-04-waterdrop_mp3_3",
+                    "name": "synth-wavetables-04-waterdrop.mp3",
+                    "filename": "synth-wavetables-04-waterdrop.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-04-waterdrop.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-05-analog-synth-01-c_mp3_4",
+                    "name": "synth-wavetables-05-analog-synth-01-c.mp3",
+                    "filename": "synth-wavetables-05-analog-synth-01-c.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-05-analog-synth-01-c.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-06-beep1-resonant-error-beep_mp3_5",
+                    "name": "synth-wavetables-06-beep1-resonant-error-beep.mp3",
+                    "filename": "synth-wavetables-06-beep1-resonant-error-beep.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-06-beep1-resonant-error-beep.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-07-boemmmmm-m_mp3_6",
+                    "name": "synth-wavetables-07-boemmmmm-m.mp3",
+                    "filename": "synth-wavetables-07-boemmmmm-m.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-07-boemmmmm-m.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-08-sky-snare019_mp3_7",
+                    "name": "synth-wavetables-08-sky-snare019.mp3",
+                    "filename": "synth-wavetables-08-sky-snare019.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-08-sky-snare019.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-09-cool-synth-strings_mp3_8",
+                    "name": "synth-wavetables-09-cool-synth-strings.mp3",
+                    "filename": "synth-wavetables-09-cool-synth-strings.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-09-cool-synth-strings.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-10-retro-beep-mmm-boop-mmm_mp3_9",
+                    "name": "synth-wavetables-10-retro-beep-mmm-boop-mmm.mp3",
+                    "filename": "synth-wavetables-10-retro-beep-mmm-boop-mmm.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-10-retro-beep-mmm-boop-mmm.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-11-sky-bassdrum046_mp3_10",
+                    "name": "synth-wavetables-11-sky-bassdrum046.mp3",
+                    "filename": "synth-wavetables-11-sky-bassdrum046.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-11-sky-bassdrum046.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-12-sky-snare018_mp3_11",
+                    "name": "synth-wavetables-12-sky-snare018.mp3",
+                    "filename": "synth-wavetables-12-sky-snare018.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-12-sky-snare018.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-13-dubstep-kick-4-clean_mp3_12",
+                    "name": "synth-wavetables-13-dubstep-kick-4-clean.mp3",
+                    "filename": "synth-wavetables-13-dubstep-kick-4-clean.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-13-dubstep-kick-4-clean.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-14-computersounds02_mp3_13",
+                    "name": "synth-wavetables-14-computersounds02.mp3",
+                    "filename": "synth-wavetables-14-computersounds02.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-14-computersounds02.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-15-computersounds01_mp3_14",
+                    "name": "synth-wavetables-15-computersounds01.mp3",
+                    "filename": "synth-wavetables-15-computersounds01.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-15-computersounds01.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-16-simple-kick-drum_mp3_15",
+                    "name": "synth-wavetables-16-simple-kick-drum.mp3",
+                    "filename": "synth-wavetables-16-simple-kick-drum.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-16-simple-kick-drum.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-17-warm-basssynth-4002_mp3_16",
+                    "name": "synth-wavetables-17-warm-basssynth-4002.mp3",
+                    "filename": "synth-wavetables-17-warm-basssynth-4002.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-17-warm-basssynth-4002.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-18-sky-snare015_mp3_17",
+                    "name": "synth-wavetables-18-sky-snare015.mp3",
+                    "filename": "synth-wavetables-18-sky-snare015.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-18-sky-snare015.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-19-kick-1-ptfc_mp3_18",
+                    "name": "synth-wavetables-19-kick-1-ptfc.mp3",
+                    "filename": "synth-wavetables-19-kick-1-ptfc.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-19-kick-1-ptfc.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-20-sky-snare017_mp3_19",
+                    "name": "synth-wavetables-20-sky-snare017.mp3",
+                    "filename": "synth-wavetables-20-sky-snare017.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-20-sky-snare017.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-21-sky-snare016_mp3_20",
+                    "name": "synth-wavetables-21-sky-snare016.mp3",
+                    "filename": "synth-wavetables-21-sky-snare016.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-21-sky-snare016.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-22-sky-bassdrum035_mp3_21",
+                    "name": "synth-wavetables-22-sky-bassdrum035.mp3",
+                    "filename": "synth-wavetables-22-sky-bassdrum035.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-22-sky-bassdrum035.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-23-sky-bassdrum023_mp3_22",
+                    "name": "synth-wavetables-23-sky-bassdrum023.mp3",
+                    "filename": "synth-wavetables-23-sky-bassdrum023.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-23-sky-bassdrum023.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-24-sky-bassdrum015_mp3_23",
+                    "name": "synth-wavetables-24-sky-bassdrum015.mp3",
+                    "filename": "synth-wavetables-24-sky-bassdrum015.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-24-sky-bassdrum015.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-25-synthesized-ambient-snare_mp3_24",
+                    "name": "synth-wavetables-25-synthesized-ambient-snare.mp3",
+                    "filename": "synth-wavetables-25-synthesized-ambient-snare.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-25-synthesized-ambient-snare.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-26-sky-snare020_mp3_25",
+                    "name": "synth-wavetables-26-sky-snare020.mp3",
+                    "filename": "synth-wavetables-26-sky-snare020.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-26-sky-snare020.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-27-sky-bassdrum047_mp3_26",
+                    "name": "synth-wavetables-27-sky-bassdrum047.mp3",
+                    "filename": "synth-wavetables-27-sky-bassdrum047.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-27-sky-bassdrum047.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-28-sky-bassdrum044_mp3_27",
+                    "name": "synth-wavetables-28-sky-bassdrum044.mp3",
+                    "filename": "synth-wavetables-28-sky-bassdrum044.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-28-sky-bassdrum044.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-29-dubstep-snare-2-beefy_mp3_28",
+                    "name": "synth-wavetables-29-dubstep-snare-2-beefy.mp3",
+                    "filename": "synth-wavetables-29-dubstep-snare-2-beefy.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-29-dubstep-snare-2-beefy.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-30-walkie-talkie-roger-beep_mp3_29",
+                    "name": "synth-wavetables-30-walkie-talkie-roger-beep.mp3",
+                    "filename": "synth-wavetables-30-walkie-talkie-roger-beep.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-30-walkie-talkie-roger-beep.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-31-bass-mega-thud_mp3_30",
+                    "name": "synth-wavetables-31-bass-mega-thud.mp3",
+                    "filename": "synth-wavetables-31-bass-mega-thud.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-31-bass-mega-thud.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-32-square-blip-non-fade_mp3_31",
+                    "name": "synth-wavetables-32-square-blip-non-fade.mp3",
+                    "filename": "synth-wavetables-32-square-blip-non-fade.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-32-square-blip-non-fade.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-33-sky-bassdrum050_mp3_32",
+                    "name": "synth-wavetables-33-sky-bassdrum050.mp3",
+                    "filename": "synth-wavetables-33-sky-bassdrum050.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-33-sky-bassdrum050.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-34-synthslapbassloop_mp3_33",
+                    "name": "synth-wavetables-34-synthslapbassloop.mp3",
+                    "filename": "synth-wavetables-34-synthslapbassloop.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-34-synthslapbassloop.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-35-gadashjaaah_mp3_34",
+                    "name": "synth-wavetables-35-gadashjaaah.mp3",
+                    "filename": "synth-wavetables-35-gadashjaaah.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-35-gadashjaaah.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-36-sky-snare003_mp3_35",
+                    "name": "synth-wavetables-36-sky-snare003.mp3",
+                    "filename": "synth-wavetables-36-sky-snare003.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-36-sky-snare003.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-37-analogue-white-noise_mp3_36",
+                    "name": "synth-wavetables-37-analogue-white-noise.mp3",
+                    "filename": "synth-wavetables-37-analogue-white-noise.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-37-analogue-white-noise.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-38-sky-bassdrum018_mp3_37",
+                    "name": "synth-wavetables-38-sky-bassdrum018.mp3",
+                    "filename": "synth-wavetables-38-sky-bassdrum018.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-38-sky-bassdrum018.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-39-ec-digi-001_mp3_38",
+                    "name": "synth-wavetables-39-ec-digi-001.mp3",
+                    "filename": "synth-wavetables-39-ec-digi-001.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-39-ec-digi-001.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-40-sky-bassdrum001_mp3_39",
+                    "name": "synth-wavetables-40-sky-bassdrum001.mp3",
+                    "filename": "synth-wavetables-40-sky-bassdrum001.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-40-sky-bassdrum001.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-41-warm-basssynth-4001_mp3_40",
+                    "name": "synth-wavetables-41-warm-basssynth-4001.mp3",
+                    "filename": "synth-wavetables-41-warm-basssynth-4001.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-41-warm-basssynth-4001.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-42-shimmerhat-fakesamples_mp3_41",
+                    "name": "synth-wavetables-42-shimmerhat-fakesamples.mp3",
+                    "filename": "synth-wavetables-42-shimmerhat-fakesamples.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-42-shimmerhat-fakesamples.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-43-analog-synth-01-c_mp3_42",
+                    "name": "synth-wavetables-43-analog-synth-01-c.mp3",
+                    "filename": "synth-wavetables-43-analog-synth-01-c.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-43-analog-synth-01-c.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-44-sky-snare006_mp3_43",
+                    "name": "synth-wavetables-44-sky-snare006.mp3",
+                    "filename": "synth-wavetables-44-sky-snare006.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-44-sky-snare006.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-45-sky-bassdrum049_mp3_44",
+                    "name": "synth-wavetables-45-sky-bassdrum049.mp3",
+                    "filename": "synth-wavetables-45-sky-bassdrum049.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-45-sky-bassdrum049.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-46-sky-bassdrum013_mp3_45",
+                    "name": "synth-wavetables-46-sky-bassdrum013.mp3",
+                    "filename": "synth-wavetables-46-sky-bassdrum013.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-46-sky-bassdrum013.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-47-sky-snare004_mp3_46",
+                    "name": "synth-wavetables-47-sky-snare004.mp3",
+                    "filename": "synth-wavetables-47-sky-snare004.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-47-sky-snare004.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-48-vw-undergrindust_mp3_47",
+                    "name": "synth-wavetables-48-vw-undergrindust.mp3",
+                    "filename": "synth-wavetables-48-vw-undergrindust.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-48-vw-undergrindust.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-49-sky-bassdrum004_mp3_48",
+                    "name": "synth-wavetables-49-sky-bassdrum004.mp3",
+                    "filename": "synth-wavetables-49-sky-bassdrum004.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-49-sky-bassdrum004.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-50-sky-snare014_mp3_49",
+                    "name": "synth-wavetables-50-sky-snare014.mp3",
+                    "filename": "synth-wavetables-50-sky-snare014.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-50-sky-snare014.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-51-c-rca-victor38_mp3_50",
+                    "name": "synth-wavetables-51-c-rca-victor38.mp3",
+                    "filename": "synth-wavetables-51-c-rca-victor38.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-51-c-rca-victor38.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-52-alarming-saw-wave_mp3_51",
+                    "name": "synth-wavetables-52-alarming-saw-wave.mp3",
+                    "filename": "synth-wavetables-52-alarming-saw-wave.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-52-alarming-saw-wave.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-53-sky-bassdrum029_mp3_52",
+                    "name": "synth-wavetables-53-sky-bassdrum029.mp3",
+                    "filename": "synth-wavetables-53-sky-bassdrum029.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-53-sky-bassdrum029.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-54-synthesized-helicopter-rotor-blades_mp3_53",
+                    "name": "synth-wavetables-54-synthesized-helicopter-rotor-blades.mp3",
+                    "filename": "synth-wavetables-54-synthesized-helicopter-rotor-blades.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-54-synthesized-helicopter-rotor-blades.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-55-warm-basssynth-4003_mp3_54",
+                    "name": "synth-wavetables-55-warm-basssynth-4003.mp3",
+                    "filename": "synth-wavetables-55-warm-basssynth-4003.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-55-warm-basssynth-4003.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-56-sky-bassdrum003_mp3_55",
+                    "name": "synth-wavetables-56-sky-bassdrum003.mp3",
+                    "filename": "synth-wavetables-56-sky-bassdrum003.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-56-sky-bassdrum003.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-57-sky-bassdrum002_mp3_56",
+                    "name": "synth-wavetables-57-sky-bassdrum002.mp3",
+                    "filename": "synth-wavetables-57-sky-bassdrum002.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-57-sky-bassdrum002.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-58-analog-synth-01-f_mp3_57",
+                    "name": "synth-wavetables-58-analog-synth-01-f.mp3",
+                    "filename": "synth-wavetables-58-analog-synth-01-f.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-58-analog-synth-01-f.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-59-ao-subtractor-snare-2-1_mp3_58",
+                    "name": "synth-wavetables-59-ao-subtractor-snare-2-1.mp3",
+                    "filename": "synth-wavetables-59-ao-subtractor-snare-2-1.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-59-ao-subtractor-snare-2-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-60-soft-synth-strings_mp3_59",
+                    "name": "synth-wavetables-60-soft-synth-strings.mp3",
+                    "filename": "synth-wavetables-60-soft-synth-strings.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-60-soft-synth-strings.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-61-synthesizer-6_mp3_60",
+                    "name": "synth-wavetables-61-synthesizer-6.mp3",
+                    "filename": "synth-wavetables-61-synthesizer-6.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-61-synthesizer-6.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-62-sky-bassdrum039_mp3_61",
+                    "name": "synth-wavetables-62-sky-bassdrum039.mp3",
+                    "filename": "synth-wavetables-62-sky-bassdrum039.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-62-sky-bassdrum039.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-63-warm-basssynth-4102_mp3_62",
+                    "name": "synth-wavetables-63-warm-basssynth-4102.mp3",
+                    "filename": "synth-wavetables-63-warm-basssynth-4102.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-63-warm-basssynth-4102.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "synth_wavetables_synth-wavetables-64-shorter-sqr-wave-octave-thing_mp3_63",
+                    "name": "synth-wavetables-64-shorter-sqr-wave-octave-thing.mp3",
+                    "filename": "synth-wavetables-64-shorter-sqr-wave-octave-thing.mp3",
+                    "path": "/samples/synth/wavetables/synth-wavetables-64-shorter-sqr-wave-octave-thing.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ]
+        },
+        "orchestral": {
+            "strings": [
+                {
+                    "id": "orchestral_strings_orchestral-strings-01-melted-snow-baroque-ambient_mp3_0",
+                    "name": "orchestral-strings-01-melted-snow-baroque-ambient.mp3",
+                    "filename": "orchestral-strings-01-melted-snow-baroque-ambient.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-01-melted-snow-baroque-ambient.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_strings_orchestral-strings-02-high-string-intense-suspense_mp3_1",
+                    "name": "orchestral-strings-02-high-string-intense-suspense.mp3",
+                    "filename": "orchestral-strings-02-high-string-intense-suspense.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-02-high-string-intense-suspense.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_strings_orchestral-strings-03-redemption_mp3_2",
+                    "name": "orchestral-strings-03-redemption.mp3",
+                    "filename": "orchestral-strings-03-redemption.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-03-redemption.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_strings_orchestral-strings-04-baroque-heaven_mp3_3",
+                    "name": "orchestral-strings-04-baroque-heaven.mp3",
+                    "filename": "orchestral-strings-04-baroque-heaven.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-04-baroque-heaven.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_strings_orchestral-strings-05-lovescene-76bpm-emin_mp3_4",
+                    "name": "orchestral-strings-05-lovescene-76bpm-emin.mp3",
+                    "filename": "orchestral-strings-05-lovescene-76bpm-emin.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-05-lovescene-76bpm-emin.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_strings_orchestral-strings-06-double-bass-a-1-pizzicato-non-vibrato_mp3_5",
+                    "name": "orchestral-strings-06-double-bass-a-1-pizzicato-non-vibrato.mp3",
+                    "filename": "orchestral-strings-06-double-bass-a-1-pizzicato-non-vibrato.mp3",
+                    "path": "/samples/orchestral/strings/orchestral-strings-06-double-bass-a-1-pizzicato-non-vibrato.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "brass": [
+                {
+                    "id": "orchestral_brass_orchestral-brass-01-horn-crescendo-tone-b3_mp3_0",
+                    "name": "orchestral-brass-01-horn-crescendo-tone-b3.mp3",
+                    "filename": "orchestral-brass-01-horn-crescendo-tone-b3.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-01-horn-crescendo-tone-b3.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_brass_orchestral-brass-02-tenor-trombone-vibrato-sustain-g3-tenort_mp3_1",
+                    "name": "orchestral-brass-02-tenor-trombone-vibrato-sustain-g3-tenort.mp3",
+                    "filename": "orchestral-brass-02-tenor-trombone-vibrato-sustain-g3-tenort.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-02-tenor-trombone-vibrato-sustain-g3-tenort.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_brass_orchestral-brass-03-arpasauro-low-note_mp3_2",
+                    "name": "orchestral-brass-03-arpasauro-low-note.mp3",
+                    "filename": "orchestral-brass-03-arpasauro-low-note.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-03-arpasauro-low-note.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_brass_orchestral-brass-04-trumpet-sustain-e-5-sum-shtrumpet-sus-f4_mp3_3",
+                    "name": "orchestral-brass-04-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "filename": "orchestral-brass-04-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-04-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_brass_orchestral-brass-05-trumpet-sustain-e-5-sum-shtrumpet-sus-f4_mp3_4",
+                    "name": "orchestral-brass-05-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "filename": "orchestral-brass-05-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-05-trumpet-sustain-e-5-sum-shtrumpet-sus-f4.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_brass_orchestral-brass-06-tuba-sustain-e-3-tuba3-sus-f2-v3-rr1-mid_mp3_5",
+                    "name": "orchestral-brass-06-tuba-sustain-e-3-tuba3-sus-f2-v3-rr1-mid.mp3",
+                    "filename": "orchestral-brass-06-tuba-sustain-e-3-tuba3-sus-f2-v3-rr1-mid.mp3",
+                    "path": "/samples/orchestral/brass/orchestral-brass-06-tuba-sustain-e-3-tuba3-sus-f2-v3-rr1-mid.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ],
+            "woodwinds": [
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-01-bassoon-c-2-tenuto-vibrato_mp3_0",
+                    "name": "orchestral-woodwinds-01-bassoon-c-2-tenuto-vibrato.mp3",
+                    "filename": "orchestral-woodwinds-01-bassoon-c-2-tenuto-vibrato.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-01-bassoon-c-2-tenuto-vibrato.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-02-bassoon-e-2-tenuto-non-vibrato_mp3_1",
+                    "name": "orchestral-woodwinds-02-bassoon-e-2-tenuto-non-vibrato.mp3",
+                    "filename": "orchestral-woodwinds-02-bassoon-e-2-tenuto-non-vibrato.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-02-bassoon-e-2-tenuto-non-vibrato.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-03-bassoon-c-2-tenuto-non-vibrato_mp3_2",
+                    "name": "orchestral-woodwinds-03-bassoon-c-2-tenuto-non-vibrato.mp3",
+                    "filename": "orchestral-woodwinds-03-bassoon-c-2-tenuto-non-vibrato.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-03-bassoon-c-2-tenuto-non-vibrato.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-04-piccolo-sustain-c5-piccolo-c5-sustain1-w_mp3_3",
+                    "name": "orchestral-woodwinds-04-piccolo-sustain-c5-piccolo-c5-sustain1-w.mp3",
+                    "filename": "orchestral-woodwinds-04-piccolo-sustain-c5-piccolo-c5-sustain1-w.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-04-piccolo-sustain-c5-piccolo-c5-sustain1-w.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-05-bassoon-c-4-tenuto-vibrato_mp3_4",
+                    "name": "orchestral-woodwinds-05-bassoon-c-4-tenuto-vibrato.mp3",
+                    "filename": "orchestral-woodwinds-05-bassoon-c-4-tenuto-vibrato.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-05-bassoon-c-4-tenuto-vibrato.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "orchestral_woodwinds_orchestral-woodwinds-06-bassoon-g-3-tenuto-non-vibrato-fortissim_mp3_5",
+                    "name": "orchestral-woodwinds-06-bassoon-g-3-tenuto-non-vibrato-fortissim.mp3",
+                    "filename": "orchestral-woodwinds-06-bassoon-g-3-tenuto-non-vibrato-fortissim.mp3",
+                    "path": "/samples/orchestral/woodwinds/orchestral-woodwinds-06-bassoon-g-3-tenuto-non-vibrato-fortissim.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ]
+        },
+        "fx": {
+            "default": [
+                {
+                    "id": "fx_fx-fx-01-button-pressed_mp3_0",
+                    "name": "fx-fx-01-button-pressed.mp3",
+                    "filename": "fx-fx-01-button-pressed.mp3",
+                    "path": "/samples/fx/fx-fx-01-button-pressed.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "fx_fx-fx-02-sylized-achievement-fx_mp3_1",
+                    "name": "fx-fx-02-sylized-achievement-fx.mp3",
+                    "filename": "fx-fx-02-sylized-achievement-fx.mp3",
+                    "path": "/samples/fx/fx-fx-02-sylized-achievement-fx.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "fx_fx-fx-03-coin-pickup-sfx-1_mp3_2",
+                    "name": "fx-fx-03-coin-pickup-sfx-1.mp3",
+                    "filename": "fx-fx-03-coin-pickup-sfx-1.mp3",
+                    "path": "/samples/fx/fx-fx-03-coin-pickup-sfx-1.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "fx_fx-fx-04-affirmative-decision-chime_mp3_3",
+                    "name": "fx-fx-04-affirmative-decision-chime.mp3",
+                    "filename": "fx-fx-04-affirmative-decision-chime.mp3",
+                    "path": "/samples/fx/fx-fx-04-affirmative-decision-chime.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "fx_fx-fx-05-pop-lid-on-and-off_mp3_4",
+                    "name": "fx-fx-05-pop-lid-on-and-off.mp3",
+                    "filename": "fx-fx-05-pop-lid-on-and-off.mp3",
+                    "path": "/samples/fx/fx-fx-05-pop-lid-on-and-off.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                },
+                {
+                    "id": "fx_fx-fx-06-crispy-bite_mp3_5",
+                    "name": "fx-fx-06-crispy-bite.mp3",
+                    "filename": "fx-fx-06-crispy-bite.mp3",
+                    "path": "/samples/fx/fx-fx-06-crispy-bite.mp3",
+                    "duration": 1,
+                    "tags": [],
+                    "license": "Unknown",
+                    "author": "Unknown"
+                }
+            ]
+        }
+    }
+}
