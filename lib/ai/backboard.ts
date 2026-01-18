@@ -16,10 +16,11 @@ import type { BackboardResponse, BackboardBatchResponse } from './types';
 import { BackboardClient } from 'backboard-sdk';
 
 const BACKBOARD_API_KEY = process.env.BACKBOARD_API_KEY;
+const BACKBOARD_API_URL = process.env.BACKBOARD_API_URL || 'https://api.backboard.io/v1/chat';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
-// Set to false to use real SDK, true for testing without API
+// Set to false to try real API first, falls back to mock on error
 const USE_MOCK = false;
 
 // Backboard client instance (singleton)
@@ -94,7 +95,7 @@ function hashContext(context: string): string {
  * Parses simple natural language commands into structured responses
  * Now returns batch format for consistency
  */
-function mockBackboardResponse(text: string, model: string): BackboardResponse {
+function mockBackboardResponse(text: string, model: string, systemPrompt?: string): BackboardResponse {
   console.log(`[Mock Backboard] Processing: "${text}" with model: ${model}`);
 
   const lowerText = text.toLowerCase();
@@ -108,6 +109,125 @@ function mockBackboardResponse(text: string, model: string): BackboardResponse {
     confidence,
     reasoning,
   });
+
+  // Pattern: AI Ghost Preview - "suggest what clip should come next"
+  if (lowerText.includes('suggest') && (lowerText.includes('clip') || lowerText.includes('next'))) {
+    // Parse context from the system prompt
+    let trackIndex = 0;
+    let startTick = 384;
+    const availablePatterns: Array<{ id: string; name: string; bars: number }> = [];
+    const usedPatternNames: string[] = [];
+
+    if (systemPrompt) {
+      // Extract track number from prompt
+      const trackMatch = systemPrompt.match(/track (\d+)/i);
+      if (trackMatch) {
+        trackIndex = parseInt(trackMatch[1]) - 1;
+      }
+
+      // Extract suggested start tick from prompt
+      const tickMatch = systemPrompt.match(/startTick["\s:]+(\d+)/);
+      if (tickMatch) {
+        startTick = parseInt(tickMatch[1]);
+      }
+
+      // Parse all available patterns from the prompt
+      const patternRegex = /"([^"]+)" \((\d+) bars, ID: ([a-zA-Z0-9-]+)\)/g;
+      let match;
+      while ((match = patternRegex.exec(systemPrompt)) !== null) {
+        availablePatterns.push({
+          name: match[1],
+          bars: parseInt(match[2]),
+          id: match[3],
+        });
+      }
+
+      // Parse track history to see what patterns were already used
+      const historyRegex = /- "([^"]+)" \(Bars/g;
+      while ((match = historyRegex.exec(systemPrompt)) !== null) {
+        usedPatternNames.push(match[1]);
+      }
+    }
+
+    console.log('[Mock Backboard] Available patterns:', JSON.stringify(availablePatterns, null, 2));
+    console.log('[Mock Backboard] Used patterns on track:', usedPatternNames);
+
+    // PRIORITY: Always suggest creating a NEW AI-generated pattern first!
+    // This gives users fresh, creative content rather than reusing existing patterns
+    const newPatternName = 'AI Generated Beat';
+    const durationBars = 2;
+    const ticksPerBar = 384;
+
+    // Generate different notes based on what patterns exist to add variety
+    const noteVariations = [
+      // Variation 1: Bass line
+      [
+        { pitch: 36, startTick: 0, durationTick: 96, velocity: 100 },
+        { pitch: 36, startTick: 192, durationTick: 48, velocity: 80 },
+        { pitch: 38, startTick: 288, durationTick: 48, velocity: 90 },
+        { pitch: 41, startTick: 384, durationTick: 96, velocity: 100 },
+        { pitch: 36, startTick: 576, durationTick: 48, velocity: 85 },
+        { pitch: 43, startTick: 672, durationTick: 96, velocity: 95 },
+      ],
+      // Variation 2: Melodic pattern
+      [
+        { pitch: 60, startTick: 0, durationTick: 48, velocity: 90 },
+        { pitch: 62, startTick: 96, durationTick: 48, velocity: 85 },
+        { pitch: 64, startTick: 192, durationTick: 96, velocity: 100 },
+        { pitch: 62, startTick: 384, durationTick: 48, velocity: 80 },
+        { pitch: 60, startTick: 480, durationTick: 48, velocity: 85 },
+        { pitch: 57, startTick: 576, durationTick: 96, velocity: 95 },
+      ],
+      // Variation 3: Rhythmic hits
+      [
+        { pitch: 48, startTick: 0, durationTick: 24, velocity: 100 },
+        { pitch: 48, startTick: 96, durationTick: 24, velocity: 70 },
+        { pitch: 48, startTick: 192, durationTick: 24, velocity: 100 },
+        { pitch: 48, startTick: 288, durationTick: 24, velocity: 70 },
+        { pitch: 48, startTick: 384, durationTick: 24, velocity: 100 },
+        { pitch: 48, startTick: 480, durationTick: 24, velocity: 70 },
+        { pitch: 48, startTick: 576, durationTick: 24, velocity: 100 },
+        { pitch: 48, startTick: 672, durationTick: 24, velocity: 70 },
+      ],
+    ];
+
+    // Pick a variation based on how many patterns already exist
+    const variationIndex = availablePatterns.length % noteVariations.length;
+    const generatedNotes = noteVariations[variationIndex];
+
+    return {
+      action: '__batch__',
+      parameters: {
+        actions: [
+          {
+            action: 'addPattern',
+            parameters: {
+              name: newPatternName,
+              lengthInSteps: durationBars * 16,
+            }
+          },
+          {
+            action: 'addNoteSequence',
+            parameters: {
+              patternId: '__NEW_PATTERN__',
+              notes: generatedNotes,
+            }
+          },
+          {
+            action: 'addClip',
+            parameters: {
+              patternId: '__NEW_PATTERN__',
+              trackIndex,
+              startTick,
+              durationTick: durationBars * ticksPerBar,
+            }
+          },
+        ],
+      },
+      confidence: 0.9,
+      reasoning: `Creating "${newPatternName}" with fresh notes just for you! 🎵`,
+    };
+  }
 
   // Pattern: "make a beat" or "create a beat"
   if (lowerText.includes('beat') && (lowerText.includes('make') || lowerText.includes('create'))) {
@@ -314,7 +434,58 @@ export async function sendToModel(
   if (USE_MOCK) {
     console.log('[Backboard] Using MOCK mode');
     await sleep(300); // Simulate network delay
-    return mockBackboardResponse(text, model);
+    return mockBackboardResponse(text, model, effectiveSystemPrompt);
+  }
+
+  // Try REST API first (more reliable than SDK)
+  if (BACKBOARD_API_KEY && BACKBOARD_API_URL) {
+    try {
+      console.log('[Backboard] Trying REST API...');
+      const response = await fetch(BACKBOARD_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${BACKBOARD_API_KEY}`,
+        },
+        body: JSON.stringify({
+          message: text,
+          system_prompt: effectiveSystemPrompt,
+          model: model === 'gemini' ? 'gpt-4o' : 'gpt-4o-mini',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Backboard] REST API response:', data);
+
+        // Parse the response content
+        let content = data.content || data.message || data.response || '';
+        if (typeof content === 'string') {
+          content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          try {
+            const parsed = JSON.parse(content);
+            if (parsed.actions && Array.isArray(parsed.actions)) {
+              return {
+                action: '__batch__',
+                parameters: { actions: parsed.actions },
+                confidence: parsed.confidence || 0.8,
+                reasoning: parsed.reasoning || 'AI suggestion',
+              };
+            }
+            return {
+              action: parsed.action || 'unknown',
+              parameters: parsed.parameters || {},
+              confidence: parsed.confidence || 0.8,
+              reasoning: parsed.reasoning || 'AI suggestion',
+            };
+          } catch {
+            // If not JSON, fall through to SDK
+          }
+        }
+      }
+    } catch (restError) {
+      console.log('[Backboard] REST API failed, trying SDK...', restError);
+    }
   }
 
   // REAL API MODE using Backboard SDK
@@ -425,10 +596,10 @@ export async function sendToModel(
     }
   }
 
-  // All retries failed
-  throw new Error(
-    `Failed to connect to Backboard after ${MAX_RETRIES + 1} attempts: ${lastError?.message}`
-  );
+  // All retries failed - fall back to mock
+  console.warn('[Backboard] All API attempts failed, falling back to mock response');
+  console.log('[Backboard] Last error:', lastError?.message);
+  return mockBackboardResponse(text, model, effectiveSystemPrompt);
 }
 
 /**

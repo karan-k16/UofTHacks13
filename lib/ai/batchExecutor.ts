@@ -206,8 +206,51 @@ export async function executeBatch(
     // Step 3: Resolve conflicts (offset overlapping clips)
     const conflictResolved = resolveClipConflicts(resolvedActions);
 
-    // Track created patterns for "current" patternId resolution
+    // Track created patterns and channels for "current" ID resolution
     let lastCreatedPatternId: string | null = null;
+    let lastCreatedChannelId: string | null = null;
+
+    // Helper: Get pattern ID with fallback to most recent project pattern
+    const getPatternId = (): string | null => {
+        if (lastCreatedPatternId) {
+            console.log('[BatchExecutor] Using batch-created pattern:', lastCreatedPatternId);
+            return lastCreatedPatternId;
+        }
+        // Fallback: use the most recent pattern from the project
+        const store = useStore.getState();
+        const patterns = store.project?.patterns;
+        if (patterns && patterns.length > 0) {
+            const lastPattern = patterns[patterns.length - 1];
+            if (lastPattern) {
+                console.log('[BatchExecutor] Using fallback pattern from project:', lastPattern.id);
+                return lastPattern.id;
+            }
+        }
+        console.warn('[BatchExecutor] No pattern available for "current" reference');
+        return null;
+    };
+
+    // Helper: Get channel ID with fallback to most recent project channel
+    const getChannelId = (): string | null => {
+        if (lastCreatedChannelId) {
+            console.log('[BatchExecutor] Using batch-created channel:', lastCreatedChannelId);
+            return lastCreatedChannelId;
+        }
+        // Fallback: use the most recent channel from the project
+        const store = useStore.getState();
+        const channels = store.project?.channels;
+        if (channels && channels.length > 0) {
+            const lastChannel = channels[channels.length - 1];
+            if (lastChannel) {
+                console.log('[BatchExecutor] Using fallback channel from project:', lastChannel.id);
+                return lastChannel.id;
+            }
+        }
+        console.warn('[BatchExecutor] No channel available for "current" reference');
+        return null;
+    };
+
+    console.log('[BatchExecutor] Starting batch execution with', conflictResolved.length, 'actions');
 
     // Step 4: Parse and execute each action
     for (let i = 0; i < conflictResolved.length; i++) {
@@ -221,8 +264,30 @@ export async function executeBatch(
         try {
             // Resolve "current" patternId to actual pattern ID
             const resolvedParams = { ...actionData.parameters };
-            if (resolvedParams.patternId === 'current' && lastCreatedPatternId) {
-                resolvedParams.patternId = lastCreatedPatternId;
+
+            // Log raw action for debugging
+            console.log(`[BatchExecutor] Processing action ${i + 1}/${conflictResolved.length}:`, actionData.action);
+
+            // Resolve "current" patternId reference
+            if (resolvedParams.patternId === 'current') {
+                const patternId = getPatternId();
+                if (patternId) {
+                    resolvedParams.patternId = patternId;
+                    console.log('[BatchExecutor] Resolved patternId "current" to:', patternId);
+                } else {
+                    console.error('[BatchExecutor] Cannot resolve "current" patternId - no patterns exist');
+                }
+            }
+
+            // Resolve "current" channelId reference
+            if (resolvedParams.channelId === 'current') {
+                const channelId = getChannelId();
+                if (channelId) {
+                    resolvedParams.channelId = channelId;
+                    console.log('[BatchExecutor] Resolved channelId "current" to:', channelId);
+                } else {
+                    console.error('[BatchExecutor] Cannot resolve "current" channelId - no channels exist');
+                }
             }
 
             // Parse the action into a typed command
@@ -241,12 +306,21 @@ export async function executeBatch(
                 // Track created pattern IDs for subsequent "current" references
                 if (actionData.action === 'addPattern' && result.data?.patternId) {
                     lastCreatedPatternId = result.data.patternId;
+                    console.log('[BatchExecutor] Pattern created with ID:', lastCreatedPatternId);
+                }
+
+                // Track created channel IDs for subsequent "current" references
+                if (actionData.action === 'addChannel' && result.data?.channelId) {
+                    lastCreatedChannelId = result.data.channelId;
+                    console.log('[BatchExecutor] Channel created with ID:', lastCreatedChannelId);
                 }
             } else {
                 failCount++;
+                console.error('[BatchExecutor] Action failed:', actionData.action, result.message);
             }
         } catch (error) {
             failCount++;
+            console.error('[BatchExecutor] Exception in action:', actionData.action, error);
             results.push({
                 success: false,
                 message: error instanceof Error ? error.message : 'Unknown error executing action',
@@ -254,6 +328,8 @@ export async function executeBatch(
             });
         }
     }
+
+    console.log('[BatchExecutor] Batch complete:', successCount, 'succeeded,', failCount, 'failed');
 
     // Build summary message
     const totalActions = batchResponse.actions.length;

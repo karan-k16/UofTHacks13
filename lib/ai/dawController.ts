@@ -148,7 +148,7 @@ export function executePatternCommand(
  * Execute note-related commands
  */
 export function executeNoteCommand(
-  cmd: AddNoteCommand | UpdateNoteCommand | DeleteNoteCommand
+  cmd: AddNoteCommand | AddNoteSequenceCommand | ClearPatternNotesCommand | UpdateNoteCommand | DeleteNoteCommand
 ): CommandResult {
   const store = useStore.getState();
   const project = store.project;
@@ -692,9 +692,14 @@ export function executeChannelCommand(
       const channelName = cmd.name || `${cmd.type === 'synth' ? 'Synth' : 'Sampler'} ${project.channels.length + 1}`;
       store.addChannel(channelName, cmd.type, cmd.preset);
 
+      // Get the newly created channel ID
+      const newChannel = store.project?.channels[store.project.channels.length - 1];
+      const newChannelId = newChannel?.id;
+
       return {
         success: true,
         message: `Added ${cmd.type} channel "${channelName}"${cmd.preset ? ` with preset "${cmd.preset}"` : ''}`,
+        data: { channelId: newChannelId },
       };
     } catch (error) {
       return {

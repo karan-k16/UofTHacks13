@@ -19,6 +19,9 @@ import type { AICommand, BackboardResponse } from './types';
 export function parseAIResponse(response: BackboardResponse): AICommand {
   const { action, parameters } = response;
 
+  // Debug logging for troubleshooting
+  console.log('[CommandParser] Parsing action:', action, 'with params:', JSON.stringify(parameters));
+
   try {
     // Pattern commands
     if (action === 'addPattern') {
@@ -38,13 +41,20 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
 
     // Note commands
     if (action === 'addNote') {
+      const pitch = Number(parameters.pitch ?? parameters.note ?? 60);
+      const startTick = Number(parameters.startTick ?? parameters.start ?? parameters.tick ?? 0);
+      const durationTick = Number(parameters.durationTick ?? parameters.duration ?? parameters.length ?? 96);
+      const velocity = parameters.velocity !== undefined ? Number(parameters.velocity) : 100;
+
+      console.log('[CommandParser] addNote parsed:', { pitch, startTick, durationTick, velocity, patternId: parameters.patternId });
+
       return {
         action: 'addNote',
-        patternId: String(parameters.patternId),
-        pitch: Number(parameters.pitch),
-        startTick: Number(parameters.startTick),
-        durationTick: Number(parameters.durationTick || parameters.duration),
-        velocity: parameters.velocity !== undefined ? Number(parameters.velocity) : undefined,
+        patternId: String(parameters.patternId ?? 'current'),
+        pitch,
+        startTick,
+        durationTick,
+        velocity,
       };
     }
 
@@ -63,6 +73,91 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
       return {
         action: 'deleteNote',
         noteId: String(parameters.noteId || parameters.id),
+      };
+    }
+
+    // addNoteSequence - add multiple notes at once (CRITICAL for melodies)
+    if (action === 'addNoteSequence') {
+      console.log('[CommandParser] Parsing addNoteSequence with notes:', JSON.stringify(parameters.notes));
+      const rawNotes = parameters.notes;
+      const notes = Array.isArray(rawNotes)
+        ? rawNotes.map((n: any, idx: number) => {
+          const parsed = {
+            pitch: Number(n.pitch ?? n.note ?? 60),
+            startTick: Number(n.startTick ?? n.start ?? n.tick ?? 0),
+            durationTick: Number(n.durationTick ?? n.duration ?? n.length ?? 96),
+            velocity: n.velocity !== undefined ? Number(n.velocity) : 100,
+          };
+          console.log(`[CommandParser] Note ${idx}:`, parsed);
+          return parsed;
+        })
+        : [];
+
+      if (notes.length === 0) {
+        console.warn('[CommandParser] addNoteSequence received empty notes array');
+      }
+
+      return {
+        action: 'addNoteSequence',
+        patternId: String(parameters.patternId ?? 'current'),
+        notes,
+      };
+    }
+
+    // clearPatternNotes - clear all notes from a pattern
+    if (action === 'clearPatternNotes') {
+      return {
+        action: 'clearPatternNotes',
+        patternId: String(parameters.patternId),
+      };
+    }
+
+    // setPatternLength - set the length of a pattern
+    if (action === 'setPatternLength') {
+      return {
+        action: 'setPatternLength',
+        patternId: String(parameters.patternId),
+        lengthInSteps: Number(parameters.lengthInSteps ?? parameters.length ?? 16),
+      };
+    }
+
+    // selectPattern - select a pattern for editing
+    if (action === 'selectPattern') {
+      return {
+        action: 'selectPattern',
+        patternId: String(parameters.patternId),
+      };
+    }
+
+    // focusPanel - focus a specific panel in the UI
+    if (action === 'focusPanel') {
+      return {
+        action: 'focusPanel',
+        panel: String(parameters.panel) as 'browser' | 'channelRack' | 'mixer' | 'playlist' | 'pianoRoll' | 'chat',
+      };
+    }
+
+    // addPlaylistTrack - add a new track to the playlist
+    if (action === 'addPlaylistTrack') {
+      return {
+        action: 'addPlaylistTrack',
+        name: parameters.name ? String(parameters.name) : undefined,
+      };
+    }
+
+    // togglePlaylistTrackMute - mute/unmute a playlist track
+    if (action === 'togglePlaylistTrackMute') {
+      return {
+        action: 'togglePlaylistTrackMute',
+        trackId: String(parameters.trackId),
+      };
+    }
+
+    // togglePlaylistTrackSolo - solo/unsolo a playlist track
+    if (action === 'togglePlaylistTrackSolo') {
+      return {
+        action: 'togglePlaylistTrackSolo',
+        trackId: String(parameters.trackId),
       };
     }
 
@@ -124,6 +219,40 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
       };
     }
 
+    // setChannelVolume - set volume for a channel
+    if (action === 'setChannelVolume') {
+      return {
+        action: 'setChannelVolume',
+        channelId: String(parameters.channelId),
+        volume: Number(parameters.volume ?? 1.0),
+      };
+    }
+
+    // setChannelPan - set pan for a channel
+    if (action === 'setChannelPan') {
+      return {
+        action: 'setChannelPan',
+        channelId: String(parameters.channelId),
+        pan: Number(parameters.pan ?? 0),
+      };
+    }
+
+    // toggleChannelMute - mute/unmute a channel
+    if (action === 'toggleChannelMute') {
+      return {
+        action: 'toggleChannelMute',
+        channelId: String(parameters.channelId),
+      };
+    }
+
+    // toggleChannelSolo - solo/unsolo a channel
+    if (action === 'toggleChannelSolo') {
+      return {
+        action: 'toggleChannelSolo',
+        channelId: String(parameters.channelId),
+      };
+    }
+
     // Mixer commands
     if (action === 'setVolume') {
       return {
@@ -157,11 +286,16 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
 
     // Playlist/Clip commands
     if (action === 'addClip') {
+      const startTick = Number(parameters.startTick ?? parameters.start ?? parameters.tick ?? 0);
+      const trackIndex = Number(parameters.trackIndex ?? parameters.track ?? 0);
+
+      console.log('[CommandParser] addClip parsed:', { patternId: parameters.patternId, trackIndex, startTick });
+
       return {
         action: 'addClip',
-        patternId: String(parameters.patternId),
-        trackIndex: Number(parameters.trackIndex || parameters.track),
-        startTick: Number(parameters.startTick || parameters.start),
+        patternId: String(parameters.patternId ?? 'current'),
+        trackIndex,
+        startTick,
         durationTick: parameters.durationTick ? Number(parameters.durationTick) : undefined,
       };
     }
@@ -207,6 +341,8 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
         subcategory: parameters.subcategory ? String(parameters.subcategory) : undefined,
         sampleName: parameters.sampleName ? String(parameters.sampleName) : undefined,
         trackIndex: parameters.trackIndex !== undefined ? Number(parameters.trackIndex) : undefined,
+        startTick: parameters.startTick !== undefined ? Number(parameters.startTick) : 0,
+        durationTick: parameters.durationTick !== undefined ? Number(parameters.durationTick) : undefined,
       };
     }
 
@@ -275,9 +411,10 @@ export function parseAIResponse(response: BackboardResponse): AICommand {
     }
 
     // Unknown action - return unknown command
+    console.warn('[CommandParser] Unrecognized action:', action, '- Full response:', JSON.stringify(response));
     return {
       action: 'unknown',
-      originalText: parameters.originalText || JSON.stringify(response),
+      originalText: parameters?.originalText || JSON.stringify(response),
       reason: `Unrecognized action: ${action}`,
     };
 

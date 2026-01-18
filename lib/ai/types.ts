@@ -326,6 +326,8 @@ export interface AddAudioSampleCommand extends BaseCommand {
   subcategory?: string;
   sampleName?: string;
   trackIndex?: number;
+  startTick?: number;
+  durationTick?: number;
 }
 
 export interface AddAudioSampleToNewTrackCommand extends BaseCommand {

@@ -5,6 +5,7 @@ import { useStore } from '@/state/store';
 import { ticksToPixels, pixelsToTicks } from '@/lib/utils/time';
 import type { Clip, PatternClip, AudioClip, Pattern, PlaylistTrack as PlaylistTrackType, AudioAsset } from '@/domain/types';
 import WaveformCanvas from '@/components/common/WaveformCanvas';
+import { useAISuggestion, type GhostClip } from '@/lib/ai/hooks/useAISuggestion';
 
 const TRACK_HEIGHT = 60;
 const HEADER_WIDTH = 120;
@@ -41,6 +42,9 @@ export default function Playlist() {
 
   // Split preview state
   const [splitPreview, setSplitPreview] = useState<{ clipId: string; tick: number } | null>(null);
+
+  // AI Ghost Preview state - click only, no hover timing
+  const { isAnalyzing, analyzingTrackIndex, ghostClip, triggerSuggestion, acceptSuggestion, dismissSuggestion } = useAISuggestion();
 
   const {
     project,
@@ -598,6 +602,49 @@ export default function Playlist() {
     }
   }, [dropDebug]);
 
+  // ============================================
+  // AI Ghost Preview Handlers
+  // ============================================
+
+  // Calculate the last clip position for each track
+  const getLastClipEndTick = useCallback((trackIndex: number): number => {
+    const trackClips = clips.filter(c => c.trackIndex === trackIndex);
+    if (trackClips.length === 0) return 0;
+    return Math.max(...trackClips.map(c => c.startTick + c.durationTick));
+  }, [clips]);
+
+  // Handle + zone click - trigger AI suggestion immediately
+  const handlePlusZoneClick = useCallback((trackId: string, trackIndex: number, afterTick: number) => {
+    console.log('[AI Ghost] Click triggered for track', trackIndex);
+    if (!isAnalyzing) {
+      triggerSuggestion(trackId, trackIndex, afterTick);
+    }
+  }, [isAnalyzing, triggerSuggestion]);
+
+  // Handle ghost clip click (accept suggestion)
+  const handleGhostClipClick = useCallback(async () => {
+    const result = await acceptSuggestion();
+    if (!result.success) {
+      console.error('Failed to accept suggestion:', result.message);
+    }
+  }, [acceptSuggestion]);
+
+  // Handle ghost clip dismiss (click outside or ESC)
+  const handleGhostClipDismiss = useCallback(() => {
+    dismissSuggestion();
+  }, [dismissSuggestion]);
+
+  // ESC key to dismiss ghost clip
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && ghostClip) {
+        handleGhostClipDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [ghostClip, handleGhostClipDismiss]);
+
   // Position cursor
   const cursorX = ticksToPixels(position, playlistZoom, PPQ);
 
@@ -744,6 +791,98 @@ export default function Playlist() {
                 snapToGrid={snapToGrid}
               />
             ))}
+
+            {/* AI Ghost Preview - Plus Zones for each track */}
+            {Array.from({ length: effectiveTrackCount }).map((_, trackIndex) => {
+              const track = tracks[trackIndex];
+              const trackId = track?.id || `track-${trackIndex}`;
+              const lastClipEnd = getLastClipEndTick(trackIndex);
+              const plusZoneX = ticksToPixels(lastClipEnd, playlistZoom, PPQ) + 8;
+              const plusZoneY = trackIndex * TRACK_HEIGHT + (TRACK_HEIGHT - 32) / 2;
+              const isThisTrackAnalyzing = isAnalyzing && analyzingTrackIndex === trackIndex;
+
+              return (
+                <div
+                  key={`plus-zone-${trackId}`}
+                  className={`absolute flex items-center justify-center w-10 h-10 rounded-lg border-2 border-dashed 
+                    transition-all duration-200 cursor-pointer z-20
+                    ${isThisTrackAnalyzing
+                      ? 'border-blue-400 bg-blue-500/30 scale-110 shadow-lg shadow-blue-500/30'
+                      : 'border-ps-bg-400 bg-ps-bg-600/70 hover:border-blue-400 hover:bg-blue-500/20 hover:scale-105'
+                    }`}
+                  style={{
+                    left: plusZoneX,
+                    top: plusZoneY,
+                  }}
+                  onClick={() => handlePlusZoneClick(trackId, trackIndex, lastClipEnd)}
+                  title="Click to get AI suggestion"
+                >
+                  {isThisTrackAnalyzing ? (
+                    <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="text-blue-400 text-xl font-bold">+</span>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* AI Ghost Preview - Ghost Clip */}
+            {ghostClip && (
+              <div
+                className="absolute rounded-lg border-2 border-dashed border-cyan-400 cursor-pointer z-30
+                  transition-all duration-300 hover:border-cyan-300 shadow-xl shadow-cyan-500/50"
+                style={{
+                  left: ticksToPixels(ghostClip.startTick, playlistZoom, PPQ),
+                  top: ghostClip.trackIndex * TRACK_HEIGHT + 4,
+                  width: Math.max(ticksToPixels(ghostClip.durationTick, playlistZoom, PPQ), 120),
+                  height: TRACK_HEIGHT - 8,
+                  background: ghostClip.batchCommands
+                    ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.5) 0%, rgba(236, 72, 153, 0.5) 100%)' // Purple/pink for new patterns
+                    : 'linear-gradient(135deg, rgba(34, 211, 238, 0.5) 0%, rgba(59, 130, 246, 0.5) 100%)', // Cyan/blue for existing
+                  boxShadow: ghostClip.batchCommands
+                    ? '0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1)'
+                    : '0 0 20px rgba(34, 211, 238, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1)',
+                }}
+                onClick={handleGhostClipClick}
+                title={`Click to add: ${ghostClip.patternName}\n${ghostClip.reasoning || ''}`}
+              >
+                {/* Pulsing glow effect */}
+                <div
+                  className="absolute inset-0 rounded-lg opacity-75"
+                  style={{
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                    background: ghostClip.batchCommands
+                      ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(236, 72, 153, 0.3) 100%)'
+                      : 'linear-gradient(135deg, rgba(34, 211, 238, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%)',
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center gap-2 px-3 overflow-hidden z-10">
+                  <span className="text-2xl drop-shadow-lg animate-bounce">
+                    {ghostClip.batchCommands ? '✨' : '🤖'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-white drop-shadow-md truncate">
+                      {ghostClip.batchCommands ? '🎵 ' : ''}{ghostClip.patternName || 'AI Suggestion'}
+                    </div>
+                    {ghostClip.reasoning && (
+                      <div className="text-xs text-cyan-100 drop-shadow truncate">
+                        {ghostClip.reasoning}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-red-500/80 hover:bg-red-500 text-white text-sm font-bold shadow-lg transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGhostClipDismiss();
+                    }}
+                    title="Dismiss suggestion (ESC)"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Box Selection Rectangle */}
             {isBoxSelecting && boxSelection && (

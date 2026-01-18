@@ -63,7 +63,7 @@ export default function LandingPage() {
             Login
           </button>
           <button
-            onClick={() => router.push('/demo')}
+            onClick={() => router.push('/demo?autostart=true')}
             className="text-[13px] text-white px-5 py-2 rounded-xl border border-[#333] hover:border-[#555] transition-colors"
           >
             Demo
@@ -120,7 +120,7 @@ export default function LandingPage() {
             Learn more
           </button>
           <button
-            onClick={() => router.push('/demo')}
+            onClick={() => router.push('/demo?autostart=true')}
             className="text-[14px] text-white px-5 py-2.5 rounded-xl border border-[#444] hover:border-[#666] transition-colors flex items-center gap-2"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >

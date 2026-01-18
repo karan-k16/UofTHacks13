@@ -978,3 +978,129 @@ export function resolveSampleByDescription(
 
     return bestScore > 0 ? bestMatch : null;
 }
+
+// ============================================
+// AI Ghost Preview - Suggestion Prompt Builder
+// ============================================
+
+/**
+ * Builds a specialized system prompt for AI clip suggestions.
+ * Analyzes recent clips on the track and suggests what should come next.
+ */
+export function buildSuggestionPrompt(
+    project: Project,
+    sampleLibrary: SampleLibrary | null,
+    targetTrackId: string,
+    targetTrackIndex: number,
+    afterTick: number
+): string {
+    const PPQ = project.ppq || 96;
+    const ticksPerBar = PPQ * 4;
+
+    // Get clips on this track (clips are under project.playlist.clips)
+    const allClips = project.playlist?.clips || [];
+    const trackClips = allClips.filter(clip => clip.trackIndex === targetTrackIndex);
+
+    // Sort by position and get the most recent clips (up to 5)
+    const sortedClips = trackClips
+        .filter(clip => clip.startTick < afterTick)
+        .sort((a, b) => b.startTick - a.startTick)
+        .slice(0, 5);
+
+    // Build clip history summary
+    const clipHistory = sortedClips.map(clip => {
+        const pattern = project.patterns.find(p => p.id === clip.patternId);
+        const startBar = Math.floor(clip.startTick / ticksPerBar) + 1;
+        const endBar = Math.floor((clip.startTick + clip.durationTick) / ticksPerBar) + 1;
+
+        return {
+            name: pattern?.name || clip.name || 'Unknown',
+            startBar,
+            endBar,
+            durationBars: Math.round(clip.durationTick / ticksPerBar),
+            color: clip.color,
+            type: pattern ? 'pattern' : 'audio',
+        };
+    }).reverse(); // Chronological order
+
+    // Get all patterns for reference
+    const allPatterns = (project.patterns || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        bars: p.bars || 4,
+        hasNotes: p.notes && p.notes.length > 0,
+    }));
+
+    // Calculate the suggested start position
+    const suggestedStartBar = Math.ceil(afterTick / ticksPerBar) + 1;
+
+    // Build available samples context
+    let sampleContext = '';
+    if (sampleLibrary && sampleLibrary.categories && Array.isArray(sampleLibrary.categories)) {
+        const categories = sampleLibrary.categories.slice(0, 5).map((c: { name: string }) => c.name);
+        sampleContext = `
+Available sample categories: ${categories.join(', ')}
+You can suggest creating a new pattern with specific drums/instruments, or using an existing pattern.`;
+    }
+
+    return `You are an AI assistant helping a music producer compose their track.
+
+## Your Task
+Suggest what audio clip should come NEXT on track ${targetTrackIndex + 1} after bar ${suggestedStartBar - 1}.
+
+## Track History (Recent clips on this track)
+${clipHistory.length > 0
+            ? clipHistory.map(c => `- "${c.name}" (Bars ${c.startBar}-${c.endBar}, ${c.durationBars} bar${c.durationBars > 1 ? 's' : ''})`).join('\n')
+            : '- No previous clips on this track'
+        }
+
+## Available Patterns in Project
+${allPatterns.length > 0
+            ? allPatterns.map(p => `- "${p.name}" (${p.bars} bars, ID: ${p.id})`).join('\n')
+            : '- No patterns yet'
+        }
+${sampleContext}
+
+## Guidelines
+1. Analyze the pattern/history on this track to understand its role (drums, bass, melody, etc.)
+2. Suggest something DIFFERENT and CREATIVE - do NOT just repeat the last pattern
+3. Priority order for suggestions:
+   - If there are multiple patterns available, suggest a DIFFERENT pattern than what was just used
+   - Suggest creating a NEW pattern with a creative name and description
+   - Only as a last resort, suggest repeating a pattern (but extend or vary it)
+4. Be creative! Good suggestions include:
+   - A contrasting section (if track had drums, suggest a fill or break)
+   - A build-up or breakdown
+   - A complementary pattern from another part of the song
+
+## Response Format
+You MUST respond with a JSON object. Choose one of these actions:
+
+1. To place an existing pattern:
+{
+    "action": "addClip",
+    "parameters": {
+        "patternId": "<existing-pattern-id>",
+        "trackIndex": ${targetTrackIndex},
+        "startTick": ${Math.ceil(afterTick / ticksPerBar) * ticksPerBar},
+        "durationTick": <duration-in-ticks>
+    },
+    "reasoning": "<brief explanation of why this suggestion>"
+}
+
+2. To suggest creating a new pattern (the user will see this in the ghost preview):
+{
+    "action": "createAndAddPattern",
+    "parameters": {
+        "name": "<suggested-pattern-name>",
+        "trackIndex": ${targetTrackIndex},
+        "startTick": ${Math.ceil(afterTick / ticksPerBar) * ticksPerBar},
+        "durationBars": <1-8>,
+        "description": "<what the pattern should contain>"
+    },
+    "reasoning": "<brief explanation of why this suggestion>"
+}
+
+IMPORTANT: Always include a helpful "reasoning" field explaining your musical thinking.
+Respond ONLY with the JSON object, no additional text.`;
+}
