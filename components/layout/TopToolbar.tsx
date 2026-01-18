@@ -27,6 +27,7 @@ export default function TopToolbar() {
     pianoRollZoom,
     setPlaylistZoom,
     setPianoRollZoom,
+    updateProjectName,
   } = useStore();
 
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -215,9 +216,8 @@ export default function TopToolbar() {
     {
       label: 'Documentation',
       onClick: () => {
-        alert('Documentation coming soon!');
+        window.open('https://github.com/karan-k16/UofTHacks13/blob/main/README.md', '_blank');
       },
-      disabled: true,
     },
   ];
 
@@ -267,7 +267,16 @@ export default function TopToolbar() {
         {/* Project Name */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-ps-text-secondary">Project:</span>
-          <span className="text-xs font-medium text-ps-text-primary">
+          <span 
+            className="text-xs font-medium text-ps-text-primary cursor-pointer hover:text-ps-accent-primary transition-colors px-1 py-0.5 rounded hover:bg-ps-bg-700"
+            onClick={() => {
+              const newName = prompt('Enter new project name:', project?.name || 'Untitled');
+              if (newName && newName.trim()) {
+                updateProjectName(newName.trim());
+              }
+            }}
+            title="Click to rename project"
+          >
             {project?.name ?? 'Untitled'}
           </span>
           {hasUnsavedChanges && (
