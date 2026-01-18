@@ -72,15 +72,44 @@ export default function Browser() {
     }, 0);
   }, []);
 
-  const playPreview = useCallback((url: string | null) => {
+  const playPreview = useCallback((url: string | null, sampleId?: string) => {
     if (!url) return;
+    
+    // If clicking the same sample that's loaded
+    if (playingSampleId === sampleId && previewAudioRef.current) {
+      const audio = previewAudioRef.current;
+      
+      // Toggle play/pause
+      if (audio.paused) {
+        audio.play().catch(() => { });
+      } else {
+        audio.pause();
+      }
+      return;
+    }
+
+    // Different sample - stop current and play new one
     const audio = previewAudioRef.current ?? new Audio();
     previewAudioRef.current = audio;
+    
     audio.pause();
     audio.currentTime = 0;
     audio.src = url;
     audio.play().catch(() => { });
-  }, []);
+    
+    if (sampleId) {
+      setPlayingSampleId(sampleId);
+    }
+
+    // Handle playback end
+    audio.onended = () => {
+      setPlayingSampleId(null);
+    };
+
+    audio.onerror = () => {
+      setPlayingSampleId(null);
+    };
+  }, [playingSampleId]);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -88,6 +117,10 @@ export default function Browser() {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+      }
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current = null;
       }
     };
   }, []);
@@ -430,7 +463,7 @@ export default function Browser() {
                         onDragEnd={endDrag}
                         onClick={() => {
                           if (suppressClickRef.current || dragActiveRef.current) return;
-                          playPreview(sample.path);
+                          playPreview(sample.path, sample.id);
                         }}
                         className="group px-3 py-2 rounded hover:bg-ps-bg-700 cursor-grab active:cursor-grabbing"
                       >
@@ -573,7 +606,7 @@ export default function Browser() {
                           onClick={() => {
                             if (suppressClickRef.current || dragActiveRef.current) return;
                             const previewUrl = audioData || sample.storageUrl || null;
-                            playPreview(previewUrl);
+                            playPreview(previewUrl, sample.id);
                           }}
                           className="group px-3 py-2 rounded hover:bg-ps-bg-700 cursor-grab active:cursor-grabbing"
                         >
